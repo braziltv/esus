@@ -4,8 +4,9 @@ import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
 import { DoctorPanel } from '@/components/DoctorPanel';
 import { PublicDisplay } from '@/components/PublicDisplay';
+import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3 } from 'lucide-react';
 
 const Index = () => {
   const {
@@ -55,6 +56,10 @@ const Index = () => {
                 <Stethoscope className="w-4 h-4" />
                 Médico
               </TabsTrigger>
+              <TabsTrigger value="estatisticas" className="gap-2 data-[state=active]:bg-primary/10">
+                <BarChart3 className="w-4 h-4" />
+                Estatísticas
+              </TabsTrigger>
             </TabsList>
           </div>
         </div>
@@ -102,6 +107,13 @@ const Index = () => {
               onFinishConsultation={finishConsultation}
               onRecall={recallDoctor}
             />
+          </main>
+        </TabsContent>
+
+        {/* Estatísticas */}
+        <TabsContent value="estatisticas" className="mt-0">
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <StatisticsPanel patients={patients} history={history} />
           </main>
         </TabsContent>
       </Tabs>
