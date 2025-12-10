@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Activity } from 'lucide-react';
+import { Volume2, VolumeX, Activity, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -7,9 +7,10 @@ import { useEffect, useState } from 'react';
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
+  onLogout: () => void;
 }
 
-export function PanelHeader({ isAudioEnabled, onToggleAudio }: PanelHeaderProps) {
+export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout }: PanelHeaderProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -75,6 +76,17 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio }: PanelHeaderProps)
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               <span className="text-xs font-medium text-accent">Online</span>
             </div>
+
+            {/* Logout Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onLogout}
+              className="gap-2 text-destructive hover:text-destructive"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
           </div>
         </div>
       </div>
