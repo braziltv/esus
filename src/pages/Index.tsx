@@ -36,6 +36,11 @@ const Index = () => {
     recallDoctor,
   } = useCallPanel();
 
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
+  };
+
   if (!isLoggedIn) {
     return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
   }
@@ -46,6 +51,7 @@ const Index = () => {
         <PanelHeader
           isAudioEnabled={isAudioEnabled}
           onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
+          onLogout={handleLogout}
         />
 
         {/* Tab Navigation */}
