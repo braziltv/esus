@@ -1,4 +1,4 @@
-import { Volume2, Clock, Stethoscope, Activity } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -10,6 +10,10 @@ interface PublicDisplayProps {
   history?: any[];
 }
 
+interface NewsItem {
+  title: string;
+  link: string;
+}
 
 export function PublicDisplay(_props: PublicDisplayProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -18,6 +22,35 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+
+  // Fetch G1 news RSS
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://g1.globo.com/dynamo/rss2.xml'));
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        const news: NewsItem[] = [];
+        items.forEach((item, index) => {
+          if (index < 15) {
+            const title = item.querySelector('title')?.textContent || '';
+            const link = item.querySelector('link')?.textContent || '';
+            news.push({ title, link });
+          }
+        });
+        setNewsItems(news);
+      } catch (error) {
+        console.error('Error fetching news:', error);
+      }
+    };
+
+    fetchNews();
+    const interval = setInterval(fetchNews, 5 * 60 * 1000); // Refresh every 5 minutes
+    return () => clearInterval(interval);
+  }, []);
 
   // Re-check localStorage periodically for unit name
   useEffect(() => {
@@ -254,12 +287,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <p className="text-slate-400 text-sm md:text-lg lg:text-xl">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="text-center md:text-right bg-slate-800/50 rounded-xl md:rounded-2xl px-4 py-2 md:px-6 md:py-3 border border-slate-700">
-          <p className="text-3xl md:text-5xl lg:text-6xl font-mono font-bold text-white">
+        <div className="text-center md:text-right bg-slate-800/50 rounded-xl md:rounded-2xl px-6 py-3 md:px-10 md:py-5 border border-slate-700">
+          <p className="text-5xl md:text-7xl lg:text-9xl font-mono font-bold text-white leading-none">
             {format(currentTime, 'HH:mm')}
           </p>
-          <p className="text-slate-400 text-sm md:text-lg">
-            {format(currentTime, "dd 'de' MMMM", { locale: ptBR })}
+          <p className="text-xl md:text-3xl lg:text-4xl text-yellow-400 font-bold mt-2">
+            {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
+          </p>
+          <p className="text-lg md:text-2xl lg:text-3xl text-slate-300 font-medium">
+            {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
           </p>
         </div>
       </div>
@@ -370,6 +406,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
       </div>
+
+      {/* News Ticker */}
+      {newsItems.length > 0 && (
+        <div className="relative z-10 mt-4 bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-xl md:rounded-2xl overflow-hidden border border-red-500/50">
+          <div className="flex items-center">
+            <div className="bg-red-800 px-3 py-2 md:px-5 md:py-3 flex items-center gap-2 shrink-0 z-10">
+              <Newspaper className="w-4 h-4 md:w-6 md:h-6 text-white" />
+              <span className="text-white font-bold text-sm md:text-lg lg:text-xl">NOTÍCIAS</span>
+            </div>
+            <div className="flex-1 overflow-hidden py-2 md:py-3">
+              <div className="animate-marquee whitespace-nowrap">
+                {newsItems.map((item, index) => (
+                  <span key={index} className="text-white text-sm md:text-lg lg:text-xl mx-4 md:mx-8">
+                    • {item.title}
+                  </span>
+                ))}
+                {newsItems.map((item, index) => (
+                  <span key={`dup-${index}`} className="text-white text-sm md:text-lg lg:text-xl mx-4 md:mx-8">
+                    • {item.title}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
