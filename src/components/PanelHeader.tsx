@@ -37,6 +37,9 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
               <p className="text-xs text-muted-foreground">
                 {unitName}
               </p>
+              <p className="text-xs text-muted-foreground/70">
+                Solução criada e cedida gratuitamente por Kalebe Gomes.
+              </p>
             </div>
           </div>
 
