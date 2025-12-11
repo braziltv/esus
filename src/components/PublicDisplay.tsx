@@ -17,7 +17,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
-  const unitName = localStorage.getItem('unitName') || '';
+  const unitName = localStorage.getItem('selectedUnitName') || '';
 
   const speakName = useCallback((name: string, caller: 'triage' | 'doctor', destination?: string) => {
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');

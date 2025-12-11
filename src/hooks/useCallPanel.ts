@@ -12,7 +12,7 @@ const STORAGE_KEYS = {
 
 export function useCallPanel() {
   const [unitName, setUnitName] = useState(() => {
-    return localStorage.getItem('unitName') || '';
+    return localStorage.getItem('selectedUnitName') || '';
   });
 
   const { createCall, completeCall } = useSupabaseSync(unitName);
@@ -86,7 +86,7 @@ export function useCallPanel() {
   // Listen for unit name changes
   useEffect(() => {
     const handleStorage = () => {
-      const newUnitName = localStorage.getItem('unitName') || '';
+      const newUnitName = localStorage.getItem('selectedUnitName') || '';
       if (newUnitName !== unitName) {
         setUnitName(newUnitName);
       }
