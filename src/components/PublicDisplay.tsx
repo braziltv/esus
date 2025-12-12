@@ -506,15 +506,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {newsItems.length > 0 && (
         <div className="relative z-10 mt-4 bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-xl md:rounded-2xl overflow-hidden border border-red-500/50">
           <div className="flex items-center">
-            <div className="bg-red-800 px-5 py-4 md:px-8 md:py-6 flex items-center gap-3 shrink-0 z-10">
-              <Newspaper className="w-6 h-6 md:w-10 md:h-10 text-white" />
-              <span className="text-white font-bold text-lg md:text-2xl lg:text-3xl">NOTÍCIAS</span>
+            <div className="bg-red-800 px-6 py-5 md:px-10 md:py-8 flex items-center gap-3 shrink-0 z-10">
+              <Newspaper className="w-8 h-8 md:w-12 md:h-12 text-white" />
+              <span className="text-white font-bold text-xl md:text-3xl lg:text-4xl">NOTÍCIAS</span>
             </div>
-            <div className="flex-1 overflow-hidden py-4 md:py-6">
+            <div className="flex-1 overflow-hidden py-5 md:py-8">
               <div className="animate-marquee whitespace-nowrap">
                 {newsItems.map((item, index) => (
-                  <span key={index} className="text-white text-lg md:text-2xl lg:text-3xl mx-8 md:mx-12">
-                    <span className={`px-3 py-1.5 rounded text-base md:text-lg font-bold mr-4 ${
+                  <span key={index} className="text-white text-2xl md:text-3xl lg:text-4xl mx-10 md:mx-16">
+                    <span className={`px-4 py-2 rounded text-lg md:text-xl lg:text-2xl font-bold mr-5 ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
@@ -535,8 +535,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   </span>
                 ))}
                 {newsItems.map((item, index) => (
-                  <span key={`dup-${index}`} className="text-white text-lg md:text-2xl lg:text-3xl mx-8 md:mx-12">
-                    <span className={`px-3 py-1.5 rounded text-base md:text-lg font-bold mr-4 ${
+                  <span key={`dup-${index}`} className="text-white text-2xl md:text-3xl lg:text-4xl mx-10 md:mx-16">
+                    <span className={`px-4 py-2 rounded text-lg md:text-xl lg:text-2xl font-bold mr-5 ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :

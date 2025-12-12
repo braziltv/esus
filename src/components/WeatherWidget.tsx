@@ -53,20 +53,8 @@ export function WeatherWidget() {
         
         const data = await response.json();
         
-        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-        
         const current = data.current_condition[0];
-        const forecast = data.weather.slice(0, 5).map((day: any) => {
-          const date = new Date(day.date);
-          return {
-            date: day.date,
-            dayName: dayNames[date.getDay()],
-            maxTemp: parseInt(day.maxtempC),
-            minTemp: parseInt(day.mintempC),
-            humidity: parseInt(day.hourly[4]?.humidity || day.hourly[0]?.humidity),
-            description: day.hourly[4]?.lang_pt?.[0]?.value || day.hourly[0]?.weatherDesc[0]?.value || '',
-          };
-        });
+        const todayForecast = data.weather[0];
 
         setWeather({
           current: {
@@ -74,7 +62,14 @@ export function WeatherWidget() {
             humidity: parseInt(current.humidity),
             description: current.lang_pt?.[0]?.value || current.weatherDesc[0]?.value || '',
           },
-          forecast,
+          forecast: [{
+            date: todayForecast.date,
+            dayName: 'Hoje',
+            maxTemp: parseInt(todayForecast.maxtempC),
+            minTemp: parseInt(todayForecast.mintempC),
+            humidity: parseInt(todayForecast.hourly[4]?.humidity || todayForecast.hourly[0]?.humidity),
+            description: todayForecast.hourly[4]?.lang_pt?.[0]?.value || todayForecast.hourly[0]?.weatherDesc[0]?.value || '',
+          }],
           city: 'Paineiras-MG',
         });
         setError(null);
@@ -93,10 +88,10 @@ export function WeatherWidget() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-r from-sky-600/90 to-blue-700/90 rounded-xl px-4 py-2 border border-sky-500/50 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <Cloud className="w-5 h-5 text-white animate-pulse" />
-          <span className="text-white text-sm">Carregando...</span>
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/20 shadow-lg">
+        <div className="flex items-center gap-3">
+          <Cloud className="w-6 h-6 text-white/70 animate-pulse" />
+          <span className="text-white/80 text-sm font-medium">Carregando...</span>
         </div>
       </div>
     );
@@ -104,58 +99,56 @@ export function WeatherWidget() {
 
   if (error || !weather) {
     return (
-      <div className="bg-gradient-to-r from-slate-600/90 to-slate-700/90 rounded-xl px-4 py-2 border border-slate-500/50">
-        <div className="flex items-center gap-2">
-          <Cloud className="w-5 h-5 text-slate-300" />
-          <span className="text-slate-300 text-sm">{error || 'Indisponível'}</span>
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/20 shadow-lg">
+        <div className="flex items-center gap-3">
+          <Cloud className="w-6 h-6 text-white/50" />
+          <span className="text-white/60 text-sm">{error || 'Indisponível'}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-r from-sky-600/90 to-blue-700/90 rounded-xl px-3 py-2 border border-sky-500/50 backdrop-blur-sm">
-      <div className="flex items-center gap-3 md:gap-4">
-        {/* Current Weather */}
-        <div className="flex items-center gap-2 border-r border-sky-400/40 pr-3 md:pr-4">
+    <div className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/20 shadow-xl">
+      <div className="flex items-center gap-4">
+        {/* Weather Icon */}
+        <div className="flex items-center justify-center">
           {getWeatherIcon(weather.current.description)}
-          <div className="flex flex-col">
-            <span className="text-white font-bold text-lg md:text-xl leading-none">
-              {weather.current.temp}°C
-            </span>
-            <span className="text-sky-200 text-[10px] md:text-xs">{weather.city}</span>
+        </div>
+        
+        {/* Current Temperature */}
+        <div className="flex flex-col">
+          <span className="text-white font-bold text-2xl md:text-3xl leading-none drop-shadow-lg">
+            {weather.current.temp}°C
+          </span>
+          <span className="text-white/70 text-xs md:text-sm">{weather.city}</span>
+        </div>
+
+        {/* Divider */}
+        <div className="w-px h-10 bg-white/20" />
+
+        {/* Min/Max */}
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-2">
+            <Thermometer className="w-4 h-4 text-orange-300" />
+            <span className="text-white font-semibold text-sm md:text-base">{weather.forecast[0].maxTemp}°</span>
           </div>
-          <div className="flex items-center gap-1 text-sky-200 ml-1">
-            <Droplets className="w-3.5 h-3.5" />
-            <span className="text-xs md:text-sm font-medium">{weather.current.humidity}%</span>
+          <div className="flex items-center gap-2">
+            <Thermometer className="w-4 h-4 text-blue-300" />
+            <span className="text-white/80 text-sm md:text-base">{weather.forecast[0].minTemp}°</span>
           </div>
         </div>
 
-        {/* 5 Day Forecast - Horizontal */}
-        <div className="flex items-center gap-2 md:gap-3">
-          {weather.forecast.map((day, index) => (
-            <div 
-              key={day.date} 
-              className={`flex flex-col items-center px-2 py-1 rounded-lg ${
-                index === 0 ? 'bg-sky-500/40' : 'bg-sky-900/30'
-              }`}
-            >
-              <span className="text-white font-medium text-[10px] md:text-xs">
-                {index === 0 ? 'Hoje' : day.dayName}
-              </span>
-              <div className="my-0.5">
-                {getWeatherIcon(day.description, 'sm')}
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-white text-xs font-bold">{day.maxTemp}°</span>
-                <span className="text-sky-300 text-[10px]">{day.minTemp}°</span>
-              </div>
-              <div className="flex items-center gap-0.5 text-sky-200">
-                <Droplets className="w-2.5 h-2.5" />
-                <span className="text-[9px]">{day.humidity}%</span>
-              </div>
-            </div>
-          ))}
+        {/* Divider */}
+        <div className="w-px h-10 bg-white/20" />
+
+        {/* Humidity */}
+        <div className="flex items-center gap-2">
+          <Droplets className="w-5 h-5 text-cyan-300" />
+          <div className="flex flex-col">
+            <span className="text-white font-semibold text-lg md:text-xl">{weather.current.humidity}%</span>
+            <span className="text-white/60 text-[10px] md:text-xs">Umidade</span>
+          </div>
         </div>
       </div>
     </div>
