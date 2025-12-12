@@ -26,19 +26,33 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
 
-  // Fetch news from multiple sources (MG and Brazil)
+  // Fetch news from multiple sources
   useEffect(() => {
+    const feeds = [
+      { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'Brasil' },
+      { url: 'https://g1.globo.com/dynamo/ciencia-e-saude/rss2.xml', source: 'Saúde' },
+      { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'Mundo' },
+      { url: 'https://g1.globo.com/dynamo/mg/centro-oeste/rss2.xml', source: 'MG' },
+    ];
+    
+    let currentFeedIndex = 0;
+
     const fetchNews = async () => {
       try {
         const allNews: NewsItem[] = [];
         
-        // RSS feeds for Brazil and MG news
-        const feeds = [
-          { url: 'https://g1.globo.com/rss/g1/', source: 'Brasil' },
-          { url: 'https://g1.globo.com/rss/g1/mg/', source: 'MG' },
+        // Rotate through feeds - fetch from current index and next 2
+        const feedsToFetch = [
+          feeds[currentFeedIndex % feeds.length],
+          feeds[(currentFeedIndex + 1) % feeds.length],
+          feeds[(currentFeedIndex + 2) % feeds.length],
+          feeds[(currentFeedIndex + 3) % feeds.length],
         ];
+        
+        // Move to next feed for next update cycle
+        currentFeedIndex = (currentFeedIndex + 1) % feeds.length;
 
-        for (const feed of feeds) {
+        for (const feed of feedsToFetch) {
           try {
             const response = await fetch(
               `https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`
@@ -49,7 +63,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               const xml = parser.parseFromString(text, 'text/xml');
               const items = xml.querySelectorAll('item');
               items.forEach((item, index) => {
-                if (index < 8) {
+                if (index < 6) {
                   const title = item.querySelector('title')?.textContent || '';
                   if (title) {
                     allNews.push({ title, link: '', source: feed.source });
@@ -76,7 +90,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 5 * 60 * 1000);
+    // Update every 30 minutes
+    const interval = setInterval(fetchNews, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -454,7 +469,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 {newsItems.map((item, index) => (
                   <span key={index} className="text-white text-sm md:text-lg lg:text-xl mx-4 md:mx-8">
                     <span className={`px-1.5 py-0.5 rounded text-xs md:text-sm font-bold mr-2 ${
-                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 'bg-green-500 text-green-900'
+                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
+                      item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
+                      item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
+                      'bg-green-500 text-green-900'
                     }`}>
                       {item.source}
                     </span>
@@ -464,7 +482,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 {newsItems.map((item, index) => (
                   <span key={`dup-${index}`} className="text-white text-sm md:text-lg lg:text-xl mx-4 md:mx-8">
                     <span className={`px-1.5 py-0.5 rounded text-xs md:text-sm font-bold mr-2 ${
-                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 'bg-green-500 text-green-900'
+                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
+                      item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
+                      item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
+                      'bg-green-500 text-green-900'
                     }`}>
                       {item.source}
                     </span>
