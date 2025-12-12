@@ -117,37 +117,32 @@ export function WeatherWidget() {
     <div className="flex flex-col items-center gap-1">
       <span className="text-white/60 text-[10px] font-medium uppercase tracking-wider">Previsão do tempo</span>
       <div className="bg-white/10 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 shadow-lg">
-        <div className="flex items-center gap-3">
-          {/* Current Weather */}
-          {getWeatherIcon(weather.current.description, 'sm')}
-          <span className="text-white font-bold text-lg leading-none">
-            {weather.current.temp}°C
-          </span>
-
-          <div className="w-px h-5 bg-white/20" />
-
-          {/* Humidity */}
-          <div className="flex items-center gap-1">
-            <Droplets className="w-4 h-4 text-cyan-300" />
-            <span className="text-white font-medium text-sm">{weather.current.humidity}%</span>
+        <div className="flex flex-col gap-2">
+          {/* Top row: Current weather, humidity, city */}
+          <div className="flex items-center justify-center gap-3">
+            {getWeatherIcon(weather.current.description, 'sm')}
+            <span className="text-white font-bold text-lg leading-none">
+              {weather.current.temp}°C
+            </span>
+            <div className="w-px h-5 bg-white/20" />
+            <div className="flex items-center gap-1">
+              <Droplets className="w-4 h-4 text-cyan-300" />
+              <span className="text-white font-medium text-sm">{weather.current.humidity}%</span>
+            </div>
+            <div className="w-px h-5 bg-white/20" />
+            <span className="text-white/80 text-xs font-medium">Paineiras</span>
           </div>
 
-          <div className="w-px h-5 bg-white/20" />
-
-          {/* 2-day forecast */}
-          <div className="flex items-center gap-2">
+          {/* Bottom row: 2-day forecast */}
+          <div className="flex items-center justify-center gap-4 border-t border-white/10 pt-2">
             {weather.forecast.map((day, index) => (
               <div key={index} className="flex items-center gap-1">
+                {getWeatherIcon(day.description, 'sm')}
                 <span className="text-white/70 text-xs">{day.dayName}</span>
                 <span className="text-white text-xs font-medium">{day.maxTemp}°/{day.minTemp}°</span>
               </div>
             ))}
           </div>
-
-          <div className="w-px h-5 bg-white/20" />
-
-          {/* City */}
-          <span className="text-white/80 text-xs font-medium">Paineiras</span>
         </div>
       </div>
     </div>
