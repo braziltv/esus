@@ -28,7 +28,11 @@ import {
   Building2,
   BarChart3,
   Trophy,
-  Medal
+  Medal,
+  Trash2,
+  AlertTriangle,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -36,12 +40,21 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subDays, startOfDay, endOfDay, parseISO, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useToast } from '@/hooks/use-toast';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -80,6 +93,13 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [selectedUnits, setSelectedUnits] = useState<string[]>([currentUnitName]);
   const [comparisonData, setComparisonData] = useState<{unit: string, shortName: string, total: number, triage: number, doctor: number}[]>([]);
   const [previousPeriodData, setPreviousPeriodData] = useState<{total: number, triage: number, doctor: number}>({ total: 0, triage: 0, doctor: 0 });
+  
+  // Estado para modal de exclusão
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -635,14 +655,149 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     doc.save(`estatisticas_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.pdf`);
   };
 
+  // Função para apagar registros
+  const handleDeleteRecords = async () => {
+    if (deletePassword !== 'Paineiras@1') {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha informada está incorreta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      // Apagar registros do histórico de chamadas
+      const { error: historyError } = await supabase
+        .from('call_history')
+        .delete()
+        .gte('created_at', startOfDay(parseISO(dateFrom)).toISOString())
+        .lte('created_at', endOfDay(parseISO(dateTo)).toISOString())
+        .eq('unit_name', currentUnitName);
+
+      if (historyError) throw historyError;
+
+      // Apagar registros das estatísticas diárias
+      const { error: statsError } = await supabase
+        .from('statistics_daily')
+        .delete()
+        .gte('date', dateFrom)
+        .lte('date', dateTo)
+        .eq('unit_name', currentUnitName);
+
+      if (statsError) throw statsError;
+
+      toast({
+        title: "Registros apagados",
+        description: "Todos os registros do período selecionado foram removidos com sucesso.",
+      });
+
+      setDeleteDialogOpen(false);
+      setDeletePassword('');
+      loadDbHistory();
+    } catch (error) {
+      console.error('Erro ao apagar registros:', error);
+      toast({
+        title: "Erro ao apagar",
+        description: "Ocorreu um erro ao tentar apagar os registros.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Modal de confirmação para apagar */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Apagar Registros
+            </DialogTitle>
+            <DialogDescription>
+              Esta ação irá apagar permanentemente todos os registros do período de{' '}
+              <strong>{format(parseISO(dateFrom), 'dd/MM/yyyy')}</strong> a{' '}
+              <strong>{format(parseISO(dateTo), 'dd/MM/yyyy')}</strong> da unidade{' '}
+              <strong>{currentUnitName}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-sm text-destructive font-medium">
+                ⚠️ Atenção: Esta ação não pode ser desfeita!
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="delete-password">Digite a senha para confirmar:</Label>
+              <div className="relative">
+                <Input
+                  id="delete-password"
+                  type={showDeletePassword ? 'text' : 'password'}
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Senha de administrador"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowDeletePassword(!showDeletePassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showDeletePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setDeletePassword('');
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteRecords}
+              disabled={deleting || !deletePassword}
+              className="gap-2"
+            >
+              {deleting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Apagando...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Apagar Registros
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-2xl font-bold text-foreground">Estatísticas</h2>
         <div className="flex flex-wrap gap-2">
           <Button onClick={exportToPDF} className="gap-2">
             <FileDown className="w-4 h-4" />
             Exportar PDF
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={() => setDeleteDialogOpen(true)} 
+            className="gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            Apagar Registros
           </Button>
         </div>
       </div>
