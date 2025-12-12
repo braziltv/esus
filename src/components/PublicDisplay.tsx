@@ -227,21 +227,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const voices = window.speechSynthesis.getVoices();
     const ptVoices = voices.filter(v => v.lang.includes('pt'));
     
-    // Priority order: Microsoft Francisca first, then fallbacks
+    // Priority order for more natural voices (Google and Microsoft neural voices are best)
     const voicePriorities = [
-      // Microsoft Francisca - user selected voice
-      'Microsoft Francisca Online',
-      'Microsoft Francisca',
-      'Francisca',
-      // Fallback voices
+      // Google voices (most natural)
       'Google português do Brasil',
       'Google Brazilian Portuguese',
-      'Microsoft Thalita Online',
+      // Microsoft neural voices (very natural)
+      'Microsoft Francisca Online',
+      'Microsoft Thalita Online', 
+      'Microsoft Antonio Online',
+      // Other quality voices
       'Luciana',
       'Vitória',
       'Maria',
       'Fernanda',
-      'Helena'
+      'Helena',
+      // Fallback female indicators
+      'female',
+      'feminino'
     ];
     
     for (const priority of voicePriorities) {
@@ -270,11 +273,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     if (bestVoice) {
       utterance.voice = bestVoice;
+      // Adjust rate and pitch based on voice type for more natural sound
+      if (bestVoice.name.toLowerCase().includes('google')) {
+        // Google voices sound better with these settings
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+      } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
+        // Microsoft neural voices
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+      } else {
+        // Default settings for other voices
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+      }
+    } else {
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
     }
-    
-    // Voz feminina com velocidade e tom normais
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
     
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
