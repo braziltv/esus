@@ -21,7 +21,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
-  const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
+  const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date; destination?: string }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
@@ -344,6 +344,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           name: h.patient_name,
           type: h.call_type,
           time: new Date(h.created_at),
+          destination: h.destination || undefined,
         })));
       }
     };
@@ -424,6 +425,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             name: historyItem.patient_name,
             type: historyItem.call_type,
             time: new Date(historyItem.created_at),
+            destination: historyItem.destination || undefined,
           }, ...prev].slice(0, 20));
         }
       )
@@ -576,7 +578,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         {item.name}
                       </p>
                       <p className="text-xs lg:text-sm text-slate-400">
-                        {item.type === 'triage' ? 'Triagem' : 'Médico'}
+                        {item.destination || (item.type === 'triage' ? 'Triagem' : 'Consultório Médico')}
                       </p>
                     </div>
                     <span className="text-xs lg:text-sm text-slate-400 font-mono shrink-0">
