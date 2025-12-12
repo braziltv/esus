@@ -551,7 +551,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="flex flex-col">
                 <span className="text-white font-bold text-sm sm:text-base md:text-xl lg:text-2xl">NOTÍCIAS</span>
                 <span className="text-red-200 text-[10px] sm:text-xs">
-                  Próxima: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
+                  Irá atualizar em: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
                 </span>
               </div>
             </div>
