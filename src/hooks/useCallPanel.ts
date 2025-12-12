@@ -259,21 +259,18 @@ export function useCallPanel() {
     }
   }, [currentTriageCall, currentDoctorCall, completeCall]);
 
-  // Forward to triage with voice call on TV
+  // Forward to triage with voice call on TV (patient stays in waiting status to appear in triage queue)
   const forwardToTriage = useCallback((patientId: string, destination?: string) => {
-    setPatients(prev => {
-      const patient = prev.find(p => p.id === patientId);
-      if (!patient) return prev;
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) return;
 
-      // Create call to show on TV
-      createCall(patient.name, 'triage', destination || 'Triagem');
-      triggerCallEvent({ name: patient.name }, 'triage', destination || 'Triagem');
+    // Create call to show on TV - this triggers the voice announcement
+    createCall(patient.name, 'triage', destination || 'Triagem');
+    triggerCallEvent({ name: patient.name }, 'triage', destination || 'Triagem');
 
-      return prev.map(p => 
-        p.id === patientId ? { ...p, status: 'in-triage' as const, calledAt: new Date() } : p
-      );
-    });
-  }, [createCall, triggerCallEvent]);
+    // Patient remains with 'waiting' status so they appear in the triage queue
+    // The voice call directs them where to go, but they still need to be attended by triage
+  }, [patients, createCall, triggerCallEvent]);
 
   // Forward to doctor with voice call on TV
   const forwardToDoctor = useCallback((patientId: string, destination?: string) => {
