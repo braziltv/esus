@@ -267,9 +267,9 @@ export function useCallPanel() {
   }, []);
 
   // Forward to doctor without voice call (skip triage)
-  const forwardToDoctor = useCallback((patientId: string) => {
+  const forwardToDoctor = useCallback((patientId: string, destination?: string) => {
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date() } : p
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination } : p
     ));
   }, []);
 

@@ -19,7 +19,7 @@ interface TriagePanelProps {
   onRecall: () => void;
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
-  onForwardToDoctor: (id: string) => void;
+  onForwardToDoctor: (id: string, destination?: string) => void;
 }
 
 const SALAS = [
@@ -208,15 +208,34 @@ export function TriagePanel({
                   </DropdownMenu>
 
                   {/* Encaminhar para médico sem chamada */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onForwardToDoctor(patient.id)}
-                    className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                  >
-                    <Stethoscope className="w-4 h-4" />
-                    Médico
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                      >
+                        <Stethoscope className="w-4 h-4" />
+                        Médico
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-card border border-border z-50">
+                      <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 1')}
+                        className="cursor-pointer"
+                      >
+                        Consultório Médico 1
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 2')}
+                        className="cursor-pointer"
+                      >
+                        Consultório Médico 2
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   {/* Finalizar sem chamar */}
                   <Button
