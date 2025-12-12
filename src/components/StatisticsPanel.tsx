@@ -193,6 +193,107 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     },
   };
 
+  // Função auxiliar para desenhar gráfico de barras no PDF
+  const drawBarChart = (doc: jsPDF, data: {label: string, value: number}[], x: number, y: number, width: number, height: number, title: string) => {
+    const maxValue = Math.max(...data.map(d => d.value), 1);
+    const barWidth = (width - 10) / data.length;
+    const chartHeight = height - 25;
+    
+    // Título do gráfico
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(title, x + width / 2, y, { align: 'center' });
+    
+    // Desenhar barras
+    data.forEach((item, index) => {
+      const barHeight = (item.value / maxValue) * chartHeight;
+      const barX = x + 5 + (index * barWidth);
+      const barY = y + 10 + chartHeight - barHeight;
+      
+      // Barra
+      doc.setFillColor(59, 130, 246);
+      doc.rect(barX, barY, barWidth - 2, barHeight, 'F');
+      
+      // Label
+      doc.setFontSize(6);
+      doc.setTextColor(100, 100, 100);
+      doc.text(item.label, barX + (barWidth - 2) / 2, y + 10 + chartHeight + 4, { align: 'center' });
+      
+      // Valor no topo
+      if (item.value > 0) {
+        doc.setFontSize(6);
+        doc.setTextColor(0, 0, 0);
+        doc.text(item.value.toString(), barX + (barWidth - 2) / 2, barY - 1, { align: 'center' });
+      }
+    });
+    
+    // Linha base
+    doc.setDrawColor(200, 200, 200);
+    doc.line(x + 5, y + 10 + chartHeight, x + width - 5, y + 10 + chartHeight);
+  };
+
+  // Função auxiliar para desenhar gráfico de pizza no PDF
+  const drawPieChart = (doc: jsPDF, data: {name: string, value: number, color: string}[], centerX: number, centerY: number, radius: number, title: string) => {
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    if (total === 0) return;
+    
+    // Título
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(title, centerX, centerY - radius - 8, { align: 'center' });
+    
+    let startAngle = -Math.PI / 2;
+    const colors: [number, number, number][] = [
+      [59, 130, 246],  // Azul - Triagem
+      [34, 197, 94],   // Verde - Médico
+    ];
+    
+    data.forEach((item, index) => {
+      const sliceAngle = (item.value / total) * 2 * Math.PI;
+      const endAngle = startAngle + sliceAngle;
+      
+      // Desenhar fatia usando segmentos
+      doc.setFillColor(...colors[index % colors.length]);
+      
+      // Criar path da fatia
+      const segments = 50;
+      const points: [number, number][] = [[centerX, centerY]];
+      
+      for (let i = 0; i <= segments; i++) {
+        const angle = startAngle + (sliceAngle * i / segments);
+        points.push([
+          centerX + radius * Math.cos(angle),
+          centerY + radius * Math.sin(angle)
+        ]);
+      }
+      
+      // Desenhar polígono preenchido
+      if (points.length > 2) {
+        const firstPoint = points[0];
+        doc.moveTo(firstPoint[0], firstPoint[1]);
+        for (let i = 1; i < points.length; i++) {
+          doc.lineTo(points[i][0], points[i][1]);
+        }
+        doc.lineTo(firstPoint[0], firstPoint[1]);
+        doc.fill();
+      }
+      
+      startAngle = endAngle;
+    });
+    
+    // Legenda
+    let legendY = centerY + radius + 10;
+    data.forEach((item, index) => {
+      doc.setFillColor(...colors[index % colors.length]);
+      doc.rect(centerX - 30, legendY - 3, 8, 8, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+      const percentage = total > 0 ? Math.round((item.value / total) * 100) : 0;
+      doc.text(`${item.name}: ${item.value} (${percentage}%)`, centerX - 18, legendY + 3);
+      legendY += 12;
+    });
+  };
+
   // Exportar PDF
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -208,20 +309,60 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     doc.text(`Período: ${format(parseISO(dateFrom), 'dd/MM/yyyy')} a ${format(parseISO(dateTo), 'dd/MM/yyyy')}`, 14, 42);
     doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 14, 49);
     
-    // Resumo
+    // Resumo em cards
     doc.setFontSize(14);
     doc.text('Resumo do Período', 14, 62);
     
-    doc.setFontSize(11);
-    doc.text(`Total de Chamadas: ${totalCalls}`, 14, 72);
-    doc.text(`Chamadas Triagem: ${triageCalls}`, 14, 79);
-    doc.text(`Chamadas Médico: ${doctorCalls}`, 14, 86);
+    // Cards de resumo
+    const cardY = 68;
+    const cardWidth = 55;
+    const cardHeight = 20;
+    
+    // Card Total
+    doc.setFillColor(240, 240, 240);
+    doc.roundedRect(14, cardY, cardWidth, cardHeight, 3, 3, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Total de Chamadas', 14 + cardWidth/2, cardY + 7, { align: 'center' });
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text(totalCalls.toString(), 14 + cardWidth/2, cardY + 16, { align: 'center' });
+    
+    // Card Triagem
+    doc.setFillColor(219, 234, 254);
+    doc.roundedRect(14 + cardWidth + 5, cardY, cardWidth, cardHeight, 3, 3, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(59, 130, 246);
+    doc.text('Chamadas Triagem', 14 + cardWidth + 5 + cardWidth/2, cardY + 7, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text(triageCalls.toString(), 14 + cardWidth + 5 + cardWidth/2, cardY + 16, { align: 'center' });
+    
+    // Card Médico
+    doc.setFillColor(220, 252, 231);
+    doc.roundedRect(14 + (cardWidth + 5) * 2, cardY, cardWidth, cardHeight, 3, 3, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(34, 197, 94);
+    doc.text('Chamadas Médico', 14 + (cardWidth + 5) * 2 + cardWidth/2, cardY + 7, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text(doctorCalls.toString(), 14 + (cardWidth + 5) * 2 + cardWidth/2, cardY + 16, { align: 'center' });
+    
+    // Gráfico de Atendimentos por Hora
+    const hourlyChartData = hourlyData.map(h => ({ label: h.hour.substring(0, 2), value: h.atendimentos }));
+    drawBarChart(doc, hourlyChartData, 14, 100, 120, 55, 'Atendimentos por Hora');
+    
+    // Gráfico de Pizza - Distribuição por Tipo
+    drawPieChart(doc, typeData, 165, 130, 20, 'Distribuição por Tipo');
+    
+    // Gráfico de Atendimentos por Dia (últimos 7 dias)
+    const recentDailyData = dailyData.slice(-7).map(d => ({ label: d.date.substring(0, 5), value: d.atendimentos }));
+    drawBarChart(doc, recentDailyData, 14, 165, 180, 45, 'Atendimentos por Dia (Últimos 7 dias)');
     
     // Tabela de histórico
     doc.setFontSize(14);
-    doc.text('Histórico de Chamadas', 14, 100);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Histórico de Chamadas (Últimas 50)', 14, 220);
     
-    const tableData = filteredHistory.slice(0, 100).map(item => [
+    const tableData = filteredHistory.slice(0, 50).map(item => [
       item.patient_name,
       item.call_type === 'triage' ? 'Triagem' : 'Médico',
       item.destination || '-',
@@ -229,12 +370,13 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     ]);
     
     autoTable(doc, {
-      startY: 105,
+      startY: 225,
       head: [['Paciente', 'Tipo', 'Destino', 'Data/Hora']],
       body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [59, 130, 246] },
-      styles: { fontSize: 9 },
+      styles: { fontSize: 8 },
+      margin: { left: 14, right: 14 },
     });
     
     // Salvar
