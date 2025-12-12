@@ -22,7 +22,6 @@ import {
   Filter,
   Calendar,
   RefreshCw,
-  Trash2,
   Database
 } from 'lucide-react';
 import {
@@ -55,7 +54,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [dbHistory, setDbHistory] = useState<DbCallHistory[]>([]);
   const [aggregatedStats, setAggregatedStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [compacting, setCompacting] = useState(false);
   const [storageInfo, setStorageInfo] = useState({ detailed: 0, aggregated: 0 });
   const [unitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   
@@ -123,31 +121,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       setLoading(false);
     }
   }, [dateFrom, dateTo, unitName, callTypeFilter]);
-
-  // Compactar dados antigos
-  const compactData = async () => {
-    if (!confirm('Isso irá compactar dados antigos (mais de 30 dias) em resumos diários. Deseja continuar?')) {
-      return;
-    }
-    
-    setCompacting(true);
-    try {
-      const { data, error } = await supabase.rpc('compact_old_statistics', { days_to_keep: 30 });
-
-      if (error) {
-        console.error('Erro ao compactar:', error);
-        alert('Erro ao compactar dados: ' + error.message);
-      } else {
-        alert(`Compactação concluída! ${data} registros removidos.`);
-        loadDbHistory();
-      }
-    } catch (err) {
-      console.error('Erro:', err);
-      alert('Erro ao compactar dados');
-    } finally {
-      setCompacting(false);
-    }
-  };
 
   useEffect(() => {
     loadDbHistory();
@@ -277,15 +250,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             <FileDown className="w-4 h-4" />
             Exportar PDF
           </Button>
-          <Button 
-            onClick={compactData} 
-            variant="outline" 
-            className="gap-2"
-            disabled={compacting}
-          >
-            <Trash2 className={`w-4 h-4 ${compacting ? 'animate-spin' : ''}`} />
-            Compactar Dados
-          </Button>
         </div>
       </div>
 
@@ -306,7 +270,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               <span className="text-muted-foreground">dias agregados</span>
             </div>
             <span className="text-xs text-muted-foreground">
-              (Compactar remove detalhes &gt;7 dias, mantendo resumos)
+              (Compactação automática diária às 3h - mantém últimos 30 dias)
             </span>
           </div>
         </CardContent>
