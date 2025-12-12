@@ -142,19 +142,6 @@ const Index = () => {
     );
   }
 
-  // If in display mode (non-TV), show only the PublicDisplay in fullscreen
-  if (activeTab === "display") {
-    return (
-      <div ref={mainContainerRef} className="min-h-screen bg-background">
-        <PublicDisplay 
-          currentTriageCall={currentTriageCall} 
-          currentDoctorCall={currentDoctorCall}
-          history={history} 
-        />
-      </div>
-    );
-  }
-
   return (
     <div ref={mainContainerRef} className="min-h-screen bg-background">
       <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen">
@@ -172,10 +159,6 @@ const Index = () => {
               <TabsTrigger value="cadastro" className="gap-2 data-[state=active]:bg-primary/10">
                 <UserPlus className="w-4 h-4" />
                 Cadastro
-              </TabsTrigger>
-              <TabsTrigger value="display" className="gap-2 data-[state=active]:bg-primary/10">
-                <Monitor className="w-4 h-4" />
-                Atendimento ao Público
               </TabsTrigger>
               <TabsTrigger value="triagem" className="gap-2 data-[state=active]:bg-primary/10">
                 <Activity className="w-4 h-4" />
