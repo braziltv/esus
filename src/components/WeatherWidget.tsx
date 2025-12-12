@@ -109,30 +109,33 @@ export function WeatherWidget() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 shadow-lg">
-      <div className="flex items-center gap-3">
-        {/* Weather Icon */}
-        {getWeatherIcon(weather.current.description, 'sm')}
-        
-        {/* Temperature */}
-        <span className="text-white font-bold text-lg leading-none">
-          {weather.current.temp}°C
-        </span>
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-white/60 text-[10px] font-medium uppercase tracking-wider">Previsão do tempo</span>
+      <div className="bg-white/10 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 shadow-lg">
+        <div className="flex items-center gap-3">
+          {/* Weather Icon */}
+          {getWeatherIcon(weather.current.description, 'sm')}
+          
+          {/* Temperature */}
+          <span className="text-white font-bold text-lg leading-none">
+            {weather.current.temp}°C
+          </span>
 
-        {/* Divider */}
-        <div className="w-px h-5 bg-white/20" />
+          {/* Divider */}
+          <div className="w-px h-5 bg-white/20" />
 
-        {/* Humidity */}
-        <div className="flex items-center gap-1">
-          <Droplets className="w-4 h-4 text-cyan-300" />
-          <span className="text-white font-medium text-sm">{weather.current.humidity}%</span>
+          {/* Humidity */}
+          <div className="flex items-center gap-1">
+            <Droplets className="w-4 h-4 text-cyan-300" />
+            <span className="text-white font-medium text-sm">{weather.current.humidity}%</span>
+          </div>
+
+          {/* Divider */}
+          <div className="w-px h-5 bg-white/20" />
+
+          {/* City */}
+          <span className="text-white/80 text-xs font-medium">Paineiras</span>
         </div>
-
-        {/* Divider */}
-        <div className="w-px h-5 bg-white/20" />
-
-        {/* City */}
-        <span className="text-white/80 text-xs font-medium">Paineiras-MG</span>
       </div>
     </div>
   );
