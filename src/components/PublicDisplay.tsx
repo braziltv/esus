@@ -513,8 +513,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <div className="flex-1 overflow-hidden py-5 md:py-8">
               <div className="animate-marquee whitespace-nowrap inline-flex">
                 {newsItems.map((item, index) => (
-                  <span key={index} className="text-white text-2xl md:text-3xl lg:text-4xl mx-10 md:mx-16 inline-block">
-                    <span className={`px-4 py-2 rounded text-lg md:text-xl lg:text-2xl font-bold mr-5 inline-block ${
+                  <span key={index} className="text-3xl md:text-4xl lg:text-5xl mx-10 md:mx-16 inline-block text-white">
+                    <span className={`px-4 py-2 rounded text-xl md:text-2xl lg:text-3xl font-bold mr-5 inline-block ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
@@ -535,8 +535,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   </span>
                 ))}
                 {newsItems.map((item, index) => (
-                  <span key={`dup-${index}`} className="text-white text-2xl md:text-3xl lg:text-4xl mx-10 md:mx-16 inline-block">
-                    <span className={`px-4 py-2 rounded text-lg md:text-xl lg:text-2xl font-bold mr-5 inline-block ${
+                  <span key={`dup-${index}`} className="text-3xl md:text-4xl lg:text-5xl mx-10 md:mx-16 inline-block text-white">
+                    <span className={`px-4 py-2 rounded text-xl md:text-2xl lg:text-3xl font-bold mr-5 inline-block ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
