@@ -395,7 +395,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 lg:p-8 relative overflow-hidden"
+      className="h-screen w-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 md:p-4 lg:p-6 relative overflow-hidden flex flex-col"
     >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -403,62 +403,62 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
-      {/* Header */}
-      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 mb-4 md:mb-6">
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-            <Volume2 className="w-6 h-6 md:w-8 md:h-8 text-white" />
+      {/* Header - Compact */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
+            <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
           </div>
-          <div className="text-center md:text-left">
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-white">
+          <div>
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight">
               Painel de Chamadas
             </h1>
-            <p className="text-slate-400 text-sm md:text-lg lg:text-xl">{unitName || 'Unidade de Saúde'}</p>
+            <p className="text-slate-400 text-xs sm:text-sm md:text-base lg:text-lg leading-tight">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Weather Widget */}
           <WeatherWidget />
           
           {/* Clock */}
-          <div className="text-center md:text-right bg-slate-800/50 rounded-xl md:rounded-2xl px-6 py-3 md:px-8 md:py-4 border border-slate-700">
-            <p className="text-4xl md:text-6xl lg:text-7xl font-mono font-bold text-white leading-none">
+          <div className="text-center bg-slate-800/50 rounded-xl px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 border border-slate-700">
+            <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-mono font-bold text-white leading-none">
               {format(currentTime, 'HH:mm')}
             </p>
-            <p className="text-lg md:text-2xl lg:text-3xl text-yellow-400 font-bold mt-1">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-yellow-400 font-bold">
               {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
             </p>
-            <p className="text-sm md:text-xl lg:text-2xl text-slate-300 font-medium">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-slate-300 font-medium">
               {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Responsive Grid */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-auto lg:h-[calc(100vh-180px)]">
+      {/* Main Content - Flex grow to fill space */}
+      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 min-h-0">
         {/* Current Calls - Main Area */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4 md:gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-2 sm:gap-3 md:gap-4 min-h-0">
           {/* Triage Call */}
-          <div className="bg-slate-800/50 rounded-2xl md:rounded-3xl border border-slate-700 overflow-hidden backdrop-blur-sm">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-3 md:p-4 lg:p-5">
-              <p className="text-white text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2 md:gap-3">
-                <Activity className="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8" />
+          <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2 sm:px-4 sm:py-3 shrink-0">
+              <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" />
                 TRIAGEM
               </p>
             </div>
-            <div className="p-4 md:p-6 lg:p-8 flex items-center justify-center min-h-[120px] md:min-h-[150px] lg:min-h-[200px]">
+            <div className="flex-1 p-3 sm:p-4 md:p-6 flex items-center justify-center min-h-0">
               {currentTriageCall ? (
                 <div className="text-center animate-pulse">
-                  <h2 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white tracking-wide">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-wide">
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-lg md:text-2xl lg:text-3xl text-blue-400 mt-2 md:mt-4 font-medium">
+                  <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium">
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
-                <p className="text-lg md:text-2xl lg:text-3xl text-slate-500">
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -466,25 +466,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className="bg-slate-800/50 rounded-2xl md:rounded-3xl border border-slate-700 overflow-hidden backdrop-blur-sm">
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 p-3 md:p-4 lg:p-5">
-              <p className="text-white text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2 md:gap-3">
-                <Stethoscope className="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8" />
+          <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-2 sm:px-4 sm:py-3 shrink-0">
+              <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2">
+                <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" />
                 CONSULTÓRIO MÉDICO
               </p>
             </div>
-            <div className="p-4 md:p-6 lg:p-8 flex items-center justify-center min-h-[120px] md:min-h-[150px] lg:min-h-[200px]">
+            <div className="flex-1 p-3 sm:p-4 md:p-6 flex items-center justify-center min-h-0">
               {currentDoctorCall ? (
                 <div className="text-center animate-pulse">
-                  <h2 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white tracking-wide">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-wide">
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-lg md:text-2xl lg:text-3xl text-emerald-400 mt-2 md:mt-4 font-medium">
+                  <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium">
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
-                <p className="text-lg md:text-2xl lg:text-3xl text-slate-500">
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -493,45 +493,45 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* History Panel */}
-        <div className="bg-slate-800/50 rounded-2xl md:rounded-3xl border border-slate-700 p-4 md:p-6 overflow-hidden backdrop-blur-sm">
-          <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
-            <Clock className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 text-primary" />
+        <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 p-2 sm:p-3 md:p-4 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
+          <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 flex items-center gap-2 shrink-0">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary" />
             Últimas Chamadas
           </h3>
-          <div className="space-y-3 md:space-y-4 overflow-y-auto max-h-[300px] lg:max-h-[calc(100%-80px)]">
+          <div className="flex-1 space-y-2 sm:space-y-3 overflow-y-auto min-h-0">
             {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-6 md:py-8 text-base md:text-xl">
+              <p className="text-slate-500 text-center py-4 text-sm sm:text-base md:text-lg">
                 Nenhuma chamada ainda
               </p>
             ) : (
               historyItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-3 md:p-4 lg:p-5 rounded-xl md:rounded-2xl ${
+                  className={`p-2 sm:p-3 md:p-4 rounded-lg md:rounded-xl ${
                     index === 0 
                       ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
                       : 'bg-slate-700/50'
                   } transition-all`}
                 >
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 ${
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 ${
                       item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                        <Activity className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                       ) : (
-                        <Stethoscope className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                        <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white text-base md:text-lg lg:text-xl truncate">
+                      <p className="font-semibold text-white text-sm sm:text-base md:text-lg truncate">
                         {item.name}
                       </p>
-                      <p className="text-sm md:text-base lg:text-lg text-slate-400">
+                      <p className="text-xs sm:text-sm md:text-base text-slate-400">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-sm md:text-base lg:text-lg text-slate-400 font-mono shrink-0">
+                    <span className="text-xs sm:text-sm md:text-base text-slate-400 font-mono shrink-0">
                       {format(item.time, 'HH:mm')}
                     </span>
                   </div>
@@ -542,24 +542,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       </div>
 
-      {/* News Ticker */}
+      {/* News Ticker - Fixed height */}
       {newsItems.length > 0 && (
-        <div className="relative z-10 mt-4 bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-xl md:rounded-2xl overflow-hidden border border-red-500/50">
+        <div className="relative z-10 mt-2 sm:mt-3 bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-lg md:rounded-xl overflow-hidden border border-red-500/50 shrink-0">
           <div className="flex items-center">
-            <div className="bg-red-800 px-6 py-5 md:px-10 md:py-8 flex items-center gap-3 shrink-0 z-10">
-              <Newspaper className="w-8 h-8 md:w-12 md:h-12 text-white" />
+            <div className="bg-red-800 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 flex items-center gap-2 shrink-0 z-10">
+              <Newspaper className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
               <div className="flex flex-col">
-                <span className="text-white font-bold text-xl md:text-3xl lg:text-4xl">NOTÍCIAS</span>
-                <span className="text-red-200 text-xs md:text-sm">
-                  Próxima atualização: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
+                <span className="text-white font-bold text-sm sm:text-base md:text-xl lg:text-2xl">NOTÍCIAS</span>
+                <span className="text-red-200 text-[10px] sm:text-xs">
+                  Próxima: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
                 </span>
               </div>
             </div>
-            <div className="flex-1 overflow-hidden py-5 md:py-8">
+            <div className="flex-1 overflow-hidden py-2 sm:py-3 md:py-4">
               <div className="animate-marquee whitespace-nowrap inline-flex">
                 {newsItems.map((item, index) => (
-                  <span key={index} className="text-3xl md:text-4xl lg:text-5xl mx-10 md:mx-16 inline-block text-white">
-                    <span className={`px-4 py-2 rounded text-xl md:text-2xl lg:text-3xl font-bold mr-5 inline-block ${
+                  <span key={index} className="text-lg sm:text-xl md:text-2xl lg:text-3xl mx-4 sm:mx-6 md:mx-10 inline-block text-white">
+                    <span className={`px-2 py-1 rounded text-xs sm:text-sm md:text-base lg:text-lg font-bold mr-2 sm:mr-3 inline-block ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
@@ -580,8 +580,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   </span>
                 ))}
                 {newsItems.map((item, index) => (
-                  <span key={`dup-${index}`} className="text-3xl md:text-4xl lg:text-5xl mx-10 md:mx-16 inline-block text-white">
-                    <span className={`px-4 py-2 rounded text-xl md:text-2xl lg:text-3xl font-bold mr-5 inline-block ${
+                  <span key={`dup-${index}`} className="text-lg sm:text-xl md:text-2xl lg:text-3xl mx-4 sm:mx-6 md:mx-10 inline-block text-white">
+                    <span className={`px-2 py-1 rounded text-xs sm:text-sm md:text-base lg:text-lg font-bold mr-2 sm:mr-3 inline-block ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
@@ -607,10 +607,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Credits */}
-      <div className="relative z-10 mt-4 text-center">
-        <p className="text-slate-400 text-sm md:text-base">
-          Solução criada e cedida gratuitamente por Kalebe Gomes.
+      {/* Credits - Minimal */}
+      <div className="relative z-10 mt-1 sm:mt-2 text-center shrink-0">
+        <p className="text-slate-500 text-[10px] sm:text-xs md:text-sm">
+          Solução criada por Kalebe Gomes
         </p>
       </div>
     </div>
