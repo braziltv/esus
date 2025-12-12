@@ -294,6 +294,21 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     });
   };
 
+  // Função para adicionar rodapé em todas as páginas
+  const addFooter = (doc: jsPDF) => {
+    const pageCount = doc.getNumberOfPages();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text('Solução criada e cedida gratuitamente por Kalebe Gomes', pageWidth / 2, pageHeight - 10, { align: 'center' });
+      doc.text(`Página ${i} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+    }
+  };
+
   // Exportar PDF
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -376,8 +391,11 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       theme: 'striped',
       headStyles: { fillColor: [59, 130, 246] },
       styles: { fontSize: 8 },
-      margin: { left: 14, right: 14 },
+      margin: { left: 14, right: 14, bottom: 20 },
     });
+    
+    // Adicionar rodapé em todas as páginas
+    addFooter(doc);
     
     // Salvar
     doc.save(`estatisticas_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.pdf`);
