@@ -34,6 +34,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // se já foi ativado nesta aba, mantém
     return window.sessionStorage.getItem('speechActivated') === 'true';
   });
+  const [showActivatedMessage, setShowActivatedMessage] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -513,7 +514,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       window.speechSynthesis.speak(testUtterance);
       window.sessionStorage.setItem('speechActivated', 'true');
-      setSpeechActivated(true);
+      
+      // Mostra a mensagem de confirmação por 2 segundos
+      setShowActivatedMessage(true);
+      setTimeout(() => {
+        setShowActivatedMessage(false);
+        setSpeechActivated(true);
+      }, 2000);
     } catch (e) {
       console.error('Erro ao ativar áudio de voz:', e);
     }
@@ -525,7 +532,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
       {/* Overlay grande para ativar áudio - desaparece após clicar */}
-      {!speechActivated && (
+      {!speechActivated && !showActivatedMessage && (
         <div className="absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center animate-fade-in">
           <div className="text-center space-y-6 px-4">
             <Volume2 className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 text-emerald-400 mx-auto animate-pulse" />
@@ -541,6 +548,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             >
               🔊 Ativar Áudio
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mensagem de confirmação "Áudio ativado!" por 2 segundos */}
+      {showActivatedMessage && (
+        <div className="absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center animate-fade-in">
+          <div className="text-center space-y-6 px-4">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto animate-scale-in">
+              <Volume2 className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-emerald-400" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-emerald-400 animate-pulse">
+              ✓ Áudio Ativado!
+            </h2>
+            <p className="text-base sm:text-lg lg:text-xl text-slate-300">
+              O painel de chamadas está pronto.
+            </p>
           </div>
         </div>
       )}
