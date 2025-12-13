@@ -300,11 +300,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     await playNotificationSound();
     console.log('✅ Notification sound played');
 
-    // Cancela qualquer fala pendente antes de iniciar a nova
+    // Garante que o mecanismo de voz esteja pronto
     try {
       window.speechSynthesis.cancel();
+      // Alguns navegadores precisam do resume antes de falar novamente
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
     } catch (e) {
-      console.warn('Erro ao cancelar speechSynthesis:', e);
+      console.warn('Erro ao preparar speechSynthesis:', e);
     }
 
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
