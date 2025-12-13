@@ -222,10 +222,37 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return new Promise<void>(resolve => setTimeout(resolve, 800));
   }, []);
 
+  // State to track if voices are loaded
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
+
+  // Load voices - they may not be immediately available
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        setVoicesLoaded(true);
+        console.log('TTS voices loaded:', voices.length, 'voices available');
+      }
+    };
+
+    // Try to load immediately
+    loadVoices();
+
+    // Also listen for the voiceschanged event (required by some browsers)
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
   // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
   const getBestVoice = useCallback(() => {
     const voices = window.speechSynthesis.getVoices();
+    console.log('Available voices:', voices.length);
+    
     const ptVoices = voices.filter(v => v.lang.includes('pt'));
+    console.log('Portuguese voices:', ptVoices.length);
     
     // Priority order for more natural voices (Google and Microsoft neural voices are best)
     const voicePriorities = [
@@ -251,21 +278,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const found = ptVoices.find(v => 
         v.name.toLowerCase().includes(priority.toLowerCase())
       );
-      if (found) return found;
+      if (found) {
+        console.log('Selected voice:', found.name);
+        return found;
+      }
     }
     
     // Return any Portuguese Brazilian voice as fallback
-    return ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
+    const fallback = ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
+    console.log('Fallback voice:', fallback?.name || 'none');
+    return fallback;
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
+    console.log('speakName called:', name, caller, destination);
+    
     // Play notification sound first
     await playNotificationSound();
     
+    // Wait a bit for the sound to finish
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const utterance = new SpeechSynthesisUtterance(
-      `${name}. Por favor, dirija-se ao ${location}.`
-    );
+    const text = `${name}. Por favor, dirija-se ao ${location}.`;
+    console.log('TTS text:', text);
+    
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
     
     // Get the best voice available
@@ -288,12 +326,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         utterance.pitch = 1.1;
       }
     } else {
+      console.log('No Portuguese voice found, using default');
       utterance.rate = 0.85;
       utterance.pitch = 1.1;
     }
     
+    // Add event listeners for debugging
+    utterance.onstart = () => console.log('TTS started speaking');
+    utterance.onend = () => console.log('TTS finished speaking');
+    utterance.onerror = (e) => console.error('TTS error:', e);
+    
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
+    console.log('TTS speak() called');
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
