@@ -28,12 +28,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   
   // Visual effect states
   const [showFlash, setShowFlash] = useState(false);
   const [triageCallKey, setTriageCallKey] = useState(0);
   const [doctorCallKey, setDoctorCallKey] = useState(0);
   const [flashColor, setFlashColor] = useState('white');
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -198,7 +200,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Play notification sound effect based on destination
   const playNotificationSound = useCallback((destination?: string) => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (!audioEnabled) {
+      console.log('Áudio ainda não habilitado pelo usuário, pulando som de notificação.');
+      return Promise.resolve();
+    }
+
+    if (!audioContextRef.current) {
+      const Ctor = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext;
+      audioContextRef.current = new Ctor();
+    }
+
+    const audioContext = audioContextRef.current;
+    if (!audioContext) return Promise.resolve();
+
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
     
     // Create a pleasant chime sound
     const playTone = (frequency: number, startTime: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.4) => {
@@ -211,12 +228,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       oscillator.frequency.value = frequency;
       oscillator.type = type;
       
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-      gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + startTime + 0.02);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
+      const startAt = audioContext.currentTime + startTime;
+      gainNode.gain.setValueAtTime(0, startAt);
+      gainNode.gain.linearRampToValueAtTime(volume, startAt + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startAt + duration);
       
-      oscillator.start(audioContext.currentTime + startTime);
-      oscillator.stop(audioContext.currentTime + startTime + duration);
+      oscillator.start(startAt);
+      oscillator.stop(startAt + duration);
     };
     
     const dest = destination?.toLowerCase() || '';
@@ -278,7 +296,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     // Return promise that resolves after the chime
     return new Promise<void>(resolve => setTimeout(resolve, 800));
-  }, []);
+  }, [audioEnabled]);
 
   // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
   const getBestVoice = useCallback(() => {
@@ -547,6 +565,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     <div 
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
+      onClick={() => {
+        if (!audioEnabled) {
+          setAudioEnabled(true);
+        }
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume();
+        }
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.resume();
+        }
+      }}
     >
       {/* Flash overlay effect when patient is called */}
       {showFlash && (
@@ -564,6 +593,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* Header - Compact */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
+        {!audioEnabled && (
+          <div className="absolute inset-x-0 -top-10 flex justify-center z-20">
+            <div className="bg-yellow-500 text-slate-900 px-4 py-2 rounded-full text-sm font-semibold shadow-lg animate-bounce">
+              Clique uma vez na tela para ativar o som das chamadas
+            </div>
+          </div>
+        )}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
             <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
