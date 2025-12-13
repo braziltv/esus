@@ -34,7 +34,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // se já foi ativado nesta aba, mantém
     return window.sessionStorage.getItem('speechActivated') === 'true';
   });
-  const [showActivatedMessage, setShowActivatedMessage] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -291,27 +290,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('🔊 speakName called for:', name, caller, destination);
 
+    if (!('speechSynthesis' in window)) {
+      console.warn('SpeechSynthesis API não suportada neste navegador.');
+      await playNotificationSound();
+      return;
+    }
+    
     // Toca primeiro o aviso sonoro
     await playNotificationSound();
     console.log('✅ Notification sound played');
 
-    if (!('speechSynthesis' in window)) {
-      console.warn('SpeechSynthesis API não suportada neste navegador.');
-      return;
-    }
-
-    // Aguarda um pouco para o som terminar antes de falar
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Cancela qualquer fala pendente e garante que o sintetizador está ativo
+    // Cancela qualquer fala pendente antes de iniciar a nova
     try {
       window.speechSynthesis.cancel();
     } catch (e) {
       console.warn('Erro ao cancelar speechSynthesis:', e);
     }
-
-    // Pequeno delay após cancel para evitar conflitos
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
@@ -338,8 +332,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     utterance.onerror = (event) => console.error('❌ Speech error:', event.error);
 
     try {
-      // Garante que o sintetizador não está pausado
-      window.speechSynthesis.resume();
       window.speechSynthesis.speak(utterance);
       console.log('✅ Speech queued');
     } catch (e) {
@@ -521,13 +513,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       window.speechSynthesis.speak(testUtterance);
       window.sessionStorage.setItem('speechActivated', 'true');
-      
-      // Mostra a mensagem de confirmação por 2 segundos
-      setShowActivatedMessage(true);
-      setTimeout(() => {
-        setShowActivatedMessage(false);
-        setSpeechActivated(true);
-      }, 2000);
+      setSpeechActivated(true);
     } catch (e) {
       console.error('Erro ao ativar áudio de voz:', e);
     }
@@ -538,49 +524,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
-      {/* Overlay grande para ativar áudio - desaparece após clicar */}
-      {!speechActivated && !showActivatedMessage && (
-        <div className="absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center animate-fade-in">
-          <div className="text-center space-y-6 px-4">
-            <Volume2 className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 text-emerald-400 mx-auto animate-pulse" />
-            <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-white">
-              Ativar Chamadas por Voz
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-300 max-w-md mx-auto">
-              Clique no botão abaixo para habilitar os avisos sonoros e de voz neste painel.
-            </p>
-            <button
-              onClick={handleActivateSpeech}
-              className="mt-4 px-8 py-4 sm:px-12 sm:py-5 lg:px-16 lg:py-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white text-xl sm:text-2xl lg:text-3xl font-bold shadow-2xl shadow-emerald-500/50 border-2 border-white/20 transition-all hover:scale-105 active:scale-95"
-            >
-              🔊 Ativar Áudio
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Mensagem de confirmação "Áudio ativado!" por 2 segundos */}
-      {showActivatedMessage && (
-        <div className="absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center animate-fade-in">
-          <div className="text-center space-y-6 px-4">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto animate-scale-in">
-              <Volume2 className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-emerald-400" />
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-emerald-400 animate-pulse">
-              ✓ Áudio Ativado!
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-300">
-              O painel de chamadas está pronto.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Indicador discreto de áudio ativo */}
-      {speechActivated && (
-        <div className="absolute z-20 top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-sm">
-          <Volume2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
-          <span className="text-[10px] sm:text-xs text-emerald-300 font-medium">Áudio ativo</span>
+      {/* Botão discreto para ativar a voz (necessário para políticas de autoplay do navegador) */}
+      {!speechActivated && (
+        <div className="absolute z-20 bottom-3 right-3 sm:bottom-4 sm:right-4">
+          <button
+            onClick={handleActivateSpeech}
+            className="px-3 py-2 sm:px-4 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-500/40 border border-white/10 animate-fade-in"
+          >
+            Ativar áudio das chamadas
+          </button>
         </div>
       )}
 
