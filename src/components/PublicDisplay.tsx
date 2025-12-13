@@ -535,24 +535,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           {/* Triage Call */}
           <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2 lg:px-4 lg:py-3 shrink-0">
-              <p className="text-white text-base sm:text-lg lg:text-xl xl:text-2xl font-bold flex items-center gap-2">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 lg:px-6 lg:py-4 shrink-0">
+              <p className="text-white text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
+                <Activity className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
                 TRIAGEM
               </p>
             </div>
-            <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
+            <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div className="text-center animate-pulse">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
+                <div className="text-center animate-pulse w-full">
+                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium">
+                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-3 sm:mt-4 font-semibold">
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
-                <p className="text-base sm:text-lg lg:text-xl text-slate-500">
+                <p className="text-lg sm:text-xl lg:text-2xl text-slate-500">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -561,24 +561,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
           {/* Doctor Call */}
           <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-2 lg:px-4 lg:py-3 shrink-0">
-              <p className="text-white text-base sm:text-lg lg:text-xl xl:text-2xl font-bold flex items-center gap-2">
-                <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 lg:px-6 lg:py-4 shrink-0">
+              <p className="text-white text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
+                <Stethoscope className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
                 CONSULTÓRIO MÉDICO
               </p>
             </div>
-            <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
+            <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div className="text-center animate-pulse">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
+                <div className="text-center animate-pulse w-full">
+                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium">
+                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-3 sm:mt-4 font-semibold">
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
-                <p className="text-base sm:text-lg lg:text-xl text-slate-500">
+                <p className="text-lg sm:text-xl lg:text-2xl text-slate-500">
                   Aguardando próxima chamada...
                 </p>
               )}
