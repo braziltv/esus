@@ -28,6 +28,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Visual effect states
+  const [showFlash, setShowFlash] = useState(false);
+  const [triageCallKey, setTriageCallKey] = useState(0);
+  const [doctorCallKey, setDoctorCallKey] = useState(0);
+  const [flashColor, setFlashColor] = useState('white');
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -426,10 +432,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           processedCallsRef.current.add(call.id);
 
           if (call.status === 'active') {
+            // Trigger visual effects
+            setFlashColor(call.call_type === 'triage' ? '#3b82f6' : '#10b981');
+            setShowFlash(true);
+            setTimeout(() => setShowFlash(false), 1000);
+            
             if (call.call_type === 'triage') {
               setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
+              setTriageCallKey(prev => prev + 1);
             } else {
               setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
+              setDoctorCallKey(prev => prev + 1);
             }
             
             // Play audio announcement
@@ -499,6 +512,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
+      {/* Flash overlay effect when patient is called */}
+      {showFlash && (
+        <div 
+          className="absolute inset-0 z-50 pointer-events-none animate-call-flash"
+          style={{ backgroundColor: flashColor }}
+        />
+      )}
+      
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
@@ -549,7 +570,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         {/* Current Calls - Side by side on landscape */}
         <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           {/* Triage Call */}
-          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
+          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl border-2 overflow-hidden backdrop-blur-sm flex flex-col relative ${
+            currentTriageCall ? 'border-blue-500 animate-border-pulse' : 'border-slate-700'
+          }`}>
+            {/* Attention ring effect */}
+            {currentTriageCall && (
+              <div className="absolute inset-0 rounded-xl lg:rounded-2xl border-4 border-blue-400 animate-attention-ring pointer-events-none" />
+            )}
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2 lg:px-4 lg:py-3 shrink-0">
               <p className="text-white text-base sm:text-lg lg:text-xl xl:text-2xl font-bold flex items-center gap-2">
                 <Activity className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
@@ -558,11 +585,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div className="text-center animate-pulse">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
+                <div key={triageCallKey} className="text-center">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide animate-name-entrance">
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium">
+                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium animate-pulse">
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
@@ -575,7 +602,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
+          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl border-2 overflow-hidden backdrop-blur-sm flex flex-col relative ${
+            currentDoctorCall ? 'border-emerald-500 animate-border-pulse' : 'border-slate-700'
+          }`}>
+            {/* Attention ring effect */}
+            {currentDoctorCall && (
+              <div className="absolute inset-0 rounded-xl lg:rounded-2xl border-4 border-emerald-400 animate-attention-ring pointer-events-none" />
+            )}
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-2 lg:px-4 lg:py-3 shrink-0">
               <p className="text-white text-base sm:text-lg lg:text-xl xl:text-2xl font-bold flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
@@ -584,11 +617,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div className="text-center animate-pulse">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
+                <div key={doctorCallKey} className="text-center">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide animate-name-entrance">
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium">
+                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium animate-pulse">
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
