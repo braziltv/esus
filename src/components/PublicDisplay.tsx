@@ -30,8 +30,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
-  const [isAnnouncing, setIsAnnouncing] = useState(false);
-  const [announcingData, setAnnouncingData] = useState<{ name: string; destination: string; type: 'triage' | 'doctor' } | null>(null);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -257,15 +255,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('speakName called with:', { name, caller, destination });
     
-    const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    
-    // Start announcement animation
-    setAnnouncingData({ name, destination: location, type: caller });
-    setIsAnnouncing(true);
-    
     // Play notification sound first
     await playNotificationSound();
     
+    const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
     console.log('TTS text:', text);
     
@@ -326,23 +319,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Cancel any ongoing speech and speak
     window.speechSynthesis.cancel();
     
-    utterance.onerror = (e) => {
-      console.error('TTS error:', e);
-      // End animation after a delay even on error
-      setTimeout(() => {
-        setIsAnnouncing(false);
-        setAnnouncingData(null);
-      }, 3000);
-    };
+    utterance.onerror = (e) => console.error('TTS error:', e);
     utterance.onstart = () => console.log('TTS started');
-    utterance.onend = () => {
-      console.log('TTS ended');
-      // Keep animation visible for a bit after speech ends
-      setTimeout(() => {
-        setIsAnnouncing(false);
-        setAnnouncingData(null);
-      }, 2000);
-    };
+    utterance.onend = () => console.log('TTS ended');
     
     window.speechSynthesis.speak(utterance);
   }, [playNotificationSound]);
@@ -379,7 +358,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         .from('call_history')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
 
       if (unitName) {
         historyQuery = historyQuery.eq('unit_name', unitName);
@@ -475,7 +454,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             name: historyItem.patient_name,
             type: historyItem.call_type,
             time: new Date(historyItem.created_at),
-          }, ...prev].slice(0, 10));
+          }, ...prev].slice(0, 20));
         }
       )
       .subscribe();
@@ -512,43 +491,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
-      {/* Announcement Animation Overlay */}
-      {isAnnouncing && announcingData && (
-        <div className="absolute inset-0 z-50 pointer-events-none">
-          {/* Flash effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-emerald-500/30 animate-call-flash" />
-          
-          {/* Expanding rings */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="absolute w-64 h-64 rounded-full border-4 border-primary/50 animate-call-ring" />
-            <div className="absolute w-64 h-64 rounded-full border-4 border-primary/50 animate-call-ring" style={{ animationDelay: '0.5s' }} />
-            <div className="absolute w-64 h-64 rounded-full border-4 border-primary/50 animate-call-ring" style={{ animationDelay: '1s' }} />
-          </div>
-          
-          {/* Central announcement card */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-slate-900/95 border-4 border-primary rounded-3xl p-8 sm:p-12 animate-call-glow animate-call-bounce max-w-2xl mx-4">
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center gap-3 text-primary">
-                  <Volume2 className="w-10 h-10 sm:w-14 sm:h-14 animate-pulse" />
-                  <span className="text-2xl sm:text-3xl font-bold uppercase tracking-wider">
-                    {announcingData.type === 'triage' ? 'Triagem' : 'Médico'}
-                  </span>
-                </div>
-                <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white animate-pulse leading-tight">
-                  {announcingData.name}
-                </h2>
-                <div className="flex items-center justify-center gap-2 text-emerald-400">
-                  <span className="text-xl sm:text-2xl lg:text-3xl font-semibold">
-                    Dirija-se ao {announcingData.destination}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
@@ -569,15 +511,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Audio Status Indicator */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
-            <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
-            <span className="text-xs sm:text-sm font-medium text-emerald-400">Áudio Ativo</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          </div>
-
           {/* Weather Widget */}
           <WeatherWidget />
+          
           {/* Clock */}
           <div className="text-center bg-slate-800/50 rounded-xl px-3 py-2 sm:px-4 lg:px-6 lg:py-3 border border-slate-700">
             <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-mono font-bold text-white leading-none">
