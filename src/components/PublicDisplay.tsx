@@ -353,12 +353,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         setCurrentDoctorCall(doctor ? { name: doctor.patient_name, destination: doctor.destination || undefined } : null);
       }
 
-      // Fetch history - same filtering logic
+      // Fetch history - same filtering logic (limit to last 10)
       let historyQuery = supabase
         .from('call_history')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(10);
 
       if (unitName) {
         historyQuery = historyQuery.eq('unit_name', unitName);
@@ -454,7 +454,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             name: historyItem.patient_name,
             type: historyItem.call_type,
             time: new Date(historyItem.created_at),
-          }, ...prev].slice(0, 20));
+          }, ...prev].slice(0, 10));
         }
       )
       .subscribe();
