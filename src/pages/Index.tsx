@@ -168,9 +168,9 @@ const Index = () => {
                 <Stethoscope className="w-4 h-4" />
                 Médico
               </TabsTrigger>
-              <TabsTrigger value="estatisticas" className="gap-2 data-[state=active]:bg-primary/10">
+              <TabsTrigger value="administrativo" className="gap-2 data-[state=active]:bg-primary/10">
                 <BarChart3 className="w-4 h-4" />
-                Estatísticas
+                Administrativo
               </TabsTrigger>
             </TabsList>
           </div>
@@ -221,8 +221,8 @@ const Index = () => {
           </main>
         </TabsContent>
 
-        {/* Estatísticas */}
-        <TabsContent value="estatisticas" className="mt-0">
+        {/* Administrativo */}
+        <TabsContent value="administrativo" className="mt-0">
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <StatisticsPanel patients={patients} history={history} />
           </main>
