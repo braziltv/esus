@@ -254,12 +254,11 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             {/* Digital Clock */}
             <div className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 text-center">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                <span className="font-mono text-base sm:text-lg font-bold text-foreground">
-                  {format(currentTime, "HH:mm:ss", { locale: ptBR })}
-                </span>
-                <span className="text-[10px] sm:text-xs text-muted-foreground">Hora Atualizada</span>
-              </div>
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+              <span className="font-mono text-base sm:text-lg font-bold text-foreground">
+                {format(currentTime, "HH:mm:ss", { locale: ptBR })}
+              </span>
+            </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground capitalize">
                 {format(currentTime, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </p>
