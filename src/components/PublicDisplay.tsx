@@ -21,6 +21,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
+  const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
@@ -255,6 +256,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('speakName called with:', { name, caller, destination });
     
+    // Set announcing state for visual emphasis
+    setAnnouncingType(caller);
+    
     // Play notification sound first
     await playNotificationSound();
     
@@ -319,9 +323,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Cancel any ongoing speech and speak
     window.speechSynthesis.cancel();
     
-    utterance.onerror = (e) => console.error('TTS error:', e);
+    utterance.onerror = (e) => {
+      console.error('TTS error:', e);
+      setAnnouncingType(null);
+    };
     utterance.onstart = () => console.log('TTS started');
-    utterance.onend = () => console.log('TTS ended');
+    utterance.onend = () => {
+      console.log('TTS ended');
+      setAnnouncingType(null);
+    };
     
     window.speechSynthesis.speak(utterance);
   }, [playNotificationSound]);
@@ -543,8 +553,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div className="text-center animate-pulse w-full">
-                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
+                <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-110' : ''}`}>
+                  <h2 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black tracking-wide leading-tight break-words px-2 transition-all duration-300 ${
+                    announcingType === 'triage' 
+                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
+                      : 'text-white'
+                  }`}>
                     {currentTriageCall.name}
                   </h2>
                   <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-3 sm:mt-4 font-semibold">
@@ -569,8 +583,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div className="text-center animate-pulse w-full">
-                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
+                <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-110' : ''}`}>
+                  <h2 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black tracking-wide leading-tight break-words px-2 transition-all duration-300 ${
+                    announcingType === 'doctor' 
+                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
+                      : 'text-white'
+                  }`}>
                     {currentDoctorCall.name}
                   </h2>
                   <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-3 sm:mt-4 font-semibold">
