@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Patient, CallHistory } from '@/types/patient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,11 @@ import {
   Trash2,
   AlertTriangle,
   Eye,
-  EyeOff
+  EyeOff,
+  Download,
+  Upload,
+  FileUp,
+  HardDrive
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -106,6 +110,14 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [compareDialogOpen, setCompareDialogOpen] = useState(false);
   const [comparePassword, setComparePassword] = useState('');
   const [showComparePassword, setShowComparePassword] = useState(false);
+  
+  // Estado para backup/restore
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const [restorePassword, setRestorePassword] = useState('');
+  const [showRestorePassword, setShowRestorePassword] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [backupData, setBackupData] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { toast } = useToast();
 
@@ -766,6 +778,155 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
+  // Função para exportar backup
+  const exportBackup = async () => {
+    try {
+      // Buscar todos os dados do histórico
+      const { data: historyData, error: historyError } = await supabase
+        .from('call_history')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (historyError) throw historyError;
+
+      // Buscar estatísticas agregadas
+      const { data: statsData, error: statsError } = await supabase
+        .from('statistics_daily')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (statsError) throw statsError;
+
+      const backup = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        exportedBy: currentUnitName,
+        data: {
+          call_history: historyData || [],
+          statistics_daily: statsData || [],
+        }
+      };
+
+      // Criar arquivo e baixar
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_chamadas_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Backup exportado",
+        description: `Backup com ${historyData?.length || 0} registros de chamadas e ${statsData?.length || 0} estatísticas diárias.`,
+      });
+    } catch (error) {
+      console.error('Erro ao exportar backup:', error);
+      toast({
+        title: "Erro ao exportar",
+        description: "Ocorreu um erro ao gerar o backup.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Função para processar arquivo de backup
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const parsed = JSON.parse(content);
+        
+        // Validar estrutura do backup
+        if (!parsed.version || !parsed.data || !parsed.data.call_history) {
+          throw new Error('Formato de backup inválido');
+        }
+
+        setBackupData(parsed);
+        setRestoreDialogOpen(true);
+      } catch (error) {
+        toast({
+          title: "Arquivo inválido",
+          description: "O arquivo selecionado não é um backup válido.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Função para restaurar backup
+  const handleRestoreBackup = async () => {
+    if (restorePassword !== 'Paineiras@1') {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha informada está incorreta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!backupData) return;
+
+    setRestoring(true);
+    try {
+      let insertedHistory = 0;
+      let insertedStats = 0;
+
+      // Inserir dados do histórico (ignorar duplicados pelo ID)
+      if (backupData.data.call_history && backupData.data.call_history.length > 0) {
+        for (const record of backupData.data.call_history) {
+          const { error } = await supabase
+            .from('call_history')
+            .upsert(record, { onConflict: 'id' });
+          
+          if (!error) insertedHistory++;
+        }
+      }
+
+      // Inserir estatísticas diárias
+      if (backupData.data.statistics_daily && backupData.data.statistics_daily.length > 0) {
+        for (const record of backupData.data.statistics_daily) {
+          const { error } = await supabase
+            .from('statistics_daily')
+            .upsert(record, { onConflict: 'id' });
+          
+          if (!error) insertedStats++;
+        }
+      }
+
+      toast({
+        title: "Backup restaurado",
+        description: `Restaurados ${insertedHistory} registros de chamadas e ${insertedStats} estatísticas diárias.`,
+      });
+
+      setRestoreDialogOpen(false);
+      setRestorePassword('');
+      setBackupData(null);
+      loadDbHistory();
+    } catch (error) {
+      console.error('Erro ao restaurar backup:', error);
+      toast({
+        title: "Erro ao restaurar",
+        description: "Ocorreu um erro ao restaurar o backup.",
+        variant: "destructive",
+      });
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Modal de senha para comparação */}
@@ -953,12 +1114,129 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Modal de restauração de backup */}
+      <Dialog open={restoreDialogOpen} onOpenChange={(open) => {
+        setRestoreDialogOpen(open);
+        if (!open) {
+          setRestorePassword('');
+          setBackupData(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-primary" />
+              Restaurar Backup
+            </DialogTitle>
+            <DialogDescription>
+              Confirme a restauração do backup com a senha de administrador.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {backupData && (
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <HardDrive className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">Informações do Backup</span>
+                </div>
+                <div className="text-sm text-muted-foreground space-y-1 ml-6">
+                  <p>Versão: {backupData.version}</p>
+                  <p>Exportado em: {format(parseISO(backupData.exportedAt), 'dd/MM/yyyy HH:mm')}</p>
+                  <p>Registros de chamadas: {backupData.data.call_history?.length || 0}</p>
+                  <p>Estatísticas diárias: {backupData.data.statistics_daily?.length || 0}</p>
+                </div>
+              </div>
+            )}
+            
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+              <p className="text-sm text-amber-600 font-medium">
+                ⚠️ Os registros existentes com mesmo ID serão atualizados.
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="restore-password">Digite a senha para confirmar:</Label>
+              <div className="relative">
+                <Input
+                  id="restore-password"
+                  type={showRestorePassword ? 'text' : 'password'}
+                  value={restorePassword}
+                  onChange={(e) => setRestorePassword(e.target.value)}
+                  placeholder="Senha de administrador"
+                  className="pr-10"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRestoreBackup();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRestorePassword(!showRestorePassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showRestorePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRestoreDialogOpen(false);
+                setRestorePassword('');
+                setBackupData(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleRestoreBackup}
+              disabled={restoring || !restorePassword}
+              className="gap-2"
+            >
+              {restoring ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Restaurando...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4" />
+                  Restaurar Backup
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Input oculto para seleção de arquivo */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept=".json"
+        className="hidden"
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-2xl font-bold text-foreground">Estatísticas</h2>
+        <h2 className="text-2xl font-bold text-foreground">Administrativo</h2>
         <div className="flex flex-wrap gap-2">
           <Button onClick={exportToPDF} className="gap-2">
             <FileDown className="w-4 h-4" />
-            Exportar PDF
+            Relatório PDF
+          </Button>
+          <Button onClick={exportBackup} variant="outline" className="gap-2">
+            <Download className="w-4 h-4" />
+            Backup
+          </Button>
+          <Button 
+            onClick={() => fileInputRef.current?.click()} 
+            variant="outline" 
+            className="gap-2"
+          >
+            <FileUp className="w-4 h-4" />
+            Restaurar
           </Button>
           <Button 
             variant="destructive" 
@@ -966,7 +1244,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             className="gap-2"
           >
             <Trash2 className="w-4 h-4" />
-            Apagar Registros
+            Apagar
           </Button>
         </div>
       </div>
