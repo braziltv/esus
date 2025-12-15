@@ -6,6 +6,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Get the API key index for the current day (rotates daily)
+function getDailyKeyIndex(totalKeys: number): number {
+  const today = new Date();
+  // Use day of year + some randomization based on the year
+  const startOfYear = new Date(today.getFullYear(), 0, 0);
+  const diff = today.getTime() - startOfYear.getTime();
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  // Add year to create variation across years
+  const seed = dayOfYear + today.getFullYear();
+  
+  return seed % totalKeys;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -34,9 +48,16 @@ serve(async (req) => {
       throw new Error("No ELEVENLABS_API_KEY configured");
     }
 
-    // Shuffle keys for random selection but keep all for retry
-    const shuffledKeys = [...allKeys].sort(() => Math.random() - 0.5);
+    // Select the key for today (daily rotation)
+    const todayKeyIdx = getDailyKeyIndex(allKeys.length);
     
+    // Reorder keys: start with today's key, then the others as fallback
+    const orderedKeys = [
+      allKeys[todayKeyIdx],
+      ...allKeys.filter((_, idx) => idx !== todayKeyIdx)
+    ];
+    
+    console.log(`Today's primary API key: ${orderedKeys[0].index} (day rotation)`);
     console.log(`Generating TTS for: "${text}"`);
 
     // Use Lucas voice - male, good for Portuguese
@@ -45,9 +66,9 @@ serve(async (req) => {
     let lastError: Error | null = null;
     let successKeyIndex = 0;
 
-    // Try each key until one succeeds
-    for (const { key, index } of shuffledKeys) {
-      console.log(`Trying API key ${index} of ${allKeys.length} available`);
+    // Try each key in order (primary first, then fallbacks)
+    for (const { key, index } of orderedKeys) {
+      console.log(`Trying API key ${index}`);
       
       try {
         const response = await fetch(
