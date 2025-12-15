@@ -119,6 +119,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [backupData, setBackupData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Estado para modal de exclusão de estatísticas
+  const [deleteStatsDialogOpen, setDeleteStatsDialogOpen] = useState(false);
+  const [deleteStatsPassword, setDeleteStatsPassword] = useState('');
+  const [showDeleteStatsPassword, setShowDeleteStatsPassword] = useState(false);
+  const [deletingStats, setDeletingStats] = useState(false);
+  
   const { toast } = useToast();
 
   // Carregar dados do banco (detalhados + agregados)
@@ -927,6 +933,46 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
+  // Função para excluir apenas estatísticas de atendimento
+  const handleDeleteStatistics = async () => {
+    if (deleteStatsPassword !== 'Paineiras@1') {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha informada está incorreta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDeletingStats(true);
+    try {
+      const { error } = await supabase
+        .from('statistics_daily')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) throw error;
+
+      toast({
+        title: "Estatísticas apagadas",
+        description: "Todas as estatísticas de atendimento foram removidas com sucesso.",
+      });
+
+      setDeleteStatsDialogOpen(false);
+      setDeleteStatsPassword('');
+      loadDbHistory();
+    } catch (error) {
+      console.error('Erro ao apagar estatísticas:', error);
+      toast({
+        title: "Erro ao apagar",
+        description: "Ocorreu um erro ao tentar apagar as estatísticas.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingStats(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Modal de senha para comparação */}
@@ -1210,6 +1256,83 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Modal de confirmação para apagar estatísticas */}
+      <Dialog open={deleteStatsDialogOpen} onOpenChange={(open) => {
+        setDeleteStatsDialogOpen(open);
+        if (!open) setDeleteStatsPassword('');
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <BarChart3 className="w-5 h-5" />
+              Apagar Estatísticas de Atendimento
+            </DialogTitle>
+            <DialogDescription>
+              Esta ação irá remover todas as estatísticas diárias agregadas de atendimento.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-sm text-destructive font-medium">
+                ⚠️ Atenção: Esta ação não pode ser desfeita! Todas as estatísticas de todas as unidades serão removidas.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="delete-stats-password">Digite a senha para confirmar:</Label>
+              <div className="relative">
+                <Input
+                  id="delete-stats-password"
+                  type={showDeleteStatsPassword ? 'text' : 'password'}
+                  value={deleteStatsPassword}
+                  onChange={(e) => setDeleteStatsPassword(e.target.value)}
+                  placeholder="Senha de administrador"
+                  className="pr-10"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleDeleteStatistics();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteStatsPassword(!showDeleteStatsPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showDeleteStatsPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteStatsDialogOpen(false);
+                setDeleteStatsPassword('');
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteStatistics}
+              disabled={deletingStats || !deleteStatsPassword}
+              className="gap-2"
+            >
+              {deletingStats ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Apagando...
+                </>
+              ) : (
+                <>
+                  <BarChart3 className="w-4 h-4" />
+                  Apagar Estatísticas
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Input oculto para seleção de arquivo */}
       <input
         type="file"
@@ -1239,12 +1362,20 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             Restaurar
           </Button>
           <Button 
+            variant="outline" 
+            onClick={() => setDeleteStatsDialogOpen(true)} 
+            className="gap-2 border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Limpar Estatísticas
+          </Button>
+          <Button 
             variant="destructive" 
             onClick={() => setDeleteDialogOpen(true)} 
             className="gap-2"
           >
             <Trash2 className="w-4 h-4" />
-            Apagar
+            Apagar Tudo
           </Button>
         </div>
       </div>
