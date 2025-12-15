@@ -26,7 +26,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
-  const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
+  const [newsCountdown, setNewsCountdown] = useState(3 * 60); // 3 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -168,19 +168,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
 
     fetchNews();
-    setNewsCountdown(5 * 60); // Reset countdown
-    // Update every 5 minutes
+    setNewsCountdown(3 * 60); // Reset countdown
+    // Update every 3 minutes
     const interval = setInterval(() => {
       fetchNews();
-      setNewsCountdown(5 * 60); // Reset countdown after fetch
-    }, 5 * 60 * 1000);
+      setNewsCountdown(3 * 60); // Reset countdown after fetch
+    }, 3 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   // Countdown timer for next news update
   useEffect(() => {
     const countdownInterval = setInterval(() => {
-      setNewsCountdown(prev => (prev > 0 ? prev - 1 : 5 * 60));
+      setNewsCountdown(prev => (prev > 0 ? prev - 1 : 3 * 60));
     }, 1000);
     return () => clearInterval(countdownInterval);
   }, []);
