@@ -2072,52 +2072,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Gráfico de Nomes Mais Usados */}
-            <div>
-              <h4 className="font-medium mb-3 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Top 10 Nomes Mais Chamados
-              </h4>
-              {ttsNameUsage.length > 0 ? (
-                <div className="h-[250px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ttsNameUsage.slice(0, 10)} layout="vertical">
-                      <XAxis type="number" />
-                      <YAxis 
-                        dataKey="name_text" 
-                        type="category" 
-                        width={100}
-                        tick={{ fontSize: 11 }}
-                        tickFormatter={(value) => value.length > 12 ? value.substring(0, 12) + '...' : value}
-                      />
-                      <ChartTooltip 
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload as TTSNameUsage;
-                            return (
-                              <div className="bg-background border rounded-lg p-3 shadow-lg">
-                                <p className="font-medium text-sm mb-1 capitalize">{data.name_text}</p>
-                                <p className="text-sm text-purple-600">{data.usage_count} chamadas</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Último uso: {format(parseISO(data.last_used), 'dd/MM HH:mm')}
-                                </p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Bar dataKey="usage_count" fill="hsl(270, 70%, 55%)" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                  Nenhum nome registrado no período
-                </div>
-              )}
-            </div>
+          <div className="grid md:grid-cols-1 gap-6">
 
             {/* Lista de Nomes com Botão Ver Todos */}
             <div>
