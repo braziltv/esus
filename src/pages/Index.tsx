@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
+import { useTTSPreCache } from '@/hooks/useTTSPreCache';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -100,6 +101,26 @@ const Index = () => {
     updatePatientPriority,
   } = useCallPanel();
 
+  const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
+
+  // Pré-cachear todas as frases de destino ao fazer login
+  useEffect(() => {
+    if (isLoggedIn) {
+      // Delay para não interferir com o carregamento da página
+      const timer = setTimeout(() => {
+        preCacheAllDestinationPhrases();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoggedIn, preCacheAllDestinationPhrases]);
+
+  // Wrapper para addPatient que também pré-cacheia o nome
+  const handleAddPatient = async (name: string, priority?: 'normal' | 'priority' | 'emergency') => {
+    addPatient(name, priority);
+    // Pré-cachear o nome em background (não bloqueia)
+    preCachePatientName(name);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("selectedUnitId");
@@ -183,7 +204,7 @@ const Index = () => {
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <PatientRegistration
               patients={patients}
-              onAddPatient={addPatient}
+              onAddPatient={handleAddPatient}
               onRemovePatient={removePatient}
               onDirectPatient={directPatient}
               onFinishWithoutCall={finishWithoutCall}
