@@ -153,6 +153,101 @@ async function testApiKey(keyName: string, apiKey: string | undefined): Promise<
   }
 }
 
+// Get or generate audio for a text segment
+async function getOrGenerateAudio(
+  supabase: any,
+  text: string,
+  isPermanent: boolean,
+  apiKey: string,
+  voiceId: string
+): Promise<ArrayBuffer> {
+  const cacheKey = generateCacheKey(text, isPermanent);
+  const nameHash = getNameHash(text);
+  
+  // Check permanent cache first for non-permanent requests
+  if (!isPermanent && supabase) {
+    const permanentKey = `phrase_${nameHash}.mp3`;
+    const { data: permanentFile } = await supabase.storage
+      .from('tts-cache')
+      .download(permanentKey);
+    
+    if (permanentFile) {
+      console.log(`Permanent cache HIT for segment: ${permanentKey}`);
+      return permanentFile.arrayBuffer();
+    }
+  }
+  
+  // Check regular cache
+  if (supabase) {
+    const { data: existingFile } = await supabase.storage
+      .from('tts-cache')
+      .download(cacheKey);
+    
+    if (existingFile) {
+      console.log(`Cache HIT for segment: ${cacheKey}`);
+      return existingFile.arrayBuffer();
+    }
+  }
+  
+  // Generate new audio
+  console.log(`Generating audio for segment: "${text}"`);
+  const response = await fetch(
+    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+    {
+      method: "POST",
+      headers: {
+        "xi-api-key": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text,
+        model_id: "eleven_multilingual_v2",
+        output_format: "mp3_44100_128",
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: 0.3,
+          use_speaker_boost: true,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
+  }
+
+  const audioBuffer = await response.arrayBuffer();
+  
+  // Cache the generated audio
+  if (supabase) {
+    await supabase.storage
+      .from('tts-cache')
+      .upload(cacheKey, audioBuffer, {
+        contentType: 'audio/mpeg',
+        upsert: true,
+      });
+    console.log(`Cached segment: ${cacheKey}`);
+  }
+  
+  return audioBuffer;
+}
+
+// Concatenate multiple MP3 audio buffers
+function concatenateAudioBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
+  const totalLength = buffers.reduce((acc, buf) => acc + buf.byteLength, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  
+  for (const buffer of buffers) {
+    result.set(new Uint8Array(buffer), offset);
+    offset += buffer.byteLength;
+  }
+  
+  return result.buffer;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -162,7 +257,75 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys } = await req.json();
+    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate } = await req.json();
+
+    const supabase = supabaseUrl && supabaseServiceKey 
+      ? createClient(supabaseUrl, supabaseServiceKey) 
+      : null;
+
+    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+    const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
+
+    // Handle concatenation mode: combine name + prefix + destination
+    if (concatenate && supabase && ELEVENLABS_API_KEY) {
+      const { name, prefix, destination } = concatenate;
+      console.log(`Concatenation request: name="${name}", prefix="${prefix}", destination="${destination}"`);
+      
+      const audioBuffers: ArrayBuffer[] = [];
+      let apiCallsMade = 0;
+      
+      // Get name audio (check cache first, generate if needed)
+      if (name) {
+        const nameHash = getNameHash(name);
+        const nameCacheKey = generateCacheKey(name, false);
+        
+        // Track name usage
+        await trackNameUsage(supabase, nameHash, name);
+        
+        const nameAudio = await getOrGenerateAudio(supabase, name, false, ELEVENLABS_API_KEY, selectedVoiceId);
+        audioBuffers.push(nameAudio);
+        
+        // Check if this was a cache miss (for API tracking)
+        const { data: cached } = await supabase.storage.from('tts-cache').download(nameCacheKey);
+        if (!cached) apiCallsMade++;
+        
+        // Check for promotion to permanent cache
+        await checkAndPromoteFrequentName(supabase, nameHash, name, nameCacheKey);
+      }
+      
+      // Get prefix audio (always from permanent cache)
+      if (prefix) {
+        const prefixAudio = await getOrGenerateAudio(supabase, prefix, true, ELEVENLABS_API_KEY, selectedVoiceId);
+        audioBuffers.push(prefixAudio);
+      }
+      
+      // Get destination audio (always from permanent cache)
+      if (destination) {
+        const destAudio = await getOrGenerateAudio(supabase, destination, true, ELEVENLABS_API_KEY, selectedVoiceId);
+        audioBuffers.push(destAudio);
+      }
+      
+      // Concatenate all audio segments
+      const combinedAudio = concatenateAudioBuffers(audioBuffers);
+      console.log(`Concatenated audio: ${audioBuffers.length} segments, ${combinedAudio.byteLength} bytes total`);
+      
+      // Track API usage if any calls were made
+      if (apiCallsMade > 0) {
+        await supabase.from("api_key_usage").insert({
+          api_key_index: 1,
+          unit_name: unitName || "Desconhecido"
+        });
+      }
+      
+      return new Response(combinedAudio, {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "audio/mpeg",
+          "X-Cache": apiCallsMade > 0 ? "PARTIAL" : "HIT",
+          "X-Segments": String(audioBuffers.length),
+        },
+      });
+    }
 
     // Test all API keys if requested
     if (testAllKeys) {
@@ -186,8 +349,7 @@ serve(async (req) => {
     }
 
     // Handle cache clearing request
-    if (clearCache && supabaseUrl && supabaseServiceKey) {
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    if (clearCache && supabase) {
       const cacheKey = generateCacheKey(clearCache, false);
       
       const { error } = await supabase.storage
@@ -214,10 +376,6 @@ serve(async (req) => {
     const cacheKey = generateCacheKey(text, isPermanent);
     const nameHash = getNameHash(text);
     console.log(`TTS request for: "${text}" (cache key: ${cacheKey}, permanent: ${isPermanent})`);
-
-    const supabase = supabaseUrl && supabaseServiceKey 
-      ? createClient(supabaseUrl, supabaseServiceKey) 
-      : null;
 
     // For non-permanent caches (patient names), check if permanent version exists first
     if (!isPermanent && supabase) {
@@ -271,16 +429,11 @@ serve(async (req) => {
       console.log(`Cache MISS for: ${cacheKey}`);
     }
 
-    // Use the single API key
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    
     if (!ELEVENLABS_API_KEY) {
       throw new Error("ELEVENLABS_API_KEY not configured");
     }
 
     console.log("Using ELEVENLABS_API_KEY");
-
-    const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
