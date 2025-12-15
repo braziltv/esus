@@ -94,82 +94,47 @@ serve(async (req) => {
       console.log(`Cache MISS for: ${cacheKey}`);
     }
 
-    // Generate new audio from ElevenLabs
-    const ELEVENLABS_API_KEY_1 = Deno.env.get("ELEVENLABS_API_KEY");
-    const ELEVENLABS_API_KEY_2 = Deno.env.get("ELEVENLABS_API_KEY_2");
-    const ELEVENLABS_API_KEY_3 = Deno.env.get("ELEVENLABS_API_KEY_3");
+    // Usar apenas a chave 2 (as outras estão bloqueadas)
+    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY_2");
     
-    const allKeys = [
-      { key: ELEVENLABS_API_KEY_1, index: 1 },
-      { key: ELEVENLABS_API_KEY_2, index: 2 },
-      { key: ELEVENLABS_API_KEY_3, index: 3 },
-    ].filter((item): item is { key: string; index: number } => Boolean(item.key));
-    
-    if (allKeys.length === 0) {
-      throw new Error("No ELEVENLABS_API_KEY configured");
+    if (!ELEVENLABS_API_KEY) {
+      throw new Error("ELEVENLABS_API_KEY_2 not configured");
     }
 
-    const todayKeyIdx = getDailyKeyIndex(allKeys.length);
-    const orderedKeys = [
-      allKeys[todayKeyIdx],
-      ...allKeys.filter((_, idx) => idx !== todayKeyIdx)
-    ];
-    
-    console.log(`Today's primary API key: ${orderedKeys[0].index}`);
+    console.log("Using ELEVENLABS_API_KEY_2");
 
     const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
 
-    let lastError: Error | null = null;
-    let successKeyIndex = 0;
-    let audioBuffer: ArrayBuffer | null = null;
-
-    for (const { key, index } of orderedKeys) {
-      console.log(`Trying API key ${index}`);
-      
-      try {
-        const response = await fetch(
-          `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
-          {
-            method: "POST",
-            headers: {
-              "xi-api-key": key,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              text,
-              model_id: "eleven_multilingual_v2",
-              output_format: "mp3_44100_128",
-              voice_settings: {
-                stability: 0.5,
-                similarity_boost: 0.75,
-                style: 0.3,
-                use_speaker_boost: true,
-              },
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`API key ${index} failed:`, response.status, errorText);
-          lastError = new Error(`ElevenLabs API error: ${response.status}`);
-          continue;
-        }
-
-        audioBuffer = await response.arrayBuffer();
-        console.log(`Audio generated with key ${index}, size: ${audioBuffer.byteLength} bytes`);
-        successKeyIndex = index;
-        break;
-      } catch (fetchError) {
-        console.error(`Error with API key ${index}:`, fetchError);
-        lastError = fetchError instanceof Error ? fetchError : new Error(String(fetchError));
-        continue;
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVENLABS_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          model_id: "eleven_multilingual_v2",
+          output_format: "mp3_44100_128",
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            style: 0.3,
+            use_speaker_boost: true,
+          },
+        }),
       }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("ElevenLabs API error:", response.status, errorText);
+      throw new Error(`ElevenLabs API error: ${response.status}`);
     }
 
-    if (!audioBuffer) {
-      throw lastError || new Error("All API keys failed");
-    }
+    const audioBuffer = await response.arrayBuffer();
+    console.log(`Audio generated, size: ${audioBuffer.byteLength} bytes`);
 
     // Save to cache
     if (supabaseUrl && supabaseServiceKey) {
@@ -190,7 +155,7 @@ serve(async (req) => {
 
       // Track API key usage
       await supabase.from("api_key_usage").insert({
-        api_key_index: successKeyIndex,
+        api_key_index: 2,
         unit_name: unitName || "Desconhecido"
       });
     }
