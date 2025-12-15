@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Patient, CallHistory } from '@/types/patient';
 import { useSupabaseSync } from './useSupabaseSync';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEYS = {
   PATIENTS: 'callPanel_patients',
@@ -104,6 +105,69 @@ export function useCallPanel() {
       clearInterval(interval);
     };
   }, [unitName]);
+
+  // Realtime sync for patient_calls - when a patient is forwarded to triage, add them to local state
+  const processedCallIdsRef = useRef<Set<string>>(new Set());
+  
+  useEffect(() => {
+    if (!unitName) return;
+
+    const channel = supabase
+      .channel('patients-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'patient_calls',
+          filter: `unit_name=eq.${unitName}`,
+        },
+        (payload) => {
+          const call = payload.new as any;
+          
+          // Skip if already processed
+          if (processedCallIdsRef.current.has(call.id)) return;
+          processedCallIdsRef.current.add(call.id);
+          
+          // Check if this patient already exists locally
+          const patientExists = patients.some(p => p.name === call.patient_name && p.status !== 'attended');
+          
+          if (!patientExists && call.status === 'active') {
+            // Add patient from another device
+            const newPatient: Patient = {
+              id: `patient-${call.id}`,
+              name: call.patient_name,
+              status: call.call_type === 'triage' ? 'in-triage' : 'in-consultation',
+              priority: call.priority || 'normal',
+              createdAt: new Date(call.created_at),
+              calledAt: new Date(call.created_at),
+              calledBy: call.call_type,
+              destination: call.destination,
+            };
+            
+            setPatients(prev => {
+              // Double-check to avoid duplicates
+              if (prev.some(p => p.name === call.patient_name && p.status !== 'attended')) {
+                return prev;
+              }
+              return [...prev, newPatient];
+            });
+            
+            // Set as current call
+            if (call.call_type === 'triage') {
+              setCurrentTriageCall(newPatient);
+            } else if (call.call_type === 'doctor') {
+              setCurrentDoctorCall(newPatient);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [unitName, patients]);
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -276,8 +340,17 @@ export function useCallPanel() {
       createCall(patient.name, 'triage', destination || 'Triagem');
       triggerCallEvent({ name: patient.name }, 'triage', destination || 'Triagem');
 
+      const updatedPatient: Patient = {
+        ...patient,
+        status: 'waiting' as const, // Keep as waiting so it shows in triage queue
+        calledAt: new Date(),
+      };
+      
+      // Set as current triage call so it appears in "Chamada Atual"
+      setCurrentTriageCall(updatedPatient);
+
       return prev.map(p => 
-        p.id === patientId ? { ...p, status: 'in-triage' as const, calledAt: new Date() } : p
+        p.id === patientId ? updatedPatient : p
       );
     });
   }, [createCall, triggerCallEvent]);

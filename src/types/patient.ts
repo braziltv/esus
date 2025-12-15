@@ -8,6 +8,7 @@ export interface Patient {
   createdAt: Date;
   calledAt?: Date;
   calledBy?: 'triage' | 'doctor';
+  destination?: string;
 }
 
 export interface CallHistory {
