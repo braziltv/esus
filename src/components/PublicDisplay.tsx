@@ -301,8 +301,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
       
       window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-      console.log('Audio test completed');
+      window.speechSynthesis.resume();
+      
+      // Wait before speaking after cancel()
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+        console.log('Audio test completed');
+      }, 200);
     } catch (error) {
       console.error('Audio test failed:', error);
     }
@@ -375,8 +380,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('Selected voice:', preferredVoice.name);
     }
     
-    // Cancel any ongoing speech and speak
+    // Cancel any ongoing speech and ensure synthesizer is ready
     window.speechSynthesis.cancel();
+    window.speechSynthesis.resume(); // Ensure it's not stuck in paused state
     
     utterance.onerror = (e) => {
       console.error('TTS error:', e);
@@ -388,8 +394,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       setAnnouncingType(null);
     };
     
-    window.speechSynthesis.speak(utterance);
-  }, [playNotificationSound]);
+    // CRITICAL: Wait before speaking after cancel() - browser needs time to clear queue
+    // This is a well-known Web Speech API bug
+    setTimeout(() => {
+      console.log('Attempting to speak after delay...');
+      window.speechSynthesis.speak(utterance);
+      
+      // Safety timeout to clear state if onend never fires (Chrome bug with some voices)
+      setTimeout(() => {
+        if (announcingType) {
+          console.log('Safety timeout: clearing announcing state');
+          setAnnouncingType(null);
+        }
+      }, 15000);
+    }, 200);
+  }, [playNotificationSound, announcingType]);
 
   // Load initial data from Supabase
   useEffect(() => {
