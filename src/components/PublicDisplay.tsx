@@ -971,7 +971,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <iframe
             ref={youtubePlayerRef}
             key={currentVideoIndex} // Force reload when video changes
-            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=0&controls=0&loop=0&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
+            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&controls=0&loop=0&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
             className="w-full h-full"
             allow="autoplay; encrypted-media"
             allowFullScreen
@@ -1310,49 +1310,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <Volume2 className="w-3 h-3" />
           <span>Testar Áudio</span>
         </button>
-        
-        {/* YouTube Settings Button - Only show when no video is configured */}
-        {!youtubeVideoId && (
-          <Dialog open={showVideoSettings} onOpenChange={(open) => {
-            setShowVideoSettings(open);
-            if (open) setTempYoutubeUrl('');
-          }}>
-            <DialogTrigger asChild>
-              <button
-                className="flex items-center gap-1 px-2 py-1 text-[9px] sm:text-[10px] lg:text-xs text-red-400 hover:text-red-300 bg-slate-800/50 hover:bg-slate-700/50 rounded-md border border-slate-700 hover:border-red-600 transition-colors"
-                title="Adicionar vídeo do YouTube"
-              >
-                <Youtube className="w-3 h-3" />
-                <span>Adicionar Vídeo</span>
-              </button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Youtube className="w-5 h-5 text-red-500" />
-                  Configurar Vídeo do YouTube
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Link do YouTube</label>
-                  <Input
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    value={tempYoutubeUrl}
-                    onChange={(e) => setTempYoutubeUrl(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Cole o link do vídeo do YouTube. O vídeo será exibido em tela cheia e pausará automaticamente durante as chamadas de pacientes.
-                  </p>
-                </div>
-                <Button onClick={saveYoutubeUrl} className="w-full">
-                  <Play className="w-4 h-4 mr-2" />
-                  Salvar e Reproduzir
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
     </div>
   );
