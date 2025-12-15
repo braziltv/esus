@@ -215,7 +215,7 @@
 
 .animate-marquee {
   display: inline-flex;
-  animation: marquee 1200s linear infinite;
+  animation: marquee 1140s linear infinite;
 }
 
 @keyframes flash {
