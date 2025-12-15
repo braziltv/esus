@@ -288,43 +288,67 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     console.log('Audio unlocked and saved to localStorage');
   }, [audioUnlocked]);
 
+  // Play audio with amplification using Web Audio API (2x volume = 100% increase)
+  const playAmplifiedAudio = useCallback((audioElement: HTMLAudioElement, gain: number = 2.0): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (!audioContextRef.current) audioContextRef.current = audioContext;
+        
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        
+        const source = audioContext.createMediaElementSource(audioElement);
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = gain; // 2.0 = 100% volume increase
+        
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        audioElement.onended = () => {
+          source.disconnect();
+          gainNode.disconnect();
+          resolve();
+        };
+        audioElement.onerror = (e) => {
+          source.disconnect();
+          gainNode.disconnect();
+          reject(e);
+        };
+        
+        audioElement.play().catch(reject);
+      } catch (e) {
+        // Fallback to normal playback if Web Audio API fails
+        console.warn('Web Audio API amplification failed, using normal volume:', e);
+        audioElement.volume = 1.0;
+        audioElement.onended = () => resolve();
+        audioElement.onerror = (e) => reject(e);
+        audioElement.play().catch(reject);
+      }
+    });
+  }, []);
+
   // Play notification sound effect (uses preloaded audio for faster playback)
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
     
     return new Promise<void>((resolve, reject) => {
-      // Use preloaded audio if available, otherwise create new
-      const audio = notificationAudioRef.current || new Audio('/sounds/notification.mp3');
-      audio.volume = 1.0; // Maximum volume
-      audio.currentTime = 0; // Reset to beginning
+      // Create new audio element each time to allow Web Audio API connection
+      const audio = new Audio('/sounds/notification.mp3');
+      audio.currentTime = 0;
       
-      const handleEnded = () => {
-        console.log('Notification sound finished');
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('error', handleError);
-        resolve();
-      };
-      
-      const handleError = (e: Event) => {
-        console.error('Error playing notification sound:', e);
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('error', handleError);
-        reject(e);
-      };
-      
-      audio.addEventListener('ended', handleEnded);
-      audio.addEventListener('error', handleError);
-      
-      audio.play().then(() => {
-        console.log('Notification sound playing');
-      }).catch((err) => {
-        console.error('Failed to play notification sound:', err);
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('error', handleError);
-        reject(err);
-      });
+      playAmplifiedAudio(audio, 2.0)
+        .then(() => {
+          console.log('Notification sound finished');
+          resolve();
+        })
+        .catch((err) => {
+          console.error('Failed to play notification sound:', err);
+          reject(err);
+        });
     });
-  }, []);
+  }, [playAmplifiedAudio]);
 
   const speakWithWebSpeech = useCallback(
     (text: string, opts?: { rate?: number; pitch?: number; volume?: number }) => {
@@ -394,21 +418,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       
-      return new Promise((resolve, reject) => {
-        const audio = new Audio(audioUrl);
-        audio.volume = 1.0; // Maximum volume
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          resolve();
-        };
-        audio.onerror = (e) => {
-          URL.revokeObjectURL(audioUrl);
-          reject(e);
-        };
-        audio.play().catch(reject);
-      });
+      const audio = new Audio(audioUrl);
+      try {
+        await playAmplifiedAudio(audio, 2.0);
+      } finally {
+        URL.revokeObjectURL(audioUrl);
+      }
     },
-    []
+    [playAmplifiedAudio]
   );
 
   // Test audio function
@@ -513,21 +530,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       
-      return new Promise((resolve, reject) => {
-        const audio = new Audio(audioUrl);
-        audio.volume = 1.0;
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          resolve();
-        };
-        audio.onerror = (e) => {
-          URL.revokeObjectURL(audioUrl);
-          reject(e);
-        };
-        audio.play().catch(reject);
-      });
+      const audio = new Audio(audioUrl);
+      try {
+        await playAmplifiedAudio(audio, 2.0);
+      } finally {
+        URL.revokeObjectURL(audioUrl);
+      }
     },
-    [unitName]
+    [unitName, playAmplifiedAudio]
   );
 
   const speakName = useCallback(
