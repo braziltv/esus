@@ -37,11 +37,7 @@ import {
   Upload,
   FileUp,
   HardDrive,
-  Volume2,
-  Youtube,
-  Plus,
-  X,
-  Save
+  Volume2
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -150,19 +146,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [ttsNameUsage, setTtsNameUsage] = useState<TTSNameUsage[]>([]);
   const [showNamesDialog, setShowNamesDialog] = useState(false);
   
-  // Estado para configuração de vídeos do YouTube
-  const [youtubeUrls, setYoutubeUrls] = useState<string[]>(() => {
-    const saved = localStorage.getItem('publicDisplayYoutubePlaylist');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return ['', '', '', '', '', '', '', '', '', ''];
-      }
-    }
-    return ['', '', '', '', '', '', '', '', '', ''];
-  });
-
   const { toast } = useToast();
 
   // Carregar dados do banco (detalhados + agregados)
@@ -2211,83 +2194,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Configuração de Vídeos do YouTube */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Youtube className="w-5 h-5 text-red-500" />
-            Playlist de Vídeos (Atendimento ao Público)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Configure até 10 vídeos para reprodução aleatória na tela de Atendimento ao Público.
-            Os vídeos pausarão automaticamente durante as chamadas de pacientes.
-          </p>
-          <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 mb-4">
-            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-              💡 Google Drive = com som automático
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              YouTube inicia mudo (política do navegador). Use Google Drive para vídeos com som.
-            </p>
-          </div>
-          
-          <div className="space-y-3">
-            {youtubeUrls.map((url, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span className="text-sm font-medium w-6 text-muted-foreground">{index + 1}.</span>
-                <Input
-                  placeholder="Link do Google Drive ou YouTube..."
-                  value={url}
-                  onChange={(e) => {
-                    const newUrls = [...youtubeUrls];
-                    newUrls[index] = e.target.value;
-                    setYoutubeUrls(newUrls);
-                  }}
-                  className="flex-1"
-                />
-                {url && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      const newUrls = [...youtubeUrls];
-                      newUrls[index] = '';
-                      setYoutubeUrls(newUrls);
-                    }}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-          
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{youtubeUrls.filter(u => u.trim()).length}</span> vídeos configurados
-            </div>
-            <Button
-              onClick={() => {
-                localStorage.setItem('publicDisplayYoutubePlaylist', JSON.stringify(youtubeUrls));
-                // Also clear the old single URL if exists
-                localStorage.removeItem('publicDisplayYoutubeUrl');
-                toast({
-                  title: "Playlist salva!",
-                  description: `${youtubeUrls.filter(u => u.trim()).length} vídeos configurados para reprodução aleatória.`,
-                });
-              }}
-              className="gap-2"
-            >
-              <Save className="w-4 h-4" />
-              Salvar Playlist
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

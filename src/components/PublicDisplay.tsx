@@ -1,12 +1,8 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX, Settings, Youtube, X, Play, Pause } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { toast } from 'sonner';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -19,93 +15,6 @@ interface NewsItem {
   link: string;
   source: string;
 }
-
-// Extract YouTube video ID from various URL formats
-const extractYouTubeId = (url: string): string | null => {
-  if (!url) return null;
-  
-  // Handle various YouTube URL formats
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([^&\n?#]+)/,
-    /^([a-zA-Z0-9_-]{11})$/ // Direct video ID
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  return null;
-};
-
-// Extract Google Drive file ID and return preview URL for iframe embedding
-const extractGoogleDriveUrl = (url: string): string | null => {
-  if (!url) return null;
-  
-  // Handle various Google Drive URL formats
-  const patterns = [
-    /drive\.google\.com\/file\/d\/([^/]+)/,
-    /drive\.google\.com\/open\?id=([^&]+)/,
-    /drive\.google\.com\/uc\?.*id=([^&]+)/,
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      // Return preview URL for iframe (user needs to click play manually)
-      return `https://drive.google.com/file/d/${match[1]}/preview`;
-    }
-  }
-  return null;
-};
-
-// Check if URL is from Cloudinary and extract a direct delivery URL
-const getCloudinaryDirectUrl = (url: string): string | null => {
-  if (!url) return null;
-
-  // Embed player URL format
-  // Example: https://player.cloudinary.com/embed/?cloud_name=xxx&public_id=yyy&profile=cld-default
-  try {
-    const u = new URL(url);
-    if (u.hostname === 'player.cloudinary.com' && u.pathname.startsWith('/embed')) {
-      const cloudName = u.searchParams.get('cloud_name') || '';
-      const publicIdRaw = u.searchParams.get('public_id') || '';
-      if (cloudName && publicIdRaw) {
-        const publicIdDecoded = decodeURIComponent(publicIdRaw);
-        // Encode only what's needed for a URL path (keeps slashes if any)
-        const publicIdPath = encodeURI(publicIdDecoded);
-        // Do NOT force .mp4 extension; Cloudinary will serve the correct format.
-        return `https://res.cloudinary.com/${cloudName}/video/upload/${publicIdPath}`;
-      }
-    }
-  } catch {
-    // ignore invalid URL
-  }
-
-  // Already a direct URL
-  if (url.includes('res.cloudinary.com')) return url;
-
-  return null;
-};
-
-// Check if URL is from Cloudinary
-const isCloudinaryUrl = (url: string): boolean => {
-  if (!url) return false;
-  return url.includes('res.cloudinary.com') || url.includes('player.cloudinary.com') || url.includes('cloudinary.com/video');
-};
-
-// Determine video type from URL
-const getVideoType = (url: string): 'youtube' | 'googledrive' | 'cloudinary' | 'direct' | null => {
-  if (!url) return null;
-  if (extractYouTubeId(url)) return 'youtube';
-  if (extractGoogleDriveUrl(url)) return 'googledrive';
-  // Cloudinary URLs - supports autoplay with sound!
-  if (isCloudinaryUrl(url)) return 'cloudinary';
-  // Check for direct video URLs
-  if (url.match(/\.(mp4|webm|ogg|mov)(\?|$)/i)) return 'direct';
-  return null;
-};
 
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
@@ -122,96 +31,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
-  
-  // YouTube playlist states
-  const [youtubePlaylist, setYoutubePlaylist] = useState<string[]>(() => {
-    const saved = localStorage.getItem('publicDisplayYoutubePlaylist');
-    if (saved) {
-      try {
-        return JSON.parse(saved).filter((url: string) => url.trim());
-      } catch {
-        return [];
-      }
-    }
-    // Fallback to old single URL
-    const oldUrl = localStorage.getItem('publicDisplayYoutubeUrl');
-    return oldUrl ? [oldUrl] : [];
-  });
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(() => {
-    const saved = localStorage.getItem('publicDisplayYoutubePlaylist');
-    if (saved) {
-      try {
-        const urls = JSON.parse(saved).filter((url: string) => url.trim());
-        if (urls.length > 0) {
-          return Math.floor(Math.random() * urls.length);
-        }
-      } catch {}
-    }
-    return 0;
-  });
-  const [tempYoutubeUrl, setTempYoutubeUrl] = useState('');
-  const [showVideoSettings, setShowVideoSettings] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
-  const youtubePlayerRef = useRef<HTMLIFrameElement>(null);
-  const wasPlayingBeforeAnnouncement = useRef(true);
-  
-  // Get current video URL
-  const currentYoutubeUrl = youtubePlaylist[currentVideoIndex] || '';
-  
-  // Switch to next random video
-  const switchToNextVideo = useCallback(() => {
-    if (youtubePlaylist.length <= 1) return;
-    
-    let nextIndex;
-    do {
-      nextIndex = Math.floor(Math.random() * youtubePlaylist.length);
-    } while (nextIndex === currentVideoIndex && youtubePlaylist.length > 1);
-    
-    setCurrentVideoIndex(nextIndex);
-    console.log('Switching to video:', nextIndex, youtubePlaylist[nextIndex]);
-  }, [youtubePlaylist, currentVideoIndex]);
-
-  // Listen for video end events from YouTube iframe
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://www.youtube.com') return;
-      
-      try {
-        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        // YouTube sends state change events: 0 = ended
-        if (data.event === 'onStateChange' && data.info === 0) {
-          console.log('Video ended, switching to next...');
-          switchToNextVideo();
-        }
-      } catch {
-        // Ignore non-JSON messages
-      }
-    };
-    
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [switchToNextVideo]);
-
-  // Reload playlist from localStorage periodically
-  useEffect(() => {
-    const checkPlaylist = () => {
-      const saved = localStorage.getItem('publicDisplayYoutubePlaylist');
-      if (saved) {
-        try {
-          const urls = JSON.parse(saved).filter((url: string) => url.trim());
-          if (JSON.stringify(urls) !== JSON.stringify(youtubePlaylist)) {
-            setYoutubePlaylist(urls);
-            if (urls.length > 0) {
-              setCurrentVideoIndex(Math.floor(Math.random() * urls.length));
-            }
-          }
-        } catch {}
-      }
-    };
-    
-    const interval = setInterval(checkPlaylist, 5000);
-    return () => clearInterval(interval);
-  }, [youtubePlaylist]);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -788,73 +607,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => window.clearTimeout(t);
   }, [announcingType]);
 
-  // Handle YouTube video pause/play based on announcement state
-  useEffect(() => {
-    const videoId = extractYouTubeId(currentYoutubeUrl);
-    if (!videoId || !youtubePlayerRef.current) return;
-
-    if (announcingType) {
-      // Store current playing state and pause video
-      wasPlayingBeforeAnnouncement.current = isVideoPlaying;
-      setIsVideoPlaying(false);
-      
-      // Send pause command to YouTube iframe
-      try {
-        youtubePlayerRef.current.contentWindow?.postMessage(
-          JSON.stringify({ event: 'command', func: 'pauseVideo' }),
-          '*'
-        );
-      } catch (e) {
-        console.warn('Failed to pause YouTube video:', e);
-      }
-    } else {
-      // Resume video if it was playing before announcement
-      if (wasPlayingBeforeAnnouncement.current) {
-        setIsVideoPlaying(true);
-        try {
-          youtubePlayerRef.current.contentWindow?.postMessage(
-            JSON.stringify({ event: 'command', func: 'playVideo' }),
-            '*'
-          );
-        } catch (e) {
-          console.warn('Failed to resume YouTube video:', e);
-        }
-      }
-    }
-  }, [announcingType, currentYoutubeUrl, isVideoPlaying]);
-
-  // Save YouTube URL (for single video mode from display)
-  const saveYoutubeUrl = useCallback(() => {
-    const videoId = extractYouTubeId(tempYoutubeUrl);
-    if (tempYoutubeUrl && !videoId) {
-      toast.error('URL do YouTube inválida. Verifique o link.');
-      return;
-    }
-    
-    if (tempYoutubeUrl) {
-      // Add to playlist
-      const newPlaylist = [tempYoutubeUrl, ...youtubePlaylist.filter(u => u !== tempYoutubeUrl)].slice(0, 10);
-      setYoutubePlaylist(newPlaylist);
-      localStorage.setItem('publicDisplayYoutubePlaylist', JSON.stringify(newPlaylist.concat(Array(10 - newPlaylist.length).fill(''))));
-      setCurrentVideoIndex(0);
-      toast.success('Vídeo adicionado à playlist!');
-    }
-    
-    setShowVideoSettings(false);
-    setTempYoutubeUrl('');
-    setIsVideoPlaying(true);
-  }, [tempYoutubeUrl, youtubePlaylist]);
-
-  // Remove all YouTube videos
-  const removeYoutubeVideo = useCallback(() => {
-    setYoutubePlaylist([]);
-    setTempYoutubeUrl('');
-    localStorage.removeItem('publicDisplayYoutubePlaylist');
-    localStorage.removeItem('publicDisplayYoutubeUrl');
-    setShowVideoSettings(false);
-    toast.success('Playlist removida');
-  }, []);
-
   // Load initial data from Supabase
   useEffect(() => {
     const loadData = async () => {
@@ -1026,161 +778,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     );
   }
 
-  const youtubeVideoId = extractYouTubeId(currentYoutubeUrl);
-  const googleDriveUrl = extractGoogleDriveUrl(currentYoutubeUrl);
-  const videoType = getVideoType(currentYoutubeUrl);
-  const hasVideo = videoType !== null;
-
   return (
     <div 
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
-      {/* Video Fullscreen - Hidden during announcements */}
-      {hasVideo && !announcingType && (
-        <div className="absolute inset-0 z-30 bg-black">
-          {/* Google Drive Video - iframe (autoplay not guaranteed, user may need to click play) */}
-          {videoType === 'googledrive' && googleDriveUrl && (
-            <iframe
-              key={currentVideoIndex}
-              src={googleDriveUrl}
-              className="w-full h-full"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              title="Google Drive Video"
-            />
-          )}
-          
-          {/* YouTube Video - muted due to browser policy */}
-          {videoType === 'youtube' && youtubeVideoId && (
-            <iframe
-              ref={youtubePlayerRef}
-              key={currentVideoIndex}
-              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&controls=0&loop=0&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
-              className="w-full h-full"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              title="YouTube Video"
-            />
-          )}
-          
-          {/* Cloudinary video - with sound! */}
-          {videoType === 'cloudinary' && (
-            <video
-              key={currentVideoIndex}
-              src={getCloudinaryDirectUrl(currentYoutubeUrl) || currentYoutubeUrl}
-              className="w-full h-full object-contain"
-              autoPlay
-              loop={youtubePlaylist.length === 1}
-              onEnded={switchToNextVideo}
-              onError={(e) => {
-                console.error('Cloudinary video failed to load:', {
-                  originalUrl: currentYoutubeUrl,
-                  resolvedUrl: getCloudinaryDirectUrl(currentYoutubeUrl),
-                  error: e,
-                });
-                toast.error('Falha ao carregar vídeo (Cloudinary)');
-              }}
-              playsInline
-            />
-          )}
-          
-          {/* Direct video URL - with sound! */}
-          {videoType === 'direct' && (
-            <video
-              key={currentVideoIndex}
-              src={currentYoutubeUrl}
-              className="w-full h-full object-contain"
-              autoPlay
-              loop={youtubePlaylist.length === 1}
-              onEnded={switchToNextVideo}
-              playsInline
-            />
-          )}
-          
-          {/* Overlay controls on video */}
-          <div className="absolute top-4 right-4 flex items-center gap-2 z-40">
-            {/* Video type indicator */}
-            <div className="px-3 py-1.5 rounded-full bg-black/50 text-white/70 text-xs">
-              {videoType === 'cloudinary' ? 'Cloudinary ♪' : videoType === 'googledrive' ? 'Google Drive' : videoType === 'youtube' ? 'YouTube (mudo)' : 'Vídeo'}
-            </div>
-            
-            {/* Playlist info */}
-            {youtubePlaylist.length > 1 && (
-              <div className="px-3 py-1.5 rounded-full bg-black/50 text-white/70 text-sm">
-                {currentVideoIndex + 1} / {youtubePlaylist.length}
-              </div>
-            )}
-            
-            {/* Next video button */}
-            {youtubePlaylist.length > 1 && (
-              <button
-                onClick={switchToNextVideo}
-                className="p-2 rounded-full bg-black/50 hover:bg-black/70 text-white/70 hover:text-white transition-colors"
-                title="Próximo vídeo"
-              >
-                <Play className="w-5 h-5" />
-              </button>
-            )}
-            
-            {/* Settings button */}
-            <Dialog open={showVideoSettings} onOpenChange={(open) => {
-              setShowVideoSettings(open);
-              if (open) setTempYoutubeUrl('');
-            }}>
-              <DialogTrigger asChild>
-                <button
-                  className="p-2 rounded-full bg-black/50 hover:bg-black/70 text-white/70 hover:text-white transition-colors"
-                  title="Configurar vídeo"
-                >
-                  <Settings className="w-5 h-5" />
-                </button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Youtube className="w-5 h-5 text-red-500" />
-                    Playlist de Vídeos
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="p-3 rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">{youtubePlaylist.length}</span> vídeos na playlist
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Configure a playlist na aba Administrativo
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Adicionar vídeo rapidamente</label>
-                    <Input
-                      placeholder="Link do Google Drive ou YouTube..."
-                      value={tempYoutubeUrl}
-                      onChange={(e) => setTempYoutubeUrl(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Google Drive: com som • YouTube: sem som
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={saveYoutubeUrl} className="flex-1" disabled={!tempYoutubeUrl}>
-                      <Play className="w-4 h-4 mr-2" />
-                      Adicionar
-                    </Button>
-                    <Button variant="destructive" onClick={removeYoutubeVideo}>
-                      <X className="w-4 h-4 mr-2" />
-                      Limpar
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      )}
-
       {/* Flash overlay during announcement */}
       {announcingType && (
         <div className="absolute inset-0 z-50 pointer-events-none animate-flash">
@@ -1192,13 +794,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Animated background elements - only show when no video */}
-      {!hasVideo && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-        </div>
-      )}
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+      </div>
 
       {/* Header - Compact */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
