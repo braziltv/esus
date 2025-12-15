@@ -20,15 +20,17 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY_1 = Deno.env.get("ELEVENLABS_API_KEY");
     const ELEVENLABS_API_KEY_2 = Deno.env.get("ELEVENLABS_API_KEY_2");
+    const ELEVENLABS_API_KEY_3 = Deno.env.get("ELEVENLABS_API_KEY_3");
     
-    // Randomly select one of the two API keys
-    const availableKeys = [ELEVENLABS_API_KEY_1, ELEVENLABS_API_KEY_2].filter((key): key is string => Boolean(key));
+    // Randomly select one of the available API keys
+    const availableKeys = [ELEVENLABS_API_KEY_1, ELEVENLABS_API_KEY_2, ELEVENLABS_API_KEY_3].filter((key): key is string => Boolean(key));
     if (availableKeys.length === 0) {
       throw new Error("No ELEVENLABS_API_KEY configured");
     }
     const ELEVENLABS_API_KEY = availableKeys[Math.floor(Math.random() * availableKeys.length)];
     
-    console.log(`Using API key ${ELEVENLABS_API_KEY_1 === ELEVENLABS_API_KEY ? '1' : '2'}`);
+    const keyIndex = availableKeys.indexOf(ELEVENLABS_API_KEY) + 1;
+    console.log(`Using API key ${keyIndex} of ${availableKeys.length} available`);
 
     console.log(`Generating TTS for: "${text}"`);
 
