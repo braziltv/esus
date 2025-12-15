@@ -100,26 +100,35 @@ export function TriagePanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Menu Consultórios */}
+                {/* Menu Encaminhar para Médico - Consultórios */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm">
-                      <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Direcionar para</span> Consultório
+                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm text-purple-600 hover:text-purple-700 border-purple-300 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                      <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4" />
+                      Consultório
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-card border border-border z-50">
-                    <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
+                    <DropdownMenuLabel>Encaminhar para Médico</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {CONSULTORIOS.map((cons) => (
-                      <DropdownMenuItem
-                        key={cons.id}
-                        onClick={() => onDirectPatient(currentCall.name, cons.name)}
-                        className="cursor-pointer"
-                      >
-                        {cons.name}
-                      </DropdownMenuItem>
-                    ))}
+                    <DropdownMenuItem
+                      onClick={() => {
+                        onForwardToDoctor(currentCall.id, 'Consultório Médico 1');
+                        onFinishTriage(currentCall.id);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      Consultório Médico 1
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        onForwardToDoctor(currentCall.id, 'Consultório Médico 2');
+                        onFinishTriage(currentCall.id);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      Consultório Médico 2
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
