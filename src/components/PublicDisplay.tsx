@@ -1,8 +1,12 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX, Settings, Youtube, X, Play, Pause } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -15,6 +19,25 @@ interface NewsItem {
   link: string;
   source: string;
 }
+
+// Extract YouTube video ID from various URL formats
+const extractYouTubeId = (url: string): string | null => {
+  if (!url) return null;
+  
+  // Handle various YouTube URL formats
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([^&\n?#]+)/,
+    /^([a-zA-Z0-9_-]{11})$/ // Direct video ID
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return null;
+};
 
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
@@ -31,6 +54,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // YouTube video states
+  const [youtubeUrl, setYoutubeUrl] = useState(() => localStorage.getItem('publicDisplayYoutubeUrl') || '');
+  const [tempYoutubeUrl, setTempYoutubeUrl] = useState('');
+  const [showVideoSettings, setShowVideoSettings] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const youtubePlayerRef = useRef<HTMLIFrameElement>(null);
+  const wasPlayingBeforeAnnouncement = useRef(true);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -607,6 +638,70 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => window.clearTimeout(t);
   }, [announcingType]);
 
+  // Handle YouTube video pause/play based on announcement state
+  useEffect(() => {
+    const videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId || !youtubePlayerRef.current) return;
+
+    if (announcingType) {
+      // Store current playing state and pause video
+      wasPlayingBeforeAnnouncement.current = isVideoPlaying;
+      setIsVideoPlaying(false);
+      
+      // Send pause command to YouTube iframe
+      try {
+        youtubePlayerRef.current.contentWindow?.postMessage(
+          JSON.stringify({ event: 'command', func: 'pauseVideo' }),
+          '*'
+        );
+      } catch (e) {
+        console.warn('Failed to pause YouTube video:', e);
+      }
+    } else {
+      // Resume video if it was playing before announcement
+      if (wasPlayingBeforeAnnouncement.current) {
+        setIsVideoPlaying(true);
+        try {
+          youtubePlayerRef.current.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: 'playVideo' }),
+            '*'
+          );
+        } catch (e) {
+          console.warn('Failed to resume YouTube video:', e);
+        }
+      }
+    }
+  }, [announcingType, youtubeUrl, isVideoPlaying]);
+
+  // Save YouTube URL
+  const saveYoutubeUrl = useCallback(() => {
+    const videoId = extractYouTubeId(tempYoutubeUrl);
+    if (tempYoutubeUrl && !videoId) {
+      toast.error('URL do YouTube inválida. Verifique o link.');
+      return;
+    }
+    
+    setYoutubeUrl(tempYoutubeUrl);
+    localStorage.setItem('publicDisplayYoutubeUrl', tempYoutubeUrl);
+    setShowVideoSettings(false);
+    setIsVideoPlaying(true);
+    
+    if (tempYoutubeUrl) {
+      toast.success('Vídeo do YouTube configurado!');
+    } else {
+      toast.success('Vídeo removido');
+    }
+  }, [tempYoutubeUrl]);
+
+  // Remove YouTube video
+  const removeYoutubeVideo = useCallback(() => {
+    setYoutubeUrl('');
+    setTempYoutubeUrl('');
+    localStorage.removeItem('publicDisplayYoutubeUrl');
+    setShowVideoSettings(false);
+    toast.success('Vídeo removido');
+  }, []);
+
   // Load initial data from Supabase
   useEffect(() => {
     const loadData = async () => {
@@ -778,11 +873,74 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     );
   }
 
+  const youtubeVideoId = extractYouTubeId(youtubeUrl);
+
   return (
     <div 
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
+      {/* YouTube Video Fullscreen - Hidden during announcements */}
+      {youtubeVideoId && !announcingType && (
+        <div className="absolute inset-0 z-30 bg-black">
+          <iframe
+            ref={youtubePlayerRef}
+            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=0&controls=0&loop=1&playlist=${youtubeVideoId}&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
+            className="w-full h-full"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title="YouTube Video"
+          />
+          {/* Overlay controls on video */}
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-40">
+            <Dialog open={showVideoSettings} onOpenChange={(open) => {
+              setShowVideoSettings(open);
+              if (open) setTempYoutubeUrl(youtubeUrl);
+            }}>
+              <DialogTrigger asChild>
+                <button
+                  className="p-2 rounded-full bg-black/50 hover:bg-black/70 text-white/70 hover:text-white transition-colors"
+                  title="Configurar vídeo"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Youtube className="w-5 h-5 text-red-500" />
+                    Configurar Vídeo do YouTube
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Link do YouTube</label>
+                    <Input
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={tempYoutubeUrl}
+                      onChange={(e) => setTempYoutubeUrl(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Cole o link do vídeo do YouTube que deseja exibir
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={saveYoutubeUrl} className="flex-1">
+                      <Play className="w-4 h-4 mr-2" />
+                      Salvar
+                    </Button>
+                    <Button variant="destructive" onClick={removeYoutubeVideo}>
+                      <X className="w-4 h-4 mr-2" />
+                      Remover
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      )}
+
       {/* Flash overlay during announcement */}
       {announcingType && (
         <div className="absolute inset-0 z-50 pointer-events-none animate-flash">
@@ -794,11 +952,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-      </div>
+      {/* Animated background elements - only show when no video */}
+      {!youtubeVideoId && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+        </div>
+      )}
 
       {/* Header - Compact */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
@@ -1039,6 +1199,49 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <Volume2 className="w-3 h-3" />
           <span>Testar Áudio</span>
         </button>
+        
+        {/* YouTube Settings Button - Only show when no video is configured */}
+        {!youtubeVideoId && (
+          <Dialog open={showVideoSettings} onOpenChange={(open) => {
+            setShowVideoSettings(open);
+            if (open) setTempYoutubeUrl(youtubeUrl);
+          }}>
+            <DialogTrigger asChild>
+              <button
+                className="flex items-center gap-1 px-2 py-1 text-[9px] sm:text-[10px] lg:text-xs text-red-400 hover:text-red-300 bg-slate-800/50 hover:bg-slate-700/50 rounded-md border border-slate-700 hover:border-red-600 transition-colors"
+                title="Adicionar vídeo do YouTube"
+              >
+                <Youtube className="w-3 h-3" />
+                <span>Adicionar Vídeo</span>
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Youtube className="w-5 h-5 text-red-500" />
+                  Configurar Vídeo do YouTube
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Link do YouTube</label>
+                  <Input
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={tempYoutubeUrl}
+                    onChange={(e) => setTempYoutubeUrl(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Cole o link do vídeo do YouTube. O vídeo será exibido em tela cheia e pausará automaticamente durante as chamadas de pacientes.
+                  </p>
+                </div>
+                <Button onClick={saveYoutubeUrl} className="w-full">
+                  <Play className="w-4 h-4 mr-2" />
+                  Salvar e Reproduzir
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
