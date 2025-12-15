@@ -25,8 +25,8 @@ serve(async (req) => {
 
     console.log(`Generating TTS for: "${text}"`);
 
-    // Use Daniel voice - professional male voice
-    const selectedVoiceId = voiceId || "onwK4e9ZLuTAKqWW03F9"; // Daniel
+    // Use Lily voice - soft and calm, good for Portuguese
+    const selectedVoiceId = voiceId || "pFZP5JQG7iQjIQuC4Bku"; // Lily
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
