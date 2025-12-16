@@ -155,6 +155,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   
   // Estado para geração de áudios de horas
   const [generatingHourAudios, setGeneratingHourAudios] = useState(false);
+  const [currentGeneratingHour, setCurrentGeneratingHour] = useState<number | null>(null);
   
   const { toast } = useToast();
   const { generateAllHourAudios } = useHourAudio();
@@ -1683,12 +1684,15 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             variant="outline" 
             onClick={async () => {
               setGeneratingHourAudios(true);
+              setCurrentGeneratingHour(0);
               toast({
                 title: "Gerando áudios de horas",
-                description: "Isso pode levar alguns minutos. Aguarde...",
+                description: "Gerando 1.440 áudios (24h × 60min). Isso pode levar ~20 minutos.",
               });
               try {
-                const result = await generateAllHourAudios();
+                const result = await generateAllHourAudios((currentHour) => {
+                  setCurrentGeneratingHour(currentHour);
+                });
                 toast({
                   title: "Áudios gerados",
                   description: `${result.success} áudios gerados com sucesso. ${result.failed} falhas.`,
@@ -1702,6 +1706,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                 });
               } finally {
                 setGeneratingHourAudios(false);
+                setCurrentGeneratingHour(null);
               }
             }}
             disabled={generatingHourAudios}
@@ -1710,7 +1715,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             {generatingHourAudios ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                Gerando...
+                {currentGeneratingHour !== null ? `Hora ${currentGeneratingHour}/23...` : 'Gerando...'}
               </>
             ) : (
               <>
