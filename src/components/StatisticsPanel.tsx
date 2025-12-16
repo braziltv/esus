@@ -1079,9 +1079,14 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
 
     setClearingCalls(true);
+    
+    // Fechar dialog imediatamente para feedback rápido
+    setClearCallsDialogOpen(false);
+    setClearCallsPassword('');
+    
     try {
       // Apagar apenas os registros de patient_calls (painel de chamados)
-      const { error: callsError } = await supabase
+      const { error: callsError, count } = await supabase
         .from('patient_calls')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000');
@@ -1093,8 +1098,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         description: "Todos os pacientes foram removidos do painel. Estatísticas e cache TTS permanecem arquivados.",
       });
 
-      setClearCallsDialogOpen(false);
-      setClearCallsPassword('');
+      // Recarregar dados em background
       loadDbHistory();
     } catch (error) {
       console.error('Erro ao limpar painel de chamados:', error);
