@@ -360,10 +360,10 @@ serve(async (req) => {
       });
     }
 
-    // Obter URLs para reprodução concatenada
+    // Obter URLs para reprodução (públicas)
     if (action === 'get-urls' && hour !== undefined && minute !== undefined) {
       const hourKey = `time/h_${hour.toString().padStart(2, '0')}.mp3`;
-      
+
       const { data: hourUrl } = supabase.storage
         .from('tts-cache')
         .getPublicUrl(hourKey);
@@ -377,12 +377,62 @@ serve(async (req) => {
         minuteUrl = mUrl.publicUrl;
       }
 
-      return new Response(JSON.stringify({ 
-        hourUrl: hourUrl.publicUrl, 
-        minuteUrl 
+      return new Response(JSON.stringify({
+        hourUrl: hourUrl.publicUrl,
+        minuteUrl,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Obter URLs assinadas (funciona mesmo com bucket privado). Se estiver faltando, gera sob demanda.
+    if (action === 'get-signed-urls' && hour !== undefined && minute !== undefined) {
+      const expiresIn = 60 * 60; // 1 hora
+
+      const ensureSignedUrl = async (filePath: string, generate: () => Promise<ArrayBuffer>) => {
+        const first = await supabase.storage.from('tts-cache').createSignedUrl(filePath, expiresIn);
+        if (first.data?.signedUrl) return first.data.signedUrl;
+
+        console.warn('Signed URL missing, generating on-demand:', { filePath, error: first.error });
+
+        const audioBuffer = await generate();
+        const { error: uploadErr } = await supabase.storage
+          .from('tts-cache')
+          .upload(filePath, audioBuffer, { contentType: 'audio/mpeg', upsert: true });
+
+        if (uploadErr) throw uploadErr;
+
+        const second = await supabase.storage.from('tts-cache').createSignedUrl(filePath, expiresIn);
+        if (!second.data?.signedUrl) throw second.error ?? new Error('Failed to create signed URL');
+        return second.data.signedUrl;
+      };
+
+      try {
+        const hourPath = `time/h_${hour.toString().padStart(2, '0')}.mp3`;
+        const hourUrl = await ensureSignedUrl(hourPath, async () => {
+          const text = getHourText(hour);
+          return await generateAudio(text, ELEVENLABS_API_KEY);
+        });
+
+        let minuteUrl: string | null = null;
+        if (minute > 0) {
+          const minutePath = `time/m_${minute.toString().padStart(2, '0')}.mp3`;
+          minuteUrl = await ensureSignedUrl(minutePath, async () => {
+            const text = getMinuteText(minute);
+            return await generateAudio(text, ELEVENLABS_API_KEY);
+          });
+        }
+
+        return new Response(JSON.stringify({ hourUrl, minuteUrl }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (e) {
+        console.error('Error ensuring signed URLs:', e);
+        return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown error' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     return new Response(JSON.stringify({ error: 'Invalid action' }), {

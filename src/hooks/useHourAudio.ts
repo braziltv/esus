@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const useHourAudio = () => {
-  // URLs diretas do storage
+  // URLs diretas do storage (públicas)
   const getHourUrl = (hour: number): string => {
     const cacheKey = `time/h_${hour.toString().padStart(2, '0')}.mp3`;
     const { data } = supabase.storage.from('tts-cache').getPublicUrl(cacheKey);
@@ -15,19 +15,44 @@ export const useHourAudio = () => {
     return data.publicUrl;
   };
 
+  const getSignedUrls = async (
+    hour: number,
+    minute: number
+  ): Promise<{ hourUrl: string; minuteUrl: string | null } | null> => {
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-hour-audio`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ action: 'get-signed-urls', hour, minute }),
+      });
+
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      if (!data?.hourUrl) return null;
+      return { hourUrl: data.hourUrl, minuteUrl: data.minuteUrl ?? null };
+    } catch {
+      return null;
+    }
+  };
+
   // Reproduzir hora concatenando os dois áudios
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
       // Get volume from localStorage
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
-      
-      const hourUrl = getHourUrl(hour);
-      const minuteUrl = getMinuteUrl(minute);
+
+      const signed = await getSignedUrls(hour, minute);
+      const hourUrl = signed?.hourUrl ?? getHourUrl(hour);
+      const minuteUrl = signed?.minuteUrl ?? getMinuteUrl(minute);
 
       // Reproduzir áudio da hora
       const hourAudio = new Audio(hourUrl);
       hourAudio.volume = timeAnnouncementVolume;
-      
+
       await new Promise<void>((resolve, reject) => {
         hourAudio.onended = () => resolve();
         hourAudio.onerror = () => reject(new Error('Hour audio failed'));
@@ -38,7 +63,7 @@ export const useHourAudio = () => {
       if (minuteUrl) {
         const minuteAudio = new Audio(minuteUrl);
         minuteAudio.volume = timeAnnouncementVolume;
-        
+
         await new Promise<void>((resolve, reject) => {
           minuteAudio.onended = () => resolve();
           minuteAudio.onerror = () => reject(new Error('Minute audio failed'));
