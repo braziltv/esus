@@ -495,13 +495,12 @@ serve(async (req) => {
     const selectedVoiceId = "Xb7hH8MSUJpSbSDYk0k2"; // Alice - sempre feminina
 
     // Configurações de voz otimizadas para português brasileiro natural
-    // Ajustadas para pronúncia clara de nomes próprios com entonação brasileira
     const brazilianVoiceSettings = {
-      stability: 0.42,           // Mais baixo para variação natural na entonação
-      similarity_boost: 0.82,    // Alto para manter clareza e timbre consistente
-      style: 0.25,               // Expressividade moderada para tom conversacional
-      use_speaker_boost: true,   // Melhora clareza e projeção da voz
-      speed: 0.88,               // Mais lento para pronúncia clara de nomes
+      stability: 0.55,           // Equilíbrio entre consistência e naturalidade
+      similarity_boost: 0.78,    // Mantém clareza da voz
+      style: 0.15,               // Leve expressividade natural
+      use_speaker_boost: true,   // Melhora clareza e pronúncia
+      speed: 0.92,               // Levemente mais lento para melhor dicção
     };
 
     // Handle concatenation mode
@@ -513,23 +512,10 @@ serve(async (req) => {
         `Concatenation request (single-call): name="${name}", prefix="${prefix}", destination="${destination}"`
       );
 
-      // Formatar texto para fala natural com pausas apropriadas
-      // Usa vírgula para pausa curta após o nome, ponto para pausa maior antes do destino
-      const parts: string[] = [];
-      if (name?.trim()) {
-        // Capitaliza primeira letra de cada palavra do nome para melhor prosódia
-        const formattedName = name.trim()
-          .split(' ')
-          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join(' ');
-        parts.push(formattedName);
-      }
-      if (destination?.trim()) {
-        parts.push(destination.trim());
-      }
-      
-      // Junta com vírgula para pausa natural entre nome e instrução
-      const combinedText = parts.join(', ');
+      const combinedText = [name, prefix, destination]
+        .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
+        .map((v) => v.trim())
+        .join('. ');
 
       if (!combinedText) {
         throw new Error('Concatenation text is empty');
