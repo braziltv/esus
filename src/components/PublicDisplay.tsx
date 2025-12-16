@@ -40,39 +40,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   useEffect(() => {
     const feeds = [
       // G1 - Geral
-      { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'Brasil' },
-      { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'Brasil' },
-      { url: 'https://g1.globo.com/dynamo/ciencia-e-saude/rss2.xml', source: 'Saúde' },
-      { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'Economia' },
-      { url: 'https://g1.globo.com/dynamo/educacao/rss2.xml', source: 'Educação' },
-      { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'Mundo' },
-      { url: 'https://g1.globo.com/dynamo/tecnologia/rss2.xml', source: 'Tech' },
-      { url: 'https://g1.globo.com/dynamo/politica/rss2.xml', source: 'Política' },
-      { url: 'https://g1.globo.com/dynamo/pop-arte/rss2.xml', source: 'Pop' },
-      { url: 'https://g1.globo.com/dynamo/natureza/rss2.xml', source: 'Natureza' },
-      { url: 'https://g1.globo.com/dynamo/carros/rss2.xml', source: 'Carros' },
-      { url: 'https://g1.globo.com/dynamo/concursos-e-emprego/rss2.xml', source: 'Emprego' },
-      { url: 'https://g1.globo.com/dynamo/turismo-e-viagem/rss2.xml', source: 'Turismo' },
-      { url: 'https://g1.globo.com/dynamo/agro/rss2.xml', source: 'Agro' },
+      { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/ciencia-e-saude/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/educacao/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/tecnologia/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/politica/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/pop-arte/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/natureza/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/carros/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/concursos-e-emprego/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/turismo-e-viagem/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/agro/rss2.xml', source: 'G1' },
       // G1 - Minas Gerais
-      { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'MG' },
-      { url: 'https://g1.globo.com/dynamo/mg/centro-oeste/rss2.xml', source: 'MG' },
-      { url: 'https://g1.globo.com/dynamo/mg/grande-minas/rss2.xml', source: 'MG' },
-      { url: 'https://g1.globo.com/dynamo/mg/sul-de-minas/rss2.xml', source: 'MG' },
-      { url: 'https://g1.globo.com/dynamo/minas-gerais/triangulo-mineiro/rss2.xml', source: 'MG' },
-      { url: 'https://g1.globo.com/dynamo/mg/zona-da-mata/rss2.xml', source: 'MG' },
-      { url: 'https://g1.globo.com/dynamo/mg/vales-de-minas-gerais/rss2.xml', source: 'MG' },
+      { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/mg/centro-oeste/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/mg/grande-minas/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/mg/sul-de-minas/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/minas-gerais/triangulo-mineiro/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/mg/zona-da-mata/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/mg/vales-de-minas-gerais/rss2.xml', source: 'G1' },
       // UOL
       { url: 'https://rss.uol.com.br/feed/noticias.xml', source: 'UOL' },
       { url: 'https://rss.uol.com.br/feed/economia.xml', source: 'UOL' },
-      { url: 'https://rss.uol.com.br/feed/esporte.xml', source: 'Esporte' },
-      { url: 'https://rss.uol.com.br/feed/tecnologia.xml', source: 'Tech' },
+      { url: 'https://rss.uol.com.br/feed/esporte.xml', source: 'UOL' },
+      { url: 'https://rss.uol.com.br/feed/tecnologia.xml', source: 'UOL' },
       // Folha
       { url: 'https://feeds.folha.uol.com.br/emcimadahora/rss091.xml', source: 'Folha' },
       { url: 'https://feeds.folha.uol.com.br/cotidiano/rss091.xml', source: 'Folha' },
       { url: 'https://feeds.folha.uol.com.br/mercado/rss091.xml', source: 'Folha' },
       { url: 'https://feeds.folha.uol.com.br/mundo/rss091.xml', source: 'Folha' },
-      { url: 'https://feeds.folha.uol.com.br/equilibrioesaude/rss091.xml', source: 'Saúde' },
+      { url: 'https://feeds.folha.uol.com.br/equilibrioesaude/rss091.xml', source: 'Folha' },
       // Estadão
       { url: 'https://www.estadao.com.br/pf/api/v1/rss/site/estadao/?outputType=xml', source: 'Estadão' },
       // CNN Brasil
@@ -1070,18 +1070,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     <span key={index} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
                       <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
-                        item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
-                        item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
-                        item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
-                        item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
-                        item.source === 'Política' ? 'bg-red-400 text-red-900' :
-                        item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
-                        item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
-                        item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
-                        item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
-                        item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
-                        item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
+                        item.source === 'G1' ? 'bg-red-500 text-white' : 
+                        item.source === 'O Globo' ? 'bg-blue-600 text-white' :
+                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
+                        item.source === 'UOL' ? 'bg-orange-500 text-white' :
+                        item.source === 'Folha' ? 'bg-blue-500 text-white' :
+                        item.source === 'Estadão' ? 'bg-slate-600 text-white' :
+                        item.source === 'CNN' ? 'bg-red-600 text-white' :
+                        item.source === 'Band' ? 'bg-green-600 text-white' :
                         'bg-green-500 text-green-900'
                       }`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
@@ -1107,18 +1103,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     <span key={`dup-${index}`} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
                       <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
-                        item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
-                        item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
-                        item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
-                        item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
-                        item.source === 'Política' ? 'bg-red-400 text-red-900' :
-                        item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
-                        item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
-                        item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
-                        item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
-                        item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
-                        item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
+                        item.source === 'G1' ? 'bg-red-500 text-white' : 
+                        item.source === 'O Globo' ? 'bg-blue-600 text-white' :
+                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
+                        item.source === 'UOL' ? 'bg-orange-500 text-white' :
+                        item.source === 'Folha' ? 'bg-blue-500 text-white' :
+                        item.source === 'Estadão' ? 'bg-slate-600 text-white' :
+                        item.source === 'CNN' ? 'bg-red-600 text-white' :
+                        item.source === 'Band' ? 'bg-green-600 text-white' :
                         'bg-green-500 text-green-900'
                       }`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
