@@ -39,68 +39,84 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Fetch news from multiple sources
   useEffect(() => {
     const feeds = [
-      // G1 - Geral
+      // G1
       { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'G1' },
       { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/ciencia-e-saude/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/educacao/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/tecnologia/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/politica/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/pop-arte/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/natureza/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/carros/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/concursos-e-emprego/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/turismo-e-viagem/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/agro/rss2.xml', source: 'G1' },
-      // G1 - Minas Gerais
       { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/mg/centro-oeste/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/mg/grande-minas/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/mg/sul-de-minas/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/minas-gerais/triangulo-mineiro/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/mg/zona-da-mata/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/mg/vales-de-minas-gerais/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'G1' },
+      { url: 'https://g1.globo.com/dynamo/politica/rss2.xml', source: 'G1' },
+      // O Globo
+      { url: 'https://oglobo.globo.com/rss.xml', source: 'O Globo' },
       // UOL
       { url: 'https://rss.uol.com.br/feed/noticias.xml', source: 'UOL' },
       { url: 'https://rss.uol.com.br/feed/economia.xml', source: 'UOL' },
       { url: 'https://rss.uol.com.br/feed/esporte.xml', source: 'UOL' },
-      { url: 'https://rss.uol.com.br/feed/tecnologia.xml', source: 'UOL' },
       // Folha
       { url: 'https://feeds.folha.uol.com.br/emcimadahora/rss091.xml', source: 'Folha' },
       { url: 'https://feeds.folha.uol.com.br/cotidiano/rss091.xml', source: 'Folha' },
       { url: 'https://feeds.folha.uol.com.br/mercado/rss091.xml', source: 'Folha' },
-      { url: 'https://feeds.folha.uol.com.br/mundo/rss091.xml', source: 'Folha' },
-      { url: 'https://feeds.folha.uol.com.br/equilibrioesaude/rss091.xml', source: 'Folha' },
       // Estadão
       { url: 'https://www.estadao.com.br/pf/api/v1/rss/site/estadao/?outputType=xml', source: 'Estadão' },
       // CNN Brasil
       { url: 'https://www.cnnbrasil.com.br/feed/', source: 'CNN' },
       // Band
       { url: 'https://www.band.uol.com.br/rss/noticias.xml', source: 'Band' },
-      // O Globo
-      { url: 'https://oglobo.globo.com/rss.xml', source: 'O Globo' },
-      // Itatiaia (via Google News)
+      // Itatiaia
       { url: 'https://news.google.com/rss/search?q=Itatiaia+site:itatiaia.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Itatiaia' },
+      // Terra
+      { url: 'https://www.terra.com.br/rss/controller.htm?path=/home/noticias', source: 'Terra' },
+      // IG
+      { url: 'https://ultimosegundo.ig.com.br/rss.xml', source: 'IG' },
+      // Correio Braziliense
+      { url: 'https://www.correiobraziliense.com.br/rss/', source: 'Correio' },
+      // Metrópoles
+      { url: 'https://www.metropoles.com/feed', source: 'Metrópoles' },
+      // Gazeta do Povo
+      { url: 'https://www.gazetadopovo.com.br/feed/rss/', source: 'Gazeta' },
+      // Poder360
+      { url: 'https://www.poder360.com.br/feed/', source: 'Poder360' },
+      // Nexo
+      { url: 'https://www.nexojornal.com.br/rss.xml', source: 'Nexo' },
+      // Agência Brasil
+      { url: 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml', source: 'Ag. Brasil' },
+      // InfoMoney
+      { url: 'https://www.infomoney.com.br/feed/', source: 'InfoMoney' },
+      // Exame
+      { url: 'https://exame.com/feed/', source: 'Exame' },
+      // Época Negócios
+      { url: 'https://epocanegocios.globo.com/rss/ultimas/feed.xml', source: 'Época' },
+      // Valor Econômico
+      { url: 'https://valor.globo.com/rss/', source: 'Valor' },
+      // O Tempo (MG)
+      { url: 'https://www.otempo.com.br/rss', source: 'O Tempo' },
+      // Hoje em Dia (MG)
+      { url: 'https://www.hojeemdia.com.br/rss', source: 'Hoje em Dia' },
+      // Estado de Minas
+      { url: 'https://www.em.com.br/rss/', source: 'EM' },
+      // Super Notícia (MG)
+      { url: 'https://www.supernoticia.com.br/rss', source: 'Super' },
+      // Tecmundo
+      { url: 'https://rss.tecmundo.com.br/feed', source: 'Tecmundo' },
+      // Olhar Digital
+      { url: 'https://olhardigital.com.br/feed/', source: 'Olhar Digital' },
+      // Canaltech
+      { url: 'https://canaltech.com.br/rss/', source: 'Canaltech' },
+      // GE (Esportes)
+      { url: 'https://ge.globo.com/dynamo/rss2.xml', source: 'GE' },
+      // Lance
+      { url: 'https://www.lance.com.br/rss.xml', source: 'Lance' },
+      // ESPN Brasil
+      { url: 'https://www.espn.com.br/rss/', source: 'ESPN' },
     ];
     
-    let currentFeedIndex = 0;
-
     const fetchNews = async () => {
       try {
         const allNews: NewsItem[] = [];
         
-        // Rotate through feeds - fetch from current index and next ones
-        const feedsToFetch = [
-          feeds[currentFeedIndex % feeds.length],
-          feeds[(currentFeedIndex + 1) % feeds.length],
-          feeds[(currentFeedIndex + 2) % feeds.length],
-          feeds[(currentFeedIndex + 3) % feeds.length],
-        ];
-        
-        // Move to next feed for next update cycle
-        currentFeedIndex = (currentFeedIndex + 1) % feeds.length;
+        // Shuffle feeds and pick 8 random ones for diversity
+        const shuffledFeeds = [...feeds].sort(() => Math.random() - 0.5);
+        const feedsToFetch = shuffledFeeds.slice(0, 8);
 
         // Try multiple CORS proxies
         const corsProxies = [
@@ -1078,7 +1094,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Estadão' ? 'bg-slate-600 text-white' :
                         item.source === 'CNN' ? 'bg-red-600 text-white' :
                         item.source === 'Band' ? 'bg-green-600 text-white' :
-                        'bg-green-500 text-green-900'
+                        item.source === 'Terra' ? 'bg-emerald-500 text-white' :
+                        item.source === 'IG' ? 'bg-pink-500 text-white' :
+                        item.source === 'Correio' ? 'bg-sky-600 text-white' :
+                        item.source === 'Metrópoles' ? 'bg-purple-600 text-white' :
+                        item.source === 'Gazeta' ? 'bg-teal-600 text-white' :
+                        item.source === 'Poder360' ? 'bg-indigo-600 text-white' :
+                        item.source === 'Nexo' ? 'bg-rose-600 text-white' :
+                        item.source === 'Ag. Brasil' ? 'bg-cyan-600 text-white' :
+                        item.source === 'InfoMoney' ? 'bg-lime-600 text-white' :
+                        item.source === 'Exame' ? 'bg-amber-600 text-white' :
+                        item.source === 'Época' ? 'bg-fuchsia-600 text-white' :
+                        item.source === 'Valor' ? 'bg-violet-600 text-white' :
+                        item.source === 'O Tempo' ? 'bg-orange-600 text-white' :
+                        item.source === 'Hoje em Dia' ? 'bg-blue-700 text-white' :
+                        item.source === 'EM' ? 'bg-red-700 text-white' :
+                        item.source === 'Super' ? 'bg-yellow-600 text-white' :
+                        item.source === 'Tecmundo' ? 'bg-purple-500 text-white' :
+                        item.source === 'Olhar Digital' ? 'bg-green-500 text-white' :
+                        item.source === 'Canaltech' ? 'bg-blue-400 text-white' :
+                        item.source === 'GE' ? 'bg-green-700 text-white' :
+                        item.source === 'Lance' ? 'bg-red-500 text-white' :
+                        item.source === 'ESPN' ? 'bg-red-800 text-white' :
+                        'bg-gray-500 text-white'
                       }`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
@@ -1111,7 +1149,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Estadão' ? 'bg-slate-600 text-white' :
                         item.source === 'CNN' ? 'bg-red-600 text-white' :
                         item.source === 'Band' ? 'bg-green-600 text-white' :
-                        'bg-green-500 text-green-900'
+                        item.source === 'Terra' ? 'bg-emerald-500 text-white' :
+                        item.source === 'IG' ? 'bg-pink-500 text-white' :
+                        item.source === 'Correio' ? 'bg-sky-600 text-white' :
+                        item.source === 'Metrópoles' ? 'bg-purple-600 text-white' :
+                        item.source === 'Gazeta' ? 'bg-teal-600 text-white' :
+                        item.source === 'Poder360' ? 'bg-indigo-600 text-white' :
+                        item.source === 'Nexo' ? 'bg-rose-600 text-white' :
+                        item.source === 'Ag. Brasil' ? 'bg-cyan-600 text-white' :
+                        item.source === 'InfoMoney' ? 'bg-lime-600 text-white' :
+                        item.source === 'Exame' ? 'bg-amber-600 text-white' :
+                        item.source === 'Época' ? 'bg-fuchsia-600 text-white' :
+                        item.source === 'Valor' ? 'bg-violet-600 text-white' :
+                        item.source === 'O Tempo' ? 'bg-orange-600 text-white' :
+                        item.source === 'Hoje em Dia' ? 'bg-blue-700 text-white' :
+                        item.source === 'EM' ? 'bg-red-700 text-white' :
+                        item.source === 'Super' ? 'bg-yellow-600 text-white' :
+                        item.source === 'Tecmundo' ? 'bg-purple-500 text-white' :
+                        item.source === 'Olhar Digital' ? 'bg-green-500 text-white' :
+                        item.source === 'Canaltech' ? 'bg-blue-400 text-white' :
+                        item.source === 'GE' ? 'bg-green-700 text-white' :
+                        item.source === 'Lance' ? 'bg-red-500 text-white' :
+                        item.source === 'ESPN' ? 'bg-red-800 text-white' :
+                        'bg-gray-500 text-white'
                       }`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
