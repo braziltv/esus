@@ -295,15 +295,16 @@ export function useCallPanel() {
   }, [currentTriageCall, completeCall]);
 
   const finishConsultation = useCallback((patientId: string) => {
-    setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'attended' as const } : p
-    ));
+    // Remove patient completely from all modules
+    setPatients(prev => prev.filter(p => p.id !== patientId));
     if (currentDoctorCall?.id === patientId) {
       setCurrentDoctorCall(null);
       completeCall('doctor');
-      // TTS cache is preserved for 72 hours and cleaned automatically
     }
-  }, [currentDoctorCall, completeCall]);
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [currentDoctorCall, currentTriageCall, completeCall]);
 
   const recallTriage = useCallback(() => {
     if (currentTriageCall) {
@@ -324,19 +325,16 @@ export function useCallPanel() {
   }, []);
 
   const finishWithoutCall = useCallback((patientId: string) => {
-    setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'attended' as const } : p
-    ));
+    // Remove patient completely from all modules
+    setPatients(prev => prev.filter(p => p.id !== patientId));
     // Clear current calls if this patient was being called
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
       completeCall('triage');
-      // TTS cache is preserved for 72 hours and cleaned automatically
     }
     if (currentDoctorCall?.id === patientId) {
       setCurrentDoctorCall(null);
       completeCall('doctor');
-      // TTS cache is preserved for 72 hours and cleaned automatically
     }
   }, [currentTriageCall, currentDoctorCall, completeCall]);
 
