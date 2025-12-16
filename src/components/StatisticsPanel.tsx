@@ -160,6 +160,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   // Estado para teste de áudio de hora
   const [testingHourAudio, setTestingHourAudio] = useState(false);
   
+  // Estado para regenerar cache de horas
+  const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
+  const [regenCachePassword, setRegenCachePassword] = useState('');
+  const [showRegenCachePassword, setShowRegenCachePassword] = useState(false);
+  const [regeneratingCache, setRegeneratingCache] = useState(false);
+  
   const { toast } = useToast();
   const { playHourAudio } = useHourAudio();
 
@@ -1117,6 +1123,61 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
+  // Função para regenerar cache de horas
+  const handleRegenerateHourCache = async () => {
+    if (regenCachePassword !== 'Paineiras@1') {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha informada está incorreta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setRegeneratingCache(true);
+    setRegenCacheDialogOpen(false);
+    setRegenCachePassword('');
+
+    toast({
+      title: "Regenerando cache de horas",
+      description: "Isso pode levar alguns minutos. Aguarde...",
+    });
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-hour-audio`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ action: 'generate-all', force: true }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Cache regenerado com sucesso",
+          description: `Horas: ${result.hours || 0}, Minutos: ${result.minutes || 0}. Falhas: ${result.failed || 0}`,
+        });
+      } else {
+        throw new Error(result.error || 'Erro desconhecido');
+      }
+    } catch (error) {
+      console.error('Erro ao regenerar cache:', error);
+      toast({
+        title: "Erro ao regenerar cache",
+        description: error instanceof Error ? error.message : "Ocorreu um erro inesperado.",
+        variant: "destructive",
+      });
+    } finally {
+      setRegeneratingCache(false);
+    }
+  };
+
   // Função para limpar painel de chamados (patient_calls) e apagar as últimas chamadas exibidas na TV
   // Mantém TTS cache e estatísticas intactas
   const handleClearPatientCalls = async () => {
@@ -1773,6 +1834,24 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               <>
                 <Volume2 className="w-4 h-4" />
                 Testar Hora Falada
+              </>
+            )}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => setRegenCacheDialogOpen(true)}
+            disabled={regeneratingCache}
+            className="gap-2 border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+          >
+            {regeneratingCache ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Regenerando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4" />
+                Regenerar Cache Horas
               </>
             )}
           </Button>
@@ -2620,6 +2699,83 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                 Fechar
               </Button>
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para regenerar cache de horas */}
+      <Dialog open={regenCacheDialogOpen} onOpenChange={(open) => {
+        setRegenCacheDialogOpen(open);
+        if (!open) setRegenCachePassword('');
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-orange-500" />
+              Regenerar Cache de Horas
+            </DialogTitle>
+            <DialogDescription>
+              Esta ação irá regenerar todos os áudios de anúncio de horas com voz mais natural em português brasileiro.
+              O processo pode levar alguns minutos.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
+              <p className="text-sm text-orange-600 font-medium">
+                ⚠️ Serão gerados 83 arquivos de áudio (24 horas + 59 minutos)
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="regen-cache-password">Digite a senha para confirmar:</Label>
+              <div className="relative">
+                <Input
+                  id="regen-cache-password"
+                  type={showRegenCachePassword ? 'text' : 'password'}
+                  value={regenCachePassword}
+                  onChange={(e) => setRegenCachePassword(e.target.value)}
+                  placeholder="Senha de administrador"
+                  className="pr-10"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRegenerateHourCache();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegenCachePassword(!showRegenCachePassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showRegenCachePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRegenCacheDialogOpen(false);
+                setRegenCachePassword('');
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleRegenerateHourCache}
+              disabled={regeneratingCache || !regenCachePassword}
+              className="gap-2 bg-orange-500 hover:bg-orange-600"
+            >
+              {regeneratingCache ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Regenerando...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  Regenerar Todos
+                </>
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
