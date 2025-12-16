@@ -174,8 +174,8 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
             <span className={`text-[8px] font-bold ${showMaxTemp ? 'text-orange-300' : 'text-cyan-300'}`}>
               {showMaxTemp ? 'MAX' : 'MIN'}
             </span>
-            <span className="text-white font-black text-xl leading-none">
-              {showMaxTemp ? weather.current.maxTemp : weather.current.minTemp}°c
+            <span className="text-white font-black text-2xl leading-none">
+              {showMaxTemp ? weather.current.maxTemp : weather.current.minTemp}°<span className="text-yellow-400">c</span>
             </span>
           </div>
           <Droplets className="w-3 h-3 text-cyan-300 ml-2" />
