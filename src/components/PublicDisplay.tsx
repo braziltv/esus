@@ -114,26 +114,45 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       try {
         const allNews: NewsItem[] = [];
         
-        // Shuffle feeds and pick 8 random ones for diversity
-        const shuffledFeeds = [...feeds].sort(() => Math.random() - 0.5);
-        const feedsToFetch = shuffledFeeds.slice(0, 8);
+        // Group feeds by source to ensure diversity
+        const feedsBySource: { [key: string]: typeof feeds } = {};
+        feeds.forEach(feed => {
+          if (!feedsBySource[feed.source]) {
+            feedsBySource[feed.source] = [];
+          }
+          feedsBySource[feed.source].push(feed);
+        });
+        
+        // Fisher-Yates shuffle function
+        const shuffle = <T,>(array: T[]): T[] => {
+          const arr = [...array];
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+          return arr;
+        };
+        
+        // Select ONE feed per source (max 12 different sources)
+        const sources = shuffle(Object.keys(feedsBySource));
+        const feedsToFetch = sources.slice(0, 12).map(source => {
+          const sourceFeeds = feedsBySource[source];
+          return sourceFeeds[Math.floor(Math.random() * sourceFeeds.length)];
+        });
 
         // Try multiple CORS proxies
         const corsProxies = [
-          (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
           (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-          (url: string) => `https://cors-anywhere.herokuapp.com/${url}`,
+          (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
         ];
 
-        for (const feed of feedsToFetch) {
-          let fetched = false;
+        // Fetch all feeds in parallel for speed
+        const fetchPromises = feedsToFetch.map(async (feed) => {
+          const feedNews: NewsItem[] = [];
           for (const getProxyUrl of corsProxies) {
-            if (fetched) break;
             try {
               const response = await fetch(getProxyUrl(feed.url), {
-                headers: {
-                  'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-                },
+                headers: { 'Accept': 'application/rss+xml, application/xml, text/xml, */*' },
               });
               if (response.ok) {
                 const text = await response.text();
@@ -141,22 +160,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 const xml = parser.parseFromString(text, 'text/xml');
                 const items = xml.querySelectorAll('item');
                 if (items.length > 0) {
-                  fetched = true;
                   items.forEach((item, index) => {
-                    if (index < 6) {
+                    if (index < 4) { // Max 4 per source
                       const title = item.querySelector('title')?.textContent || '';
-                      if (title) {
-                        allNews.push({ title, link: '', source: feed.source });
+                      if (title && title.length > 10) {
+                        feedNews.push({ title, link: '', source: feed.source });
                       }
                     }
                   });
+                  break; // Success, don't try other proxies
                 }
               }
-            } catch (feedError) {
-              console.log(`Proxy failed for ${feed.source}, trying next...`);
+            } catch (e) {
+              // Try next proxy
             }
           }
-        }
+          return feedNews;
+        });
+
+        const results = await Promise.all(fetchPromises);
+        results.forEach(news => allNews.push(...news));
 
         // If no news fetched, show static fallback news
         if (allNews.length === 0) {
@@ -170,8 +193,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           ];
           setNewsItems(fallbackNews);
         } else {
-          // Shuffle news to mix sources
-          const shuffled = allNews.sort(() => Math.random() - 0.5);
+          // Shuffle all news with Fisher-Yates for true randomness
+          const shuffled = shuffle(allNews);
           setNewsItems(shuffled);
           setLastNewsUpdate(new Date());
         }
