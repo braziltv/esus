@@ -39,75 +39,45 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Fetch news from multiple sources
   useEffect(() => {
     const feeds = [
-      // G1
+      // G1 (funcionando bem)
       { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'G1' },
       { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'G1' },
       { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'G1' },
       { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'G1' },
       { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'G1' },
       { url: 'https://g1.globo.com/dynamo/politica/rss2.xml', source: 'G1' },
-      // O Globo
-      { url: 'https://oglobo.globo.com/rss.xml', source: 'O Globo' },
-      // UOL
-      { url: 'https://rss.uol.com.br/feed/noticias.xml', source: 'UOL' },
-      { url: 'https://rss.uol.com.br/feed/economia.xml', source: 'UOL' },
-      { url: 'https://rss.uol.com.br/feed/esporte.xml', source: 'UOL' },
+      { url: 'https://g1.globo.com/dynamo/tecnologia/rss2.xml', source: 'G1' },
+      // GE Esportes
+      { url: 'https://ge.globo.com/dynamo/rss2.xml', source: 'GE' },
+      { url: 'https://ge.globo.com/dynamo/futebol/rss2.xml', source: 'GE' },
+      // ESPN Brasil (funcionando bem)
+      { url: 'https://www.espn.com.br/rss/', source: 'ESPN' },
       // Folha
       { url: 'https://feeds.folha.uol.com.br/emcimadahora/rss091.xml', source: 'Folha' },
       { url: 'https://feeds.folha.uol.com.br/cotidiano/rss091.xml', source: 'Folha' },
       { url: 'https://feeds.folha.uol.com.br/mercado/rss091.xml', source: 'Folha' },
-      // Estadão
-      { url: 'https://www.estadao.com.br/pf/api/v1/rss/site/estadao/?outputType=xml', source: 'Estadão' },
+      { url: 'https://feeds.folha.uol.com.br/esporte/rss091.xml', source: 'Folha' },
+      // Google News Brasil (confiável)
+      { url: 'https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Google' },
+      { url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FuQjBHZ0pDVWlnQVAB?hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Google' },
       // CNN Brasil
       { url: 'https://www.cnnbrasil.com.br/feed/', source: 'CNN' },
-      // Band
-      { url: 'https://www.band.uol.com.br/rss/noticias.xml', source: 'Band' },
-      // Itatiaia
-      { url: 'https://news.google.com/rss/search?q=Itatiaia+site:itatiaia.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Itatiaia' },
-      // Terra
-      { url: 'https://www.terra.com.br/rss/controller.htm?path=/home/noticias', source: 'Terra' },
-      // IG
-      { url: 'https://ultimosegundo.ig.com.br/rss.xml', source: 'IG' },
-      // Correio Braziliense
-      { url: 'https://www.correiobraziliense.com.br/rss/', source: 'Correio' },
       // Metrópoles
       { url: 'https://www.metropoles.com/feed', source: 'Metrópoles' },
-      // Gazeta do Povo
-      { url: 'https://www.gazetadopovo.com.br/feed/rss/', source: 'Gazeta' },
-      // Poder360
-      { url: 'https://www.poder360.com.br/feed/', source: 'Poder360' },
-      // Nexo
-      { url: 'https://www.nexojornal.com.br/rss.xml', source: 'Nexo' },
-      // Agência Brasil
-      { url: 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml', source: 'Ag. Brasil' },
-      // InfoMoney
-      { url: 'https://www.infomoney.com.br/feed/', source: 'InfoMoney' },
-      // Exame
-      { url: 'https://exame.com/feed/', source: 'Exame' },
-      // Época Negócios
-      { url: 'https://epocanegocios.globo.com/rss/ultimas/feed.xml', source: 'Época' },
-      // Valor Econômico
-      { url: 'https://valor.globo.com/rss/', source: 'Valor' },
-      // O Tempo (MG)
-      { url: 'https://www.otempo.com.br/rss', source: 'O Tempo' },
-      // Hoje em Dia (MG)
-      { url: 'https://www.hojeemdia.com.br/rss', source: 'Hoje em Dia' },
-      // Estado de Minas
-      { url: 'https://www.em.com.br/rss/', source: 'EM' },
-      // Super Notícia (MG)
-      { url: 'https://www.supernoticia.com.br/rss', source: 'Super' },
       // Tecmundo
       { url: 'https://rss.tecmundo.com.br/feed', source: 'Tecmundo' },
       // Olhar Digital
       { url: 'https://olhardigital.com.br/feed/', source: 'Olhar Digital' },
       // Canaltech
       { url: 'https://canaltech.com.br/rss/', source: 'Canaltech' },
-      // GE (Esportes)
-      { url: 'https://ge.globo.com/dynamo/rss2.xml', source: 'GE' },
-      // Lance
-      { url: 'https://www.lance.com.br/rss.xml', source: 'Lance' },
-      // ESPN Brasil
-      { url: 'https://www.espn.com.br/rss/', source: 'ESPN' },
+      // InfoMoney
+      { url: 'https://www.infomoney.com.br/feed/', source: 'InfoMoney' },
+      // Exame
+      { url: 'https://exame.com/feed/', source: 'Exame' },
+      // R7
+      { url: 'https://noticias.r7.com/feed.xml', source: 'R7' },
+      // Itatiaia via Google News
+      { url: 'https://news.google.com/rss/search?q=site:itatiaia.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Itatiaia' },
     ];
     
     const fetchNews = async () => {
