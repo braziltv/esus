@@ -17,16 +17,30 @@ function getHourText(hour: number): string {
   return `${hour} horas`;
 }
 
-// Texto para minutos (0-59)
+// Texto para minutos (0-59) - com pausas para dígitos iguais
 function getMinuteText(minute: number): string {
   if (minute === 0) return ''; // Não precisa de áudio para minuto 0
   if (minute === 1) return 'e um minuto';
   if (minute === 30) return 'e meia';
+  
+  // Minutos com dígitos iguais - adicionar pausa para melhor dicção
+  const doubleDigits = [11, 22, 33, 44, 55];
+  if (doubleDigits.includes(minute)) {
+    // Adiciona pausa sutil entre "e" e o número para melhor clareza
+    return `e... ${minute} minutos`;
+  }
+  
   return `e ${minute} minutos`;
 }
 
-async function generateAudio(text: string, apiKey: string): Promise<ArrayBuffer> {
-  console.log(`Generating audio for: "${text}"`);
+// Verifica se o minuto precisa de fala mais lenta
+function needsSlowerSpeech(minute: number): boolean {
+  const doubleDigits = [11, 22, 33, 44, 55];
+  return doubleDigits.includes(minute);
+}
+
+async function generateAudio(text: string, apiKey: string, slower: boolean = false): Promise<ArrayBuffer> {
+  console.log(`Generating audio for: "${text}" (slower: ${slower})`);
   
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
@@ -45,6 +59,7 @@ async function generateAudio(text: string, apiKey: string): Promise<ArrayBuffer>
           similarity_boost: 0.8,
           style: 0.3,
           use_speaker_boost: true,
+          speed: slower ? 0.85 : 1.0, // Mais lento para dígitos iguais
         },
       }),
     }
@@ -149,7 +164,8 @@ serve(async (req) => {
 
         try {
           const text = getMinuteText(m);
-          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
+          const slower = needsSlowerSpeech(m);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY, slower);
           
           const { error: uploadError } = await supabase.storage
             .from('tts-cache')
@@ -233,7 +249,8 @@ serve(async (req) => {
 
         try {
           const text = getMinuteText(m);
-          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
+          const slower = needsSlowerSpeech(m);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY, slower);
           
           await supabase.storage
             .from('tts-cache')
