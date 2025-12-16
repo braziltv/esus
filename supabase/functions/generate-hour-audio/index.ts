@@ -6,41 +6,121 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Alice - voz feminina popular em português
+// Alice - voz feminina popular em português brasileiro
 const VOICE_ID = 'Xb7hH8MSUJpSbSDYk0k2';
 
-// Texto para horas (0-23)
+// Texto para horas (0-23) - estilo brasileiro conversacional
 function getHourText(hour: number): string {
-  if (hour === 0) return 'meia noite';
+  // Meia-noite
+  if (hour === 0) return 'meia-noite';
+  // Uma hora (singular)
   if (hour === 1) return 'uma hora';
-  if (hour === 12) return 'meio dia';
-  return `${hour} horas`;
+  // Duas horas
+  if (hour === 2) return 'duas horas';
+  // Meio-dia
+  if (hour === 12) return 'meio-dia';
+  // Demais horas (três, quatro, cinco... vinte e três)
+  const hoursText: { [key: number]: string } = {
+    3: 'três horas',
+    4: 'quatro horas',
+    5: 'cinco horas',
+    6: 'seis horas',
+    7: 'sete horas',
+    8: 'oito horas',
+    9: 'nove horas',
+    10: 'dez horas',
+    11: 'onze horas',
+    13: 'treze horas',
+    14: 'catorze horas',
+    15: 'quinze horas',
+    16: 'dezesseis horas',
+    17: 'dezessete horas',
+    18: 'dezoito horas',
+    19: 'dezenove horas',
+    20: 'vinte horas',
+    21: 'vinte e uma horas',
+    22: 'vinte e duas horas',
+    23: 'vinte e três horas',
+  };
+  return hoursText[hour] || `${hour} horas`;
 }
 
-// Texto para minutos (0-59) - com pausas para dígitos iguais
+// Texto para minutos (0-59) - estilo brasileiro conversacional
 function getMinuteText(minute: number): string {
   if (minute === 0) return ''; // Não precisa de áudio para minuto 0
-  if (minute === 1) return 'e um minuto';
+  
+  // Casos especiais mais naturais
+  if (minute === 15) return 'e quinze';
   if (minute === 30) return 'e meia';
+  if (minute === 45) return 'e quarenta e cinco';
   
-  // Minutos com dígitos iguais - adicionar pausa para melhor dicção
-  const doubleDigits = [11, 22, 33, 44, 55];
-  if (doubleDigits.includes(minute)) {
-    // Adiciona pausa sutil entre "e" e o número para melhor clareza
-    return `e... ${minute} minutos`;
-  }
+  // Um minuto (singular)
+  if (minute === 1) return 'e um';
   
-  return `e ${minute} minutos`;
+  // Minutos de 2 a 59 - estilo conversacional brasileiro
+  const minutesText: { [key: number]: string } = {
+    2: 'e dois',
+    3: 'e três',
+    4: 'e quatro',
+    5: 'e cinco',
+    6: 'e seis',
+    7: 'e sete',
+    8: 'e oito',
+    9: 'e nove',
+    10: 'e dez',
+    11: 'e onze',
+    12: 'e doze',
+    13: 'e treze',
+    14: 'e catorze',
+    16: 'e dezesseis',
+    17: 'e dezessete',
+    18: 'e dezoito',
+    19: 'e dezenove',
+    20: 'e vinte',
+    21: 'e vinte e um',
+    22: 'e vinte e dois',
+    23: 'e vinte e três',
+    24: 'e vinte e quatro',
+    25: 'e vinte e cinco',
+    26: 'e vinte e seis',
+    27: 'e vinte e sete',
+    28: 'e vinte e oito',
+    29: 'e vinte e nove',
+    31: 'e trinta e um',
+    32: 'e trinta e dois',
+    33: 'e trinta e três',
+    34: 'e trinta e quatro',
+    35: 'e trinta e cinco',
+    36: 'e trinta e seis',
+    37: 'e trinta e sete',
+    38: 'e trinta e oito',
+    39: 'e trinta e nove',
+    40: 'e quarenta',
+    41: 'e quarenta e um',
+    42: 'e quarenta e dois',
+    43: 'e quarenta e três',
+    44: 'e quarenta e quatro',
+    46: 'e quarenta e seis',
+    47: 'e quarenta e sete',
+    48: 'e quarenta e oito',
+    49: 'e quarenta e nove',
+    50: 'e cinquenta',
+    51: 'e cinquenta e um',
+    52: 'e cinquenta e dois',
+    53: 'e cinquenta e três',
+    54: 'e cinquenta e quatro',
+    55: 'e cinquenta e cinco',
+    56: 'e cinquenta e seis',
+    57: 'e cinquenta e sete',
+    58: 'e cinquenta e oito',
+    59: 'e cinquenta e nove',
+  };
+  
+  return minutesText[minute] || `e ${minute}`;
 }
 
-// Verifica se o minuto precisa de fala mais lenta
-function needsSlowerSpeech(minute: number): boolean {
-  const doubleDigits = [11, 22, 33, 44, 55];
-  return doubleDigits.includes(minute);
-}
-
-async function generateAudio(text: string, apiKey: string, slower: boolean = false): Promise<ArrayBuffer> {
-  console.log(`Generating audio for: "${text}" (slower: ${slower})`);
+async function generateAudio(text: string, apiKey: string): Promise<ArrayBuffer> {
+  console.log(`Generating audio for: "${text}"`);
   
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
@@ -55,11 +135,11 @@ async function generateAudio(text: string, apiKey: string, slower: boolean = fal
         model_id: 'eleven_multilingual_v2',
         output_format: 'mp3_44100_128',
         voice_settings: {
-          stability: 0.6,
-          similarity_boost: 0.8,
-          style: 0.3,
+          stability: 0.5,        // Mais expressivo
+          similarity_boost: 0.75,
+          style: 0.4,            // Mais estilo/emoção
           use_speaker_boost: true,
-          speed: slower ? 0.85 : 1.0, // Mais lento para dígitos iguais
+          speed: 0.95,           // Ligeiramente mais lento para clareza
         },
       }),
     }
@@ -80,7 +160,7 @@ serve(async (req) => {
   }
 
   try {
-    const { action, hour, minute } = await req.json();
+    const { action, hour, minute, force } = await req.json();
     
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY_HOURS');
     if (!ELEVENLABS_API_KEY) {
@@ -93,20 +173,22 @@ serve(async (req) => {
 
     // Gerar todos os áudios de horas (24 arquivos)
     if (action === 'generate-hours') {
-      const results = { success: 0, failed: 0, errors: [] as string[] };
+      const results = { success: 0, failed: 0, skipped: 0, errors: [] as string[] };
 
       for (let h = 0; h < 24; h++) {
         const cacheKey = `h_${h.toString().padStart(2, '0')}.mp3`;
         
-        // Check if already exists
-        const { data: existingFile } = await supabase.storage
-          .from('tts-cache')
-          .list('time', { search: cacheKey });
-        
-        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
-          console.log(`Skipping ${cacheKey} - already exists`);
-          results.success++;
-          continue;
+        // Check if already exists (skip if not forcing)
+        if (!force) {
+          const { data: existingFile } = await supabase.storage
+            .from('tts-cache')
+            .list('time', { search: cacheKey });
+          
+          if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+            console.log(`Skipping ${cacheKey} - already exists`);
+            results.skipped++;
+            continue;
+          }
         }
 
         try {
@@ -125,12 +207,12 @@ serve(async (req) => {
             results.failed++;
             results.errors.push(`${cacheKey}: ${uploadError.message}`);
           } else {
-            console.log(`Successfully generated ${cacheKey}`);
+            console.log(`Successfully generated ${cacheKey} for "${text}"`);
             results.success++;
           }
 
           // Small delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
           console.error(`Error generating ${cacheKey}:`, error);
@@ -146,26 +228,27 @@ serve(async (req) => {
 
     // Gerar todos os áudios de minutos (59 arquivos - minuto 0 não precisa)
     if (action === 'generate-minutes') {
-      const results = { success: 0, failed: 0, errors: [] as string[] };
+      const results = { success: 0, failed: 0, skipped: 0, errors: [] as string[] };
 
       for (let m = 1; m < 60; m++) {
         const cacheKey = `m_${m.toString().padStart(2, '0')}.mp3`;
         
-        // Check if already exists
-        const { data: existingFile } = await supabase.storage
-          .from('tts-cache')
-          .list('time', { search: cacheKey });
-        
-        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
-          console.log(`Skipping ${cacheKey} - already exists`);
-          results.success++;
-          continue;
+        // Check if already exists (skip if not forcing)
+        if (!force) {
+          const { data: existingFile } = await supabase.storage
+            .from('tts-cache')
+            .list('time', { search: cacheKey });
+          
+          if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+            console.log(`Skipping ${cacheKey} - already exists`);
+            results.skipped++;
+            continue;
+          }
         }
 
         try {
           const text = getMinuteText(m);
-          const slower = needsSlowerSpeech(m);
-          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY, slower);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
           
           const { error: uploadError } = await supabase.storage
             .from('tts-cache')
@@ -179,12 +262,12 @@ serve(async (req) => {
             results.failed++;
             results.errors.push(`${cacheKey}: ${uploadError.message}`);
           } else {
-            console.log(`Successfully generated ${cacheKey}`);
+            console.log(`Successfully generated ${cacheKey} for "${text}"`);
             results.success++;
           }
 
           // Small delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
           console.error(`Error generating ${cacheKey}:`, error);
@@ -200,19 +283,21 @@ serve(async (req) => {
 
     // Gerar todos (horas + minutos = 83 arquivos total)
     if (action === 'generate-all') {
-      const results = { hours: 0, minutes: 0, failed: 0, errors: [] as string[] };
+      const results = { hours: 0, minutes: 0, failed: 0, skipped: 0, errors: [] as string[] };
 
       // Gerar horas
       for (let h = 0; h < 24; h++) {
         const cacheKey = `h_${h.toString().padStart(2, '0')}.mp3`;
         
-        const { data: existingFile } = await supabase.storage
-          .from('tts-cache')
-          .list('time', { search: cacheKey });
-        
-        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
-          results.hours++;
-          continue;
+        if (!force) {
+          const { data: existingFile } = await supabase.storage
+            .from('tts-cache')
+            .list('time', { search: cacheKey });
+          
+          if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+            results.skipped++;
+            continue;
+          }
         }
 
         try {
@@ -226,8 +311,9 @@ serve(async (req) => {
               upsert: true,
             });
 
+          console.log(`Generated hour ${h}: "${text}"`);
           results.hours++;
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
           results.failed++;
           results.errors.push(`h_${h}: ${error}`);
@@ -238,19 +324,20 @@ serve(async (req) => {
       for (let m = 1; m < 60; m++) {
         const cacheKey = `m_${m.toString().padStart(2, '0')}.mp3`;
         
-        const { data: existingFile } = await supabase.storage
-          .from('tts-cache')
-          .list('time', { search: cacheKey });
-        
-        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
-          results.minutes++;
-          continue;
+        if (!force) {
+          const { data: existingFile } = await supabase.storage
+            .from('tts-cache')
+            .list('time', { search: cacheKey });
+          
+          if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+            results.skipped++;
+            continue;
+          }
         }
 
         try {
           const text = getMinuteText(m);
-          const slower = needsSlowerSpeech(m);
-          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY, slower);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
           
           await supabase.storage
             .from('tts-cache')
@@ -259,8 +346,9 @@ serve(async (req) => {
               upsert: true,
             });
 
+          console.log(`Generated minute ${m}: "${text}"`);
           results.minutes++;
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
           results.failed++;
           results.errors.push(`m_${m}: ${error}`);
