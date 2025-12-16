@@ -9,9 +9,6 @@ const corsHeaders = {
 // Maximum size for permanent cache in bytes (200MB)
 const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
-// Force a single voice for all patient-call TTS: Alice (same voice used for hour announcements)
-// IMPORTANT: this also namespaces cache keys so we never reuse old MP3s generated with a different voice.
-const TTS_VOICE_ID = "Xb7hH8MSUJpSbSDYk0k2";
 // Split a full name into individual parts (first name, last name, third name, etc.)
 // All parts are normalized to lowercase to avoid duplicate cache entries
 // Handles compound names: "da", "de", "do", "dos", "das" are joined with the following word
@@ -63,8 +60,7 @@ function splitNameIntoParts(fullName: string): string[] {
 // isPermanent: if true, uses "phrase_" prefix for permanent cache (not auto-deleted)
 // Normalizes text to lowercase to avoid duplicate cache entries for same name with different casing
 function generateCacheKey(text: string, isPermanent: boolean = false): string {
-  // Include voice ID in the hash so changing the voice never reuses older cached MP3s.
-  const normalizedText = `${TTS_VOICE_ID}|${text.toLowerCase()}`;
+  const normalizedText = text.toLowerCase();
   let hash = 0;
   for (let i = 0; i < normalizedText.length; i++) {
     const char = normalizedText.charCodeAt(i);
@@ -77,8 +73,7 @@ function generateCacheKey(text: string, isPermanent: boolean = false): string {
 
 // Get just the hash part for tracking usage
 function getNameHash(text: string): string {
-  // Keep hash aligned with cache key namespace (voice-specific)
-  const normalizedText = `${TTS_VOICE_ID}|${text.toLowerCase()}`;
+  const normalizedText = text.toLowerCase();
   let hash = 0;
   for (let i = 0; i < normalizedText.length; i++) {
     const char = normalizedText.charCodeAt(i);
@@ -421,19 +416,16 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, generateAllPhrases } = await req.json();
+    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate } = await req.json();
 
     const supabase = supabaseUrl && supabaseServiceKey 
       ? createClient(supabaseUrl, supabaseServiceKey) 
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+    // Daniel voice - clear, authoritative male voice that works well with Portuguese
+    const selectedVoiceId = voiceId || "onwK4e9ZLuTAKqWW03F9";
 
-    // Force Alice only (ignore any voiceId provided by clients)
-    const selectedVoiceId = TTS_VOICE_ID;
-    if (voiceId && voiceId !== selectedVoiceId) {
-      console.log(`Ignoring client voiceId="${voiceId}". Forcing Alice voiceId="${selectedVoiceId}".`);
-    }
     // Handle concatenation mode: combine name parts + prefix + destination
     if (concatenate && supabase && ELEVENLABS_API_KEY) {
       const { name, prefix, destination } = concatenate;
@@ -581,112 +573,7 @@ serve(async (req) => {
       });
     }
 
-    // Generate all destination phrases and save to permanent cache
-    if (generateAllPhrases && supabase && ELEVENLABS_API_KEY) {
-      console.log("Generating all destination phrases with Alice voice...");
-      
-      // All FULL phrases that need to be pre-cached (must match getDestinationPhrase on client)
-      const phrases = [
-        "Por favor, dirija-se à Triagem",
-        "Por favor, dirija-se à Sala de Eletrocardiograma",
-        "Por favor, dirija-se à Sala de Curativos",
-        "Por favor, dirija-se à Sala do Raio X",
-        "Por favor, dirija-se à Enfermaria",
-        "Por favor, dirija-se ao Consultório 1",
-        "Por favor, dirija-se ao Consultório 2",
-        "Por favor, dirija-se ao Consultório Médico",
-        "Por favor, dirija-se ao Consultório Médico 1",
-        "Por favor, dirija-se ao Consultório Médico 2",
-      ];
-      
-      const results: { phrase: string; success: boolean; cacheKey?: string; error?: string }[] = [];
-      
-      for (const phrase of phrases) {
-        try {
-          const cacheKey = generateCacheKey(phrase, true); // true = permanent (phrase_ prefix)
-          
-          // Check if already exists
-          const { data: existingFile } = await supabase.storage
-            .from('tts-cache')
-            .download(cacheKey);
-          
-          if (existingFile) {
-            console.log(`Phrase "${phrase}" already cached: ${cacheKey}`);
-            results.push({ phrase, success: true, cacheKey });
-            continue;
-          }
-          
-          // Generate audio
-          console.log(`Generating audio for phrase: "${phrase}"`);
-          const response = await fetch(
-            `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
-            {
-              method: "POST",
-              headers: {
-                "xi-api-key": ELEVENLABS_API_KEY,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                text: phrase,
-                model_id: "eleven_multilingual_v2",
-                output_format: "mp3_44100_128",
-                voice_settings: {
-                  stability: 0.5,
-                  similarity_boost: 0.75,
-                  style: 0.3,
-                  use_speaker_boost: true,
-                },
-              }),
-            }
-          );
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`Failed to generate "${phrase}":`, errorText);
-            results.push({ phrase, success: false, error: errorText });
-            continue;
-          }
-          
-          const audioBuffer = await response.arrayBuffer();
-          
-          // Save to permanent cache
-          const { error: uploadError } = await supabase.storage
-            .from('tts-cache')
-            .upload(cacheKey, audioBuffer, {
-              contentType: 'audio/mpeg',
-              upsert: true,
-            });
-          
-          if (uploadError) {
-            console.error(`Failed to cache "${phrase}":`, uploadError);
-            results.push({ phrase, success: false, error: uploadError.message });
-          } else {
-            console.log(`Cached phrase: "${phrase}" as ${cacheKey}`);
-            results.push({ phrase, success: true, cacheKey });
-          }
-          
-          // Small delay between API calls
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-        } catch (error) {
-          console.error(`Error processing phrase "${phrase}":`, error);
-          results.push({ phrase, success: false, error: String(error) });
-        }
-      }
-      
-      const successCount = results.filter(r => r.success).length;
-      console.log(`Generated ${successCount}/${phrases.length} phrases successfully`);
-      
-      return new Response(JSON.stringify({ 
-        success: true, 
-        total: phrases.length,
-        generated: successCount,
-        results 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
+    // Handle cache clearing request
     if (clearCache && supabase) {
       const cacheKey = generateCacheKey(clearCache, false);
       
@@ -785,6 +672,7 @@ serve(async (req) => {
           text,
           model_id: "eleven_multilingual_v2",
           output_format: "mp3_44100_128",
+          language_code: "pt-BR",  // Português Brasileiro
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
