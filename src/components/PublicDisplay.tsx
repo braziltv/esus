@@ -512,53 +512,65 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     []
   );
 
-  // ElevenLabs TTS via edge function - plays MP3 audio (works on any device)
-  // Speak using concatenated TTS (splits name into parts for efficient caching)
+  // ElevenLabs TTS via backend function - plays MP3 audio (works on any device)
+  // IMPORTANT: We DO NOT concatenate MP3 bytes server-side because some players stop after the first segment.
+  // Instead, we fetch name + destination audios separately (both cached) and play them sequentially.
   const speakWithConcatenatedTTS = useCallback(
     async (name: string, destinationPhrase: string): Promise<void> => {
-      console.log('Speaking with concatenated TTS:', { name, destinationPhrase });
-      
+      const cleanName = name.trim();
+      const cleanDestination = destinationPhrase.trim();
+      console.log('Speaking with segmented TTS:', { name: cleanName, destinationPhrase: cleanDestination });
+
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
       const gain = 2.5 * ttsVolume;
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ 
-            unitName,
-            concatenate: {
-              name,              // Will be split into parts (first, last name) and cached separately
-              destination: destinationPhrase  // Full phrase, permanently cached
-            }
-          }),
-        }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
+      const headers = {
+        'Content-Type': 'application/json',
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      } as const;
+
+      // Fetch both audios in parallel (cached on backend storage)
+      const [nameResp, destResp] = await Promise.all([
+        fetch(url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text: cleanName, unitName, isPermanentCache: false }),
+        }),
+        fetch(url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text: cleanDestination, unitName, isPermanentCache: true }),
+        }),
+      ]);
+
+      if (!nameResp.ok) {
+        const errorData = await nameResp.json().catch(() => ({}));
+        throw new Error(errorData.error || `ElevenLabs name error: ${nameResp.status}`);
       }
 
-      const cacheStatus = response.headers.get('X-Cache');
-      const segments = response.headers.get('X-Segments');
-      const apiCalls = response.headers.get('X-API-Calls');
-      console.log(`TTS concatenated: cache=${cacheStatus}, segments=${segments}, apiCalls=${apiCalls}`);
+      if (!destResp.ok) {
+        const errorData = await destResp.json().catch(() => ({}));
+        throw new Error(errorData.error || `ElevenLabs destination error: ${destResp.status}`);
+      }
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      const audio = new Audio(audioUrl);
+      const [nameBlob, destBlob] = await Promise.all([nameResp.blob(), destResp.blob()]);
+
+      const nameUrl = URL.createObjectURL(nameBlob);
+      const destUrl = URL.createObjectURL(destBlob);
+
       try {
-        await playAmplifiedAudio(audio, gain);
+        // Play name
+        await playAmplifiedAudio(new Audio(nameUrl), gain);
+        // Small pause for clarity
+        await new Promise((r) => setTimeout(r, 250));
+        // Play destination
+        await playAmplifiedAudio(new Audio(destUrl), gain);
       } finally {
-        URL.revokeObjectURL(audioUrl);
+        URL.revokeObjectURL(nameUrl);
+        URL.revokeObjectURL(destUrl);
       }
     },
     [unitName, playAmplifiedAudio]
