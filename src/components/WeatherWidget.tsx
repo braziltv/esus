@@ -19,7 +19,7 @@ interface WeatherData {
 
 function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   const desc = description.toLowerCase();
-  const iconClass = size === 'lg' ? 'w-10 h-10' : 'w-5 h-5';
+  const iconClass = size === 'lg' ? 'w-8 h-8' : 'w-4 h-4';
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) 
     return <Sun className={`${iconClass} text-yellow-400`} />;
@@ -57,7 +57,7 @@ export function WeatherWidget() {
         const data = await response.json();
         
         const current = data.current_condition[0];
-        const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
         const forecast = data.weather.slice(0, 2).map((day: any, index: number) => {
           const date = new Date(day.date);
@@ -95,10 +95,10 @@ export function WeatherWidget() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-r from-teal-600/90 to-teal-500/90 backdrop-blur-md rounded-xl px-4 py-3 border border-teal-400/30 shadow-lg">
+      <div className="bg-gradient-to-r from-teal-600/90 to-teal-500/90 backdrop-blur-md rounded-xl px-3 py-2 border border-teal-400/30 shadow-lg">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/70 animate-pulse" />
-          <span className="text-white/80 text-sm">Carregando...</span>
+          <span className="text-white/80 text-xs">Carregando...</span>
         </div>
       </div>
     );
@@ -106,64 +106,42 @@ export function WeatherWidget() {
 
   if (error || !weather) {
     return (
-      <div className="bg-gradient-to-r from-teal-600/90 to-teal-500/90 backdrop-blur-md rounded-xl px-4 py-3 border border-teal-400/30 shadow-lg">
+      <div className="bg-gradient-to-r from-teal-600/90 to-teal-500/90 backdrop-blur-md rounded-xl px-3 py-2 border border-teal-400/30 shadow-lg">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/50" />
-          <span className="text-white/60 text-sm">{error || 'Indisponível'}</span>
+          <span className="text-white/60 text-xs">{error || 'Indisponível'}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-r from-teal-700/95 to-teal-600/95 backdrop-blur-md rounded-xl border border-teal-400/30 shadow-xl overflow-hidden">
-      {/* Header */}
-      <div className="bg-teal-500/50 px-3 py-1 text-center border-b border-teal-400/30">
-        <p className="text-white font-bold text-xs tracking-wider">CLIMA TEMPO</p>
-        <p className="text-teal-100 text-[10px] font-medium">{weather.city.toUpperCase()}</p>
-      </div>
-      
-      <div className="flex items-stretch">
-        {/* Left: Current weather */}
-        <div className="px-3 py-2 flex items-center gap-2 border-r border-teal-400/30">
-          <div className="text-center">
-            <p className="text-teal-200 text-[9px] font-semibold mb-0.5">AGORA</p>
-            <div className="flex items-center gap-1">
-              {getWeatherIcon(weather.current.description, 'lg')}
-              <span className="text-white font-black text-2xl leading-none">{weather.current.temp}°</span>
-              <span className="text-teal-200 text-xs">c</span>
-            </div>
-            <div className="flex items-center justify-center gap-1 mt-0.5">
-              <Droplets className="w-3 h-3 text-cyan-300" />
-              <span className="text-teal-100 text-[9px]">{weather.current.humidity}%</span>
-            </div>
-          </div>
+    <div className="bg-gradient-to-r from-teal-700/95 to-teal-600/95 backdrop-blur-md rounded-xl px-3 py-2 border border-teal-400/30 shadow-xl">
+      <div className="flex items-center gap-3">
+        {/* Current weather with city */}
+        <div className="flex items-center gap-2">
+          <span className="text-teal-200 text-[10px] font-semibold uppercase">{weather.city}</span>
+          {getWeatherIcon(weather.current.description, 'lg')}
+          <span className="text-white font-black text-xl leading-none">{weather.current.temp}°c</span>
+          <Droplets className="w-3 h-3 text-cyan-300 ml-1" />
+          <span className="text-teal-100 text-[10px]">{weather.current.humidity}%</span>
         </div>
         
-        {/* Right: Forecast cards */}
-        <div className="flex flex-col gap-1 p-1.5">
-          {weather.forecast.map((day, index) => (
-            <div 
-              key={index} 
-              className="bg-emerald-500/80 rounded-md px-2 py-1 flex items-center gap-2 min-w-[100px]"
-            >
-              <div className="flex-1">
-                <p className="text-white font-bold text-[9px] leading-tight">{day.dayName}</p>
-                <div className="flex items-center gap-1 text-[8px] text-white/90">
-                  <span className="text-emerald-200">MIN</span>
-                  <span className="font-semibold">{day.minTemp}°</span>
-                </div>
-                <div className="flex items-center gap-1 text-[8px] text-white/90">
-                  <span className="text-emerald-200">MAX</span>
-                  <span className="font-semibold">{day.maxTemp}°</span>
-                </div>
-              </div>
-              <div className="shrink-0">
-                {getWeatherIcon(day.description, 'sm')}
-              </div>
+        <div className="w-px h-6 bg-teal-400/40" />
+        
+        {/* Forecast inline */}
+        {weather.forecast.map((day, index) => (
+          <div 
+            key={index} 
+            className="bg-emerald-500/70 rounded-md px-2 py-1 flex items-center gap-1.5"
+          >
+            {getWeatherIcon(day.description, 'sm')}
+            <div className="text-[9px] leading-tight">
+              <p className="text-white font-bold">{day.dayName}</p>
+              <p className="text-emerald-100">{day.minTemp}°/{day.maxTemp}°</p>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
