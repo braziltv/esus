@@ -336,11 +336,11 @@ async function getOrGenerateAudio(
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
         voice_settings: {
-          stability: 0.85,
-          similarity_boost: 0.80,
-          style: 0.1,
+          stability: 0.65,
+          similarity_boost: 0.85,
+          style: 0.25,
           use_speaker_boost: true,
-          speed: 0.95,
+          speed: 0.92,
         },
       }),
     }
@@ -423,8 +423,8 @@ serve(async (req) => {
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    // Daniel voice - clear, authoritative male voice that works well with Portuguese
-    const selectedVoiceId = voiceId || "onwK4e9ZLuTAKqWW03F9";
+    // Brian voice - clear, natural voice that works excellently with multilingual model for Portuguese
+    const selectedVoiceId = voiceId || "nPczCjzI2devNBz1zQrb";
 
     // Handle concatenation mode: combine name parts + prefix + destination
     if (concatenate && supabase && ELEVENLABS_API_KEY) {
@@ -673,10 +673,11 @@ serve(async (req) => {
           model_id: "eleven_multilingual_v2",
           output_format: "mp3_44100_128",
           voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.3,
+            stability: 0.65,
+            similarity_boost: 0.85,
+            style: 0.25,
             use_speaker_boost: true,
+            speed: 0.92,
           },
         }),
       }
