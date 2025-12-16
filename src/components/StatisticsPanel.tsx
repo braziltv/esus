@@ -139,6 +139,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [showDeleteStatsPassword, setShowDeleteStatsPassword] = useState(false);
   const [deletingStats, setDeletingStats] = useState(false);
   
+  // Estado para modal de limpar painel de chamados
+  const [clearCallsDialogOpen, setClearCallsDialogOpen] = useState(false);
+  const [clearCallsPassword, setClearCallsPassword] = useState('');
+  const [showClearCallsPassword, setShowClearCallsPassword] = useState(false);
+  const [clearingCalls, setClearingCalls] = useState(false);
+  
   // Estado para uso de API keys do ElevenLabs
   const [apiKeyUsage, setApiKeyUsage] = useState<ApiKeyUsage[]>([]);
   
@@ -1060,6 +1066,48 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
+  // Função para limpar apenas o painel de chamados (patient_calls)
+  // Mantém TTS cache e estatísticas intactas
+  const handleClearPatientCalls = async () => {
+    if (clearCallsPassword !== 'Paineiras@1') {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha informada está incorreta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setClearingCalls(true);
+    try {
+      // Apagar apenas os registros de patient_calls (painel de chamados)
+      const { error: callsError } = await supabase
+        .from('patient_calls')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (callsError) throw callsError;
+
+      toast({
+        title: "Painel de chamados limpo",
+        description: "Todos os pacientes foram removidos do painel. Estatísticas e cache TTS permanecem arquivados.",
+      });
+
+      setClearCallsDialogOpen(false);
+      setClearCallsPassword('');
+      loadDbHistory();
+    } catch (error) {
+      console.error('Erro ao limpar painel de chamados:', error);
+      toast({
+        title: "Erro ao limpar",
+        description: "Ocorreu um erro ao tentar limpar o painel de chamados.",
+        variant: "destructive",
+      });
+    } finally {
+      setClearingCalls(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Modal de senha para comparação */}
@@ -1420,6 +1468,86 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Modal para limpar painel de chamados */}
+      <Dialog open={clearCallsDialogOpen} onOpenChange={(open) => {
+        setClearCallsDialogOpen(open);
+        if (!open) setClearCallsPassword('');
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-cyan-600">
+              <Users className="w-5 h-5" />
+              Limpar Painel de Chamados
+            </DialogTitle>
+            <DialogDescription>
+              Remove todos os pacientes do painel de chamados (Cadastro, Triagem, Médico).
+              <br /><br />
+              <strong className="text-green-600">✓ Estatísticas e relatórios permanecem arquivados</strong>
+              <br />
+              <strong className="text-green-600">✓ Cache TTS permanece intacto</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-3">
+              <p className="text-sm text-cyan-700 dark:text-cyan-400 font-medium">
+                ℹ️ Ideal para iniciar um novo dia de atendimento mantendo os dados históricos.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clear-calls-password">Digite a senha para confirmar:</Label>
+              <div className="relative">
+                <Input
+                  id="clear-calls-password"
+                  type={showClearCallsPassword ? 'text' : 'password'}
+                  value={clearCallsPassword}
+                  onChange={(e) => setClearCallsPassword(e.target.value)}
+                  placeholder="Senha de administrador"
+                  className="pr-10"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleClearPatientCalls();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowClearCallsPassword(!showClearCallsPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showClearCallsPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setClearCallsDialogOpen(false);
+                setClearCallsPassword('');
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleClearPatientCalls}
+              disabled={clearingCalls || !clearCallsPassword}
+              className="gap-2 bg-cyan-600 hover:bg-cyan-700"
+            >
+              {clearingCalls ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Limpando...
+                </>
+              ) : (
+                <>
+                  <Users className="w-4 h-4" />
+                  Limpar Painel
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Input oculto para seleção de arquivo */}
       <input
         type="file"
@@ -1455,6 +1583,14 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           >
             <BarChart3 className="w-4 h-4" />
             Limpar Estatísticas
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => setClearCallsDialogOpen(true)} 
+            className="gap-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950"
+          >
+            <Users className="w-4 h-4" />
+            Limpar Painel
           </Button>
           <Button 
             variant="destructive" 
