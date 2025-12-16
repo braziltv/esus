@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { Patient, PatientPriority } from '@/types/patient';
 
 const STORAGE_KEY_TRIAGE = 'triageNewPatientSoundEnabled';
 const STORAGE_KEY_DOCTOR = 'doctorNewPatientSoundEnabled';
@@ -31,7 +32,7 @@ const playNewPatientSound = () => {
   }
 };
 
-export function useNewPatientSound(panelType: 'triage' | 'doctor', patientCount: number) {
+export function useNewPatientSound(panelType: 'triage' | 'doctor', patients: Patient[]) {
   const storageKey = panelType === 'triage' ? STORAGE_KEY_TRIAGE : STORAGE_KEY_DOCTOR;
   
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -39,7 +40,13 @@ export function useNewPatientSound(panelType: 'triage' | 'doctor', patientCount:
     return stored !== null ? stored === 'true' : true; // Default enabled
   });
   
-  const prevCountRef = useRef(patientCount);
+  const [visualAlert, setVisualAlert] = useState<{ active: boolean; priority: PatientPriority | null }>({
+    active: false,
+    priority: null
+  });
+  
+  const prevCountRef = useRef(patients.length);
+  const prevIdsRef = useRef<Set<string>>(new Set(patients.map(p => p.id)));
   const isInitialMount = useRef(true);
 
   // Persist setting to localStorage
@@ -47,26 +54,48 @@ export function useNewPatientSound(panelType: 'triage' | 'doctor', patientCount:
     localStorage.setItem(storageKey, String(soundEnabled));
   }, [soundEnabled, storageKey]);
 
-  // Detect new patient arrival and play notification sound
+  // Detect new patient arrival and play notification sound + visual alert
   useEffect(() => {
     // Skip on initial mount
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      prevCountRef.current = patientCount;
+      prevCountRef.current = patients.length;
+      prevIdsRef.current = new Set(patients.map(p => p.id));
       return;
     }
 
-    // Play sound only when count increases and sound is enabled
-    if (patientCount > prevCountRef.current && soundEnabled) {
-      playNewPatientSound();
+    // Find new patients by comparing IDs
+    const currentIds = new Set(patients.map(p => p.id));
+    const newPatients = patients.filter(p => !prevIdsRef.current.has(p.id));
+
+    if (newPatients.length > 0) {
+      // Get highest priority among new patients
+      const highestPriority = newPatients.reduce((highest, patient) => {
+        const priorityOrder = { emergency: 0, priority: 1, normal: 2 };
+        return priorityOrder[patient.priority] < priorityOrder[highest] ? patient.priority : highest;
+      }, 'normal' as PatientPriority);
+
+      // Play sound if enabled
+      if (soundEnabled) {
+        playNewPatientSound();
+      }
+
+      // Show visual alert with duration based on priority
+      const duration = highestPriority === 'emergency' ? 5000 : 3000;
+      setVisualAlert({ active: true, priority: highestPriority });
+      
+      setTimeout(() => {
+        setVisualAlert({ active: false, priority: null });
+      }, duration);
     }
     
-    prevCountRef.current = patientCount;
-  }, [patientCount, soundEnabled]);
+    prevCountRef.current = patients.length;
+    prevIdsRef.current = currentIds;
+  }, [patients, soundEnabled]);
 
   const toggleSound = useCallback(() => {
     setSoundEnabled(prev => !prev);
   }, []);
 
-  return { soundEnabled, toggleSound };
+  return { soundEnabled, toggleSound, visualAlert };
 }

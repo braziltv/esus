@@ -52,10 +52,29 @@ export function TriagePanel({
   onFinishWithoutCall,
   onSendToDoctorQueue
 }: TriagePanelProps) {
-  const { soundEnabled, toggleSound } = useNewPatientSound('triage', waitingPatients.length);
+  const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
+
+  const alertColors = {
+    emergency: 'bg-red-500/20 border-red-500',
+    priority: 'bg-amber-500/20 border-amber-500',
+    normal: 'bg-green-500/20 border-green-500'
+  };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 relative">
+      {/* Visual Alert Overlay */}
+      {visualAlert.active && visualAlert.priority && (
+        <div className={`absolute inset-0 z-50 pointer-events-none rounded-xl border-4 animate-pulse ${alertColors[visualAlert.priority]}`}>
+          <div className={`absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-white font-bold text-sm ${
+            visualAlert.priority === 'emergency' ? 'bg-red-600' : 
+            visualAlert.priority === 'priority' ? 'bg-amber-600' : 'bg-green-600'
+          }`}>
+            {visualAlert.priority === 'emergency' ? '🚨 EMERGÊNCIA!' : 
+             visualAlert.priority === 'priority' ? '⚠️ PRIORIDADE' : '✓ Novo Paciente'}
+          </div>
+        </div>
+      )}
+
       {/* Sound Toggle */}
       <div className="flex justify-end">
         <Button 
