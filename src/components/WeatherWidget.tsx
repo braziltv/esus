@@ -118,27 +118,24 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     if (!currentTime || !formatTime) return null;
     
     return (
-      <>
-        <div className="w-px h-6 bg-red-600/50" />
-        <div className="flex items-center gap-2">
-          <div className="flex items-baseline whitespace-nowrap">
-            <span className="text-xl font-mono font-black text-white tracking-tight">
-              {formatTime(currentTime, 'HH:mm')}
-            </span>
-            <span className="text-sm font-mono font-bold text-yellow-400 animate-pulse">
-              :{formatTime(currentTime, 'ss')}
-            </span>
-          </div>
-          <div className="text-center">
-            <p className="text-[9px] font-mono font-bold text-yellow-400 leading-tight whitespace-nowrap">
-              {formatTime(currentTime, "EEE").toUpperCase()}
-            </p>
-            <p className="text-[9px] font-mono font-semibold text-cyan-400 leading-tight whitespace-nowrap">
-              {formatTime(currentTime, "dd/MM")}
-            </p>
-          </div>
+      <div className="flex items-center gap-2 ml-1">
+        <div className="flex items-baseline whitespace-nowrap">
+          <span className="text-xl font-mono font-black text-white tracking-tight">
+            {formatTime(currentTime, 'HH:mm')}
+          </span>
+          <span className="text-sm font-mono font-bold text-yellow-400 animate-pulse">
+            :{formatTime(currentTime, 'ss')}
+          </span>
         </div>
-      </>
+        <div className="text-center">
+          <p className="text-[9px] font-mono font-bold text-yellow-400 leading-tight whitespace-nowrap">
+            {formatTime(currentTime, "EEE").toUpperCase()}
+          </p>
+          <p className="text-[9px] font-mono font-semibold text-cyan-400 leading-tight whitespace-nowrap">
+            {formatTime(currentTime, "dd/MM")}
+          </p>
+        </div>
+      </div>
     );
   };
 
