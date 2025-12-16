@@ -95,7 +95,7 @@ export function WeatherWidget() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-r from-teal-600/90 to-teal-500/90 backdrop-blur-md rounded-xl px-3 py-2 border border-teal-400/30 shadow-lg">
+      <div className="bg-red-800 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/70 animate-pulse" />
           <span className="text-white/80 text-xs">Carregando...</span>
@@ -106,7 +106,7 @@ export function WeatherWidget() {
 
   if (error || !weather) {
     return (
-      <div className="bg-gradient-to-r from-teal-600/90 to-teal-500/90 backdrop-blur-md rounded-xl px-3 py-2 border border-teal-400/30 shadow-lg">
+      <div className="bg-red-800 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/50" />
           <span className="text-white/60 text-xs">{error || 'Indisponível'}</span>
@@ -116,29 +116,29 @@ export function WeatherWidget() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-teal-700/95 to-teal-600/95 backdrop-blur-md rounded-xl px-3 py-2 border border-teal-400/30 shadow-xl">
+    <div className="bg-red-800 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg">
       <div className="flex items-center gap-3">
         {/* Current weather with city */}
         <div className="flex items-center gap-2">
-          <span className="text-teal-200 text-[10px] font-semibold uppercase">{weather.city}</span>
+          <span className="text-red-200 text-[10px] font-semibold uppercase">{weather.city}</span>
           {getWeatherIcon(weather.current.description, 'lg')}
           <span className="text-white font-black text-xl leading-none">{weather.current.temp}°c</span>
           <Droplets className="w-3 h-3 text-cyan-300 ml-1" />
-          <span className="text-teal-100 text-[10px]">{weather.current.humidity}%</span>
+          <span className="text-red-100 text-[10px]">{weather.current.humidity}%</span>
         </div>
         
-        <div className="w-px h-6 bg-teal-400/40" />
+        <div className="w-px h-6 bg-red-600/50" />
         
         {/* Forecast inline */}
         {weather.forecast.map((day, index) => (
           <div 
             key={index} 
-            className="bg-emerald-500/70 rounded-md px-2 py-1 flex items-center gap-1.5"
+            className="bg-red-700 rounded-md px-2 py-1 flex items-center gap-1.5"
           >
             {getWeatherIcon(day.description, 'sm')}
             <div className="text-[9px] leading-tight">
               <p className="text-white font-bold">{day.dayName}</p>
-              <p className="text-emerald-100">{day.minTemp}°/{day.maxTemp}°</p>
+              <p className="text-red-100">{day.minTemp}°/{day.maxTemp}°</p>
             </div>
           </div>
         ))}
