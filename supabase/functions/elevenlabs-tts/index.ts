@@ -416,15 +416,15 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate } = await req.json();
+    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache } = await req.json();
 
     const supabase = supabaseUrl && supabaseServiceKey 
       ? createClient(supabaseUrl, supabaseServiceKey) 
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    // Daniel voice - clear, authoritative male voice that works well with Portuguese
-    const selectedVoiceId = voiceId || "onwK4e9ZLuTAKqWW03F9";
+    // Alice voice - natural female voice that works excellently with Brazilian Portuguese
+    const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2";
 
     // Handle concatenation mode: combine name parts + prefix + destination
     if (concatenate && supabase && ELEVENLABS_API_KEY) {
@@ -588,6 +588,48 @@ serve(async (req) => {
       }
       
       return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Handle clearing ALL permanent cache (destination phrases)
+    if (clearAllPhraseCache && supabase) {
+      console.log("Clearing all permanent phrase cache...");
+      const { data: files, error: listError } = await supabase.storage
+        .from('tts-cache')
+        .list('', { limit: 1000 });
+      
+      if (listError) {
+        console.error("Error listing cache files:", listError);
+        return new Response(JSON.stringify({ error: listError.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      // Filter only phrase files (permanent cache) and part files (name parts)
+      const phraseFiles = files?.filter(f => f.name.startsWith('phrase_') || f.name.startsWith('part_')) || [];
+      
+      if (phraseFiles.length > 0) {
+        const filePaths = phraseFiles.map(f => f.name);
+        console.log(`Deleting ${filePaths.length} cache files`);
+        
+        const { error: deleteError } = await supabase.storage
+          .from('tts-cache')
+          .remove(filePaths);
+        
+        if (deleteError) {
+          console.error("Error deleting cache files:", deleteError);
+          return new Response(JSON.stringify({ error: deleteError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        console.log(`Successfully deleted ${filePaths.length} cache files`);
+      }
+      
+      return new Response(JSON.stringify({ success: true, deletedCount: phraseFiles.length }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
