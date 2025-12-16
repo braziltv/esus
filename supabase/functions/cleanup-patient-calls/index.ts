@@ -1,0 +1,85 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+Deno.serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    console.log('Starting automatic patient calls cleanup...')
+
+    // 1. Apagar todos os atendimentos finalizados (status = 'completed')
+    const { data: completedDeleted, error: completedError } = await supabase
+      .from('patient_calls')
+      .delete()
+      .eq('status', 'completed')
+      .select('id')
+
+    if (completedError) {
+      console.error('Error deleting completed calls:', completedError)
+      throw completedError
+    }
+
+    const completedCount = completedDeleted?.length || 0
+    console.log(`Deleted ${completedCount} completed patient calls`)
+
+    // 2. Apagar atendimentos em aberto com mais de 2 horas de inatividade
+    // Inatividade = created_at ou updated_at (se existir) > 2 horas atrás
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+
+    const { data: inactiveDeleted, error: inactiveError } = await supabase
+      .from('patient_calls')
+      .delete()
+      .neq('status', 'completed')
+      .lt('created_at', twoHoursAgo)
+      .select('id')
+
+    if (inactiveError) {
+      console.error('Error deleting inactive calls:', inactiveError)
+      throw inactiveError
+    }
+
+    const inactiveCount = inactiveDeleted?.length || 0
+    console.log(`Deleted ${inactiveCount} inactive patient calls (> 2 hours old)`)
+
+    const totalDeleted = completedCount + inactiveCount
+
+    console.log(`Cleanup complete. Total deleted: ${totalDeleted}`)
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        completedDeleted: completedCount,
+        inactiveDeleted: inactiveCount,
+        totalDeleted,
+        timestamp: new Date().toISOString()
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    )
+
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Cleanup error:', errorMessage)
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
+      }
+    )
+  }
+})
