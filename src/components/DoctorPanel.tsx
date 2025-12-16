@@ -53,16 +53,29 @@ export function DoctorPanel({
   onRecall,
   onFinishWithoutCall
 }: DoctorPanelProps) {
-  const [selectedConsultorio, setSelectedConsultorio] = useState<string>('consultorio-1');
-  const [currentConsultorio, setCurrentConsultorio] = useState<string>('Consultório 1');
-  const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
-  const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
-  
-
   const consultorios = [
     { value: 'consultorio-1', label: 'Consultório 1' },
     { value: 'consultorio-2', label: 'Consultório 2' },
   ];
+
+  // Persist selected consultório in localStorage
+  const [selectedConsultorio, setSelectedConsultorio] = useState<string>(() => {
+    return localStorage.getItem('selectedConsultorio') || 'consultorio-1';
+  });
+  
+  const currentConsultorioLabel = consultorios.find(c => c.value === selectedConsultorio)?.label || 'Consultório 1';
+  
+  const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
+  const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
+  
+  // Filter currentCall to only show if it belongs to this consultório
+  const myCurrentCall = currentCall && currentCall.destination === currentConsultorioLabel ? currentCall : null;
+
+  // Save selected consultório to localStorage
+  const handleConsultorioChange = (value: string) => {
+    setSelectedConsultorio(value);
+    localStorage.setItem('selectedConsultorio', value);
+  };
 
   const alertColors = {
     emergency: 'bg-red-500/20 border-red-500',
@@ -71,13 +84,11 @@ export function DoctorPanel({
   };
 
   const handleCallPatient = (patientId: string) => {
-    const selected = consultorios.find(c => c.value === selectedConsultorio);
-    setCurrentConsultorio(selected?.label || 'Consultório 1');
-    onCallPatient(patientId, selected?.label);
+    onCallPatient(patientId, currentConsultorioLabel);
   };
 
   const handleRecall = () => {
-    onRecall(currentConsultorio);
+    onRecall(currentConsultorioLabel);
   };
 
   return (
@@ -112,7 +123,7 @@ export function DoctorPanel({
         <label className="block text-xs sm:text-sm font-medium text-foreground mb-2">
           Selecionar Consultório
         </label>
-        <Select value={selectedConsultorio} onValueChange={setSelectedConsultorio}>
+        <Select value={selectedConsultorio} onValueChange={handleConsultorioChange}>
           <SelectTrigger className="w-full bg-background text-sm sm:text-base">
             <SelectValue placeholder="Selecione o consultório" />
           </SelectTrigger>
@@ -131,24 +142,24 @@ export function DoctorPanel({
         <div className="bg-gradient-to-r from-green-500 to-green-600 p-3 sm:p-4">
           <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
             <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5" />
-            Chamada Atual - {currentConsultorio}
+            Chamada Atual - {currentConsultorioLabel}
           </h2>
         </div>
         <div className="p-4 sm:p-6">
-          {currentCall ? (
+          {myCurrentCall ? (
             <div className="text-center">
               <p className="text-2xl sm:text-4xl font-bold text-foreground mb-3 sm:mb-4 break-words">
-                {currentCall.name}
+                {myCurrentCall.name}
               </p>
               <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-                Chamado às {formatBrazilTime(currentCall.calledAt!, 'HH:mm')} - {currentConsultorio}
+                Chamado às {formatBrazilTime(myCurrentCall.calledAt!, 'HH:mm')} - {currentConsultorioLabel}
               </p>
               <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
                 <Button onClick={handleRecall} variant="outline" size="sm" className="text-xs sm:text-sm">
                   <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden xs:inline">Chamar</span> Novamente
                 </Button>
-                <Button onClick={() => setConfirmFinish({ id: currentCall.id, name: currentCall.name, type: 'consultation' })} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
+                <Button onClick={() => setConfirmFinish({ id: myCurrentCall.id, name: myCurrentCall.name, type: 'consultation' })} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden xs:inline">Finalizar</span> Consulta
                 </Button>
