@@ -26,7 +26,8 @@ export const useHourAudio = () => {
     }
   };
 
-  const generateAllHourAudios = async (
+  const generateHourAudios = async (
+    hour: number,
     onProgress?: (current: number, total: number) => void
   ): Promise<{ success: number; failed: number; errors: string[] }> => {
     try {
@@ -39,7 +40,7 @@ export const useHourAudio = () => {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ action: 'generate-all' }),
+          body: JSON.stringify({ action: 'generate-hour', hour }),
         }
       );
 
@@ -59,6 +60,22 @@ export const useHourAudio = () => {
     }
   };
 
+  const generateAllHourAudios = async (
+    onProgress?: (currentHour: number, totalHours: number) => void
+  ): Promise<{ success: number; failed: number; errors: string[] }> => {
+    const totalResults = { success: 0, failed: 0, errors: [] as string[] };
+    
+    for (let hour = 0; hour < 24; hour++) {
+      onProgress?.(hour, 24);
+      const result = await generateHourAudios(hour);
+      totalResults.success += result.success;
+      totalResults.failed += result.failed;
+      totalResults.errors.push(...result.errors);
+    }
+    
+    return totalResults;
+  };
+
   const checkHourAudioExists = async (hour: number, minute: number): Promise<boolean> => {
     try {
       const url = getHourAudioUrl(hour, minute);
@@ -72,6 +89,7 @@ export const useHourAudio = () => {
   return {
     getHourAudioUrl,
     playHourAudio,
+    generateHourAudios,
     generateAllHourAudios,
     checkHourAudioExists,
   };

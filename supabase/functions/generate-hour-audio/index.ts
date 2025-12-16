@@ -82,6 +82,64 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    if (action === 'generate-hour' && hour !== undefined) {
+      // Generate all minutes for a specific hour (60 files)
+      const results: { success: number; failed: number; errors: string[]; hour: number } = {
+        success: 0,
+        failed: 0,
+        errors: [],
+        hour: hour
+      };
+
+      for (let m = 0; m < 60; m++) {
+        const cacheKey = `hour_${hour.toString().padStart(2, '0')}_${m.toString().padStart(2, '0')}.mp3`;
+        
+        // Check if already exists
+        const { data: existingFile } = await supabase.storage
+          .from('tts-cache')
+          .list('hours', { search: cacheKey });
+        
+        if (existingFile && existingFile.length > 0) {
+          console.log(`Skipping ${cacheKey} - already exists`);
+          results.success++;
+          continue;
+        }
+
+        try {
+          const text = formatHourText(hour, m);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
+          
+          const { error: uploadError } = await supabase.storage
+            .from('tts-cache')
+            .upload(`hours/${cacheKey}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
+
+          if (uploadError) {
+            console.error(`Upload error for ${cacheKey}:`, uploadError);
+            results.failed++;
+            results.errors.push(`${cacheKey}: ${uploadError.message}`);
+          } else {
+            console.log(`Successfully generated ${cacheKey}`);
+            results.success++;
+          }
+
+          // Small delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 150));
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`Error generating ${cacheKey}:`, error);
+          results.failed++;
+          results.errors.push(`${cacheKey}: ${errorMsg}`);
+        }
+      }
+
+      return new Response(JSON.stringify(results), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (action === 'generate-all') {
       // Generate all hour audios (0-23 hours, 0-59 minutes)
       const results: { success: number; failed: number; errors: string[] } = {
@@ -126,7 +184,7 @@ serve(async (req) => {
             }
 
             // Small delay to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 150));
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Unknown error';
             console.error(`Error generating ${cacheKey}:`, error);
