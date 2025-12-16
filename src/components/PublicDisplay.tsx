@@ -1019,23 +1019,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         {/* Right Column: Clock + History Panel */}
         <div className="col-span-12 lg:col-span-3 flex flex-col gap-2 lg:gap-3 min-h-0">
           {/* Modern Clock */}
-          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl lg:rounded-2xl border border-slate-600/50 p-3 lg:p-4 backdrop-blur-sm shrink-0">
-            <div className="flex items-center justify-between gap-2">
+          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl lg:rounded-2xl border border-slate-600/50 p-3 lg:p-4 xl:p-5 backdrop-blur-sm shrink-0">
+            <div className="flex items-center justify-between gap-3 lg:gap-4">
               {/* Time with seconds */}
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl lg:text-4xl xl:text-5xl font-mono font-black text-white tracking-tight">
+              <div className="flex items-baseline gap-1 shrink-0">
+                <span className="text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-mono font-black text-white tracking-tight">
                   {formatBrazilTime(currentTime, 'HH:mm')}
                 </span>
-                <span className="text-xl lg:text-2xl xl:text-3xl font-mono font-bold text-primary animate-pulse">
+                <span className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-mono font-bold text-primary animate-pulse">
                   :{formatBrazilTime(currentTime, 'ss')}
                 </span>
               </div>
               {/* Date info */}
-              <div className="text-right">
-                <p className="text-sm lg:text-base xl:text-lg font-mono font-bold text-white leading-none tracking-tight whitespace-nowrap">
+              <div className="text-right shrink-0">
+                <p className="text-base lg:text-lg xl:text-xl 2xl:text-2xl font-mono font-bold text-white leading-none tracking-tight whitespace-nowrap">
                   {formatBrazilTime(currentTime, "EEEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEEE").slice(1)}
                 </p>
-                <p className="text-xs lg:text-sm font-mono font-semibold text-cyan-400 leading-tight tracking-tight">
+                <p className="text-sm lg:text-base xl:text-lg 2xl:text-xl font-mono font-semibold text-cyan-400 leading-tight tracking-tight mt-1">
                   {formatBrazilTime(currentTime, "dd/MM/yyyy")}
                 </p>
               </div>
