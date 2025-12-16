@@ -161,7 +161,7 @@ export function DoctorPanel({
                 </Button>
                 <Button onClick={() => setConfirmFinish({ id: myCurrentCall.id, name: myCurrentCall.name, type: 'consultation' })} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden xs:inline">Finalizar</span> Consulta
+                  Concluir Consulta
                 </Button>
               </div>
             </div>
@@ -233,15 +233,15 @@ export function DoctorPanel({
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 justify-end ml-9 sm:ml-0">
-                    {/* Finalizar sem chamar */}
+                    {/* Desistência - paciente não compareceu */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setConfirmFinish({ id: patient.id, name: patient.name, type: 'without' })}
-                      className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                      className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                     >
-                      <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden xs:inline">Finalizar</span>
+                      <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                      Desistência
                     </Button>
 
                     <Button
@@ -264,11 +264,17 @@ export function DoctorPanel({
       <AlertDialog open={!!confirmFinish} onOpenChange={() => setConfirmFinish(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar finalização</AlertDialogTitle>
+            <AlertDialogTitle>
+              {confirmFinish?.type === 'consultation' ? 'Concluir Consulta' : 'Confirmar Desistência'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja finalizar o atendimento de <strong>{confirmFinish?.name}</strong>?
+              {confirmFinish?.type === 'consultation' ? (
+                <>Confirma a conclusão da consulta de <strong>{confirmFinish?.name}</strong>?</>
+              ) : (
+                <>Confirma a desistência de <strong>{confirmFinish?.name}</strong>?</>
+              )}
               <br />
-              <span className="text-destructive">O paciente será removido de todos os módulos.</span>
+              <span className="text-destructive">O paciente será removido da fila.</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
