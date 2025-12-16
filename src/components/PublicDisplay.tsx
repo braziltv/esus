@@ -475,12 +475,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const storageUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/tts-cache/horaminuto/${fileName}`;
     console.log('Playing storage audio:', storageUrl);
     
-    const audio = new Audio(storageUrl);
-    await playAmplifiedAudio(audio, 2.5);
+    return new Promise((resolve, reject) => {
+      const audio = new Audio(storageUrl);
+      
+      audio.oncanplaythrough = async () => {
+        try {
+          await playAmplifiedAudio(audio, 2.5);
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      };
+      
+      audio.onerror = (e) => {
+        console.error('Audio load error for:', storageUrl, e);
+        reject(new Error(`Failed to load audio: ${fileName}`));
+      };
+      
+      audio.load();
+    });
   }, [playAmplifiedAudio]);
 
   // Announce current time using audio files from Storage
-  const announceTime = useCallback(async () => {
+  const announceTimeRef = useRef<() => Promise<void>>();
+  
+  announceTimeRef.current = async () => {
     if (!audioUnlocked || isAnnouncingTimeRef.current || announcingType) {
       console.log('Skipping time announcement - audio locked, already announcing, or patient call in progress');
       return;
@@ -503,6 +522,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       await playNotificationSound();
       
       // Play hour audio (HRS00.mp3 to HRS23.mp3)
+      console.log(`Trying to play hour: HRS${hoursStr}.mp3`);
       try {
         await playStorageAudio(`HRS${hoursStr}.mp3`);
       } catch (e) {
@@ -513,6 +533,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       await new Promise(resolve => setTimeout(resolve, 300));
       
       // Play minute audio (MIN00.mp3 to MIN59.mp3)
+      console.log(`Trying to play minute: MIN${minutesStr}.mp3`);
       try {
         await playStorageAudio(`MIN${minutesStr}.mp3`);
       } catch (e) {
@@ -525,7 +546,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     } finally {
       isAnnouncingTimeRef.current = false;
     }
-  }, [audioUnlocked, currentTime, announcingType, playNotificationSound, playStorageAudio]);
+  };
+  
+  const announceTime = useCallback(() => {
+    return announceTimeRef.current?.() ?? Promise.resolve();
+  }, []);
 
   // Generate 3 random minutes for time announcements within an hour
   const generateRandomMinutesForHour = useCallback(() => {
@@ -546,7 +571,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (!audioUnlocked) return;
 
     const checkTimeAnnouncement = () => {
-      const now = currentTime;
+      const now = new Date();
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
 
@@ -563,38 +588,43 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // Remove the minute from schedule to avoid repeating
         timeAnnouncementScheduleRef.current = schedule.filter(m => m !== currentMinute);
         console.log(`Time to announce! (${currentHour}:${currentMinute})`);
-        announceTime();
+        announceTimeRef.current?.();
       }
     };
 
     // Check every 30 seconds
     const interval = setInterval(checkTimeAnnouncement, 30000);
     
-    // Initial check
-    checkTimeAnnouncement();
+    // Initial check after a short delay
+    const timeout = setTimeout(checkTimeAnnouncement, 2000);
 
-    return () => clearInterval(interval);
-  }, [audioUnlocked, currentTime, announceTime, generateRandomMinutesForHour]);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [audioUnlocked, generateRandomMinutesForHour]);
 
   // Listen for manual time announcement trigger from admin panel
   useEffect(() => {
     if (!audioUnlocked) return;
 
-    const channel = supabase.channel('time-announcement');
+    const channel = supabase.channel('time-announcement-listener');
     
     channel
       .on('broadcast', { event: 'announce-time' }, (payload) => {
         console.log('Received time announcement command:', payload);
-        announceTime();
+        announceTimeRef.current?.();
       })
       .subscribe((status) => {
-        console.log('Time announcement channel status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('Time announcement channel ready');
+        }
       });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [audioUnlocked, announceTime]);
+  }, [audioUnlocked]);
 
   const speakWithWebSpeech = useCallback(
     (text: string, opts?: { rate?: number; pitch?: number; volume?: number }) => {
