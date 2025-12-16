@@ -11,12 +11,49 @@ const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
 // Split a full name into individual parts (first name, last name, third name, etc.)
 // All parts are normalized to lowercase to avoid duplicate cache entries
+// Handles compound names: "da", "de", "do", "dos", "das" are joined with the following word
 function splitNameIntoParts(fullName: string): string[] {
-  return fullName
+  const words = fullName
     .trim()
     .toLowerCase()
     .split(/\s+/)
     .filter(part => part.length > 0);
+  
+  // Compound name connectors in Portuguese
+  const connectors = new Set(['da', 'de', 'do', 'dos', 'das', 'e']);
+  
+  const result: string[] = [];
+  let i = 0;
+  
+  while (i < words.length) {
+    const word = words[i];
+    
+    // If current word is a connector and there's a next word, combine them
+    if (connectors.has(word) && i + 1 < words.length) {
+      // Combine connector with the following word(s)
+      let combined = word;
+      i++;
+      
+      // Keep combining while next word is also a connector
+      while (i < words.length && connectors.has(words[i])) {
+        combined += ' ' + words[i];
+        i++;
+      }
+      
+      // Add the final word after connectors
+      if (i < words.length) {
+        combined += ' ' + words[i];
+        i++;
+      }
+      
+      result.push(combined);
+    } else {
+      result.push(word);
+      i++;
+    }
+  }
+  
+  return result;
 }
 
 // Generate a cache key from the text
@@ -344,6 +381,32 @@ function concatenateAudioBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
   return result.buffer;
 }
 
+// Generate a short silence audio buffer (approximately 150ms of silence)
+// This creates a minimal valid MP3 frame with silence
+function generateSilenceBuffer(): ArrayBuffer {
+  // Short silence MP3 frame - creates a brief pause between segments
+  // This is a minimal MP3 frame that produces silence
+  const silenceData = new Uint8Array([
+    0xFF, 0xFB, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  ]);
+  return silenceData.buffer;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -369,65 +432,105 @@ serve(async (req) => {
       console.log(`Concatenation request: name="${name}", prefix="${prefix}", destination="${destination}"`);
       
       const audioBuffers: ArrayBuffer[] = [];
+      const namePartBuffers: ArrayBuffer[] = [];
       let apiCallsMade = 0;
+      const silenceBuffer = generateSilenceBuffer();
+      
+      // Helper function to get or generate audio for a part with caching
+      async function getPartAudio(part: string, isPermanent: boolean): Promise<{ audio: ArrayBuffer; fromCache: boolean }> {
+        const partHash = getNameHash(part);
+        const partCacheKey = generateCacheKey(part, isPermanent);
+        
+        // Track part usage for non-permanent parts
+        if (!isPermanent) {
+          await trackPartUsage(supabase!, partHash, part);
+        }
+        
+        // Check permanent cache first
+        const permanentKey = `phrase_${partHash}.mp3`;
+        const { data: permanentFile } = await supabase!.storage
+          .from('tts-cache')
+          .download(permanentKey);
+        
+        if (permanentFile) {
+          console.log(`Part "${part}" found in permanent cache (${permanentKey})`);
+          return { audio: await permanentFile.arrayBuffer(), fromCache: true };
+        }
+        
+        // Check temporary cache
+        const { data: tempFile } = await supabase!.storage
+          .from('tts-cache')
+          .download(partCacheKey);
+        
+        if (tempFile) {
+          console.log(`Part "${part}" found in temporary cache (${partCacheKey})`);
+          
+          // Check for promotion to permanent cache
+          if (!isPermanent) {
+            await checkAndPromoteFrequentPart(supabase!, partHash, part, partCacheKey);
+          }
+          
+          return { audio: await tempFile.arrayBuffer(), fromCache: true };
+        }
+        
+        // Generate new audio
+        console.log(`Generating audio for part: "${part}"`);
+        const partAudio = await getOrGenerateAudio(supabase!, part, isPermanent, ELEVENLABS_API_KEY!, selectedVoiceId);
+        
+        // Check for promotion to permanent cache
+        if (!isPermanent) {
+          await checkAndPromoteFrequentPart(supabase!, partHash, part, partCacheKey);
+        }
+        
+        return { audio: partAudio, fromCache: false };
+      }
       
       // Split name into parts and process each separately
       if (name) {
         const nameParts = splitNameIntoParts(name);
-        console.log(`Name "${name}" split into ${nameParts.length} parts: ${nameParts.join(', ')}`);
+        console.log(`Name "${name}" split into ${nameParts.length} parts: [${nameParts.map(p => `"${p}"`).join(', ')}]`);
         
-        for (const part of nameParts) {
-          const partHash = getNameHash(part);
-          const partCacheKey = generateCacheKey(part, false);
+        for (let i = 0; i < nameParts.length; i++) {
+          const part = nameParts[i];
+          const { audio, fromCache } = await getPartAudio(part, false);
           
-          // Track part usage
-          await trackPartUsage(supabase, partHash, part);
+          namePartBuffers.push(audio);
+          if (!fromCache) apiCallsMade++;
           
-          // Check if this part is in cache (permanent or temporary)
-          const permanentKey = `phrase_${partHash}.mp3`;
-          const { data: permanentFile } = await supabase.storage
-            .from('tts-cache')
-            .download(permanentKey);
-          
-          if (permanentFile) {
-            console.log(`Part "${part}" found in permanent cache`);
-            audioBuffers.push(await permanentFile.arrayBuffer());
-          } else {
-            const { data: tempFile } = await supabase.storage
-              .from('tts-cache')
-              .download(partCacheKey);
-            
-            if (tempFile) {
-              console.log(`Part "${part}" found in temporary cache`);
-              audioBuffers.push(await tempFile.arrayBuffer());
-            } else {
-              // Generate new audio for this part
-              const partAudio = await getOrGenerateAudio(supabase, part, false, ELEVENLABS_API_KEY, selectedVoiceId);
-              audioBuffers.push(partAudio);
-              apiCallsMade++;
-            }
+          // Add brief silence between name parts (except after last part)
+          if (i < nameParts.length - 1) {
+            namePartBuffers.push(silenceBuffer);
           }
-          
-          // Check for promotion to permanent cache
-          await checkAndPromoteFrequentPart(supabase, partHash, part, partCacheKey);
         }
+        
+        // Add all name parts to main buffer
+        audioBuffers.push(...namePartBuffers);
       }
       
-      // Get prefix audio (always from permanent cache)
+      // Add silence before destination phrase for natural pause
+      if (audioBuffers.length > 0 && destination) {
+        audioBuffers.push(silenceBuffer);
+        audioBuffers.push(silenceBuffer); // Double silence for emphasis
+      }
+      
+      // Get prefix audio (always from permanent cache) - if provided
       if (prefix) {
-        const prefixAudio = await getOrGenerateAudio(supabase, prefix, true, ELEVENLABS_API_KEY, selectedVoiceId);
-        audioBuffers.push(prefixAudio);
+        const { audio, fromCache } = await getPartAudio(prefix, true);
+        audioBuffers.push(audio);
+        if (!fromCache) apiCallsMade++;
       }
       
       // Get destination audio (always from permanent cache)
       if (destination) {
-        const destAudio = await getOrGenerateAudio(supabase, destination, true, ELEVENLABS_API_KEY, selectedVoiceId);
-        audioBuffers.push(destAudio);
+        const { audio, fromCache } = await getPartAudio(destination, true);
+        audioBuffers.push(audio);
+        if (!fromCache) apiCallsMade++;
       }
       
       // Concatenate all audio segments
       const combinedAudio = concatenateAudioBuffers(audioBuffers);
-      console.log(`Concatenated audio: ${audioBuffers.length} segments, ${combinedAudio.byteLength} bytes, ${apiCallsMade} API calls`);
+      const segmentCount = audioBuffers.filter(b => b.byteLength > 200).length; // Count real segments, not silence
+      console.log(`Concatenated audio: ${segmentCount} segments (${audioBuffers.length} total with silence), ${combinedAudio.byteLength} bytes, ${apiCallsMade} API calls made`);
       
       // Track API usage if any calls were made
       if (apiCallsMade > 0) {
@@ -442,8 +545,9 @@ serve(async (req) => {
           ...corsHeaders,
           "Content-Type": "audio/mpeg",
           "X-Cache": apiCallsMade > 0 ? "PARTIAL" : "HIT",
-          "X-Segments": String(audioBuffers.length),
+          "X-Segments": String(segmentCount),
           "X-API-Calls": String(apiCallsMade),
+          "X-Name-Parts": name ? String(splitNameIntoParts(name).length) : "0",
         },
       });
     }
