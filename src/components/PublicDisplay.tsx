@@ -1314,12 +1314,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             
             {/* Blue Section - Breaking News Title */}
-            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-[1vw] flex items-center gap-[0.5vw] shrink-0 relative">
-              <div className="absolute top-0 right-0 bg-red-600 px-[0.5vw] py-[0.1vh] flex items-center gap-[0.3vw]" style={{ fontSize: 'clamp(0.45rem, 0.6vw, 0.6rem)' }}>
-                <span className="w-[0.5vw] h-[0.5vw] min-w-[5px] min-h-[5px] bg-white rounded-full animate-pulse" />
-                <span className="text-white font-bold">AO VIVO</span>
-                <span className="text-white/80 ml-[0.3vw]">{formatBrazilTime(new Date(), 'HH:mm')}</span>
-              </div>
+            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-[1vw] flex items-center gap-[0.5vw] shrink-0">
               <Newspaper className="w-[1.8vw] h-[1.8vw] min-w-[18px] min-h-[18px] text-white shrink-0" />
               <div className="flex flex-col">
                 <span className="text-white font-black tracking-wide" style={{ fontSize: 'clamp(0.7rem, 1.2vw, 1.2rem)' }}>
