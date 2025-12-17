@@ -156,7 +156,6 @@ export const useHourAudio = () => {
           },
           body: JSON.stringify({ 
             text, 
-            voiceId: '29Pm0vQJJRoVfMCsUKB6', // Márcio - voz masculina brasileira
             skipCache: true, // Sempre gerar novo áudio
             unitName: 'TimeAnnouncement'
           }),
