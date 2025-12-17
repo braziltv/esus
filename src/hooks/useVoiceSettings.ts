@@ -99,7 +99,13 @@ export const useVoiceSettings = () => {
     const voice = AVAILABLE_VOICES[voiceKey];
     const text = testText || `Olá, meu nome é ${voice.name}. Esta é uma demonstração da minha voz.`;
     
+    console.log(`Testing voice: ${voice.name} (${voice.id})`);
+    
     try {
+      // Timeout de 15 segundos para evitar travamento
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -115,35 +121,66 @@ export const useVoiceSettings = () => {
             skipCache: true,
             unitName: 'VoiceTest'
           }),
+          signal: controller.signal,
         }
       );
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
-        console.error('Voice test failed:', response.status);
+        console.error('Voice test failed:', response.status, await response.text());
         return false;
       }
 
       const audioBlob = await response.blob();
+      console.log(`Audio received: ${audioBlob.size} bytes`);
+      
+      if (audioBlob.size === 0) {
+        console.error('Empty audio blob received');
+        return false;
+      }
+      
       const audioUrl = URL.createObjectURL(audioBlob);
       
       const audio = new Audio(audioUrl);
       audio.volume = 1.0;
       
-      await new Promise<void>((resolve, reject) => {
+      // Timeout de 30 segundos para reprodução
+      const playPromise = new Promise<void>((resolve, reject) => {
+        const playTimeout = setTimeout(() => {
+          URL.revokeObjectURL(audioUrl);
+          reject(new Error('Audio playback timeout'));
+        }, 30000);
+        
         audio.onended = () => {
+          clearTimeout(playTimeout);
           URL.revokeObjectURL(audioUrl);
           resolve();
         };
-        audio.onerror = () => {
+        audio.onerror = (e) => {
+          clearTimeout(playTimeout);
           URL.revokeObjectURL(audioUrl);
+          console.error('Audio error event:', e);
           reject(new Error('Audio playback failed'));
         };
-        audio.play().catch(reject);
+        audio.oncanplaythrough = () => {
+          audio.play().catch((err) => {
+            clearTimeout(playTimeout);
+            URL.revokeObjectURL(audioUrl);
+            reject(err);
+          });
+        };
       });
 
+      await playPromise;
+      console.log('Voice test completed successfully');
       return true;
     } catch (error) {
-      console.error('Voice test error:', error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('Voice test timeout');
+      } else {
+        console.error('Voice test error:', error);
+      }
       return false;
     }
   };
