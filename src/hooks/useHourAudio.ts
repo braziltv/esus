@@ -8,6 +8,13 @@ export const useHourAudio = () => {
    * Gerar texto da hora em português brasileiro natural
    */
   const getHourText = (hour: number, minute: number): string => {
+    // Determinar saudação baseada no horário
+    const getGreeting = (h: number): string => {
+      if (h >= 6 && h < 12) return 'Bom dia!';
+      if (h >= 12 && h < 18) return 'Boa tarde!';
+      return 'Boa noite!';
+    };
+
     // Converter hora para texto
     const hourTexts: Record<number, string> = {
       0: 'meia-noite',
@@ -108,19 +115,23 @@ export const useHourAudio = () => {
       return minuteTexts[m] || `e ${m}`;
     };
 
+    const greeting = getGreeting(hour);
     const hourText = hourTexts[hour] || `${hour} horas`;
     const minuteText = getMinuteText(minute);
 
-    // Construir frase completa
+    // Construir frase completa com saudação
     if (minute === 0) {
       // Hora cheia - não adiciona "minutos"
-      return hourText;
+      return `${greeting} São ${hourText}.`;
     } else if (minute === 30) {
       // Meia hora - usa "e meia"
-      return `${hourText} ${minuteText}`;
+      return `${greeting} São ${hourText} ${minuteText}.`;
+    } else if (minute === 1) {
+      // Um minuto - singular
+      return `${greeting} São ${hourText} ${minuteText} minuto.`;
     } else {
-      // Outros minutos - adiciona "minutos" no final
-      return `${hourText} ${minuteText} minutos`;
+      // Outros minutos - adiciona "minutos" no final (plural)
+      return `${greeting} São ${hourText} ${minuteText} minutos.`;
     }
   };
 
