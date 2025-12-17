@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
+import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -489,6 +490,11 @@ export function PatientRegistration({
             })}
           </div>
         )}
+      </div>
+
+      {/* Daily Motivational Quote */}
+      <div className="flex justify-center pt-2">
+        <DailyQuoteCard />
       </div>
 
       {/* Confirmation Dialog */}

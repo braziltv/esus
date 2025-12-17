@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
+import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
@@ -396,6 +397,11 @@ export function TriagePanel({
             })}
           </div>
         )}
+      </div>
+
+      {/* Daily Motivational Quote */}
+      <div className="flex justify-center pt-2">
+        <DailyQuoteCard />
       </div>
 
       {/* Confirmation Dialog */}

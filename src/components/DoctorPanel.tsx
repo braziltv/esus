@@ -23,6 +23,7 @@ import {
 import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
+import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 
 import {
   Tooltip,
@@ -317,6 +318,11 @@ export function DoctorPanel({
             })}
           </div>
         )}
+      </div>
+
+      {/* Daily Motivational Quote */}
+      <div className="flex justify-center pt-2">
+        <DailyQuoteCard />
       </div>
 
       {/* Confirmation Dialog */}
