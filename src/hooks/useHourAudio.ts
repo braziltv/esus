@@ -1,16 +1,14 @@
-import { useVoiceSettings } from './useVoiceSettings';
-
 /**
- * Hook para reprodução de áudios de hora via TTS
+ * Hook para reprodução de áudios de hora via ElevenLabs TTS
  * Gera frase completa do horário em português brasileiro natural
  */
 export const useHourAudio = () => {
-  const { getHourVoiceId } = useVoiceSettings();
-
+  
   /**
    * Gerar texto da hora em português brasileiro natural
    */
   const getHourText = (hour: number, minute: number): string => {
+    // Converter hora para texto
     const hourTexts: Record<number, string> = {
       0: 'meia-noite',
       1: 'uma hora',
@@ -38,6 +36,7 @@ export const useHourAudio = () => {
       23: 'vinte e três horas',
     };
 
+    // Converter minuto para texto
     const getMinuteText = (m: number): string => {
       if (m === 0) return '';
       if (m === 30) return 'e meia';
@@ -45,23 +44,65 @@ export const useHourAudio = () => {
       if (m === 45) return 'e quarenta e cinco';
       
       const minuteTexts: Record<number, string> = {
-        1: 'e um', 2: 'e dois', 3: 'e três', 4: 'e quatro', 5: 'e cinco',
-        6: 'e seis', 7: 'e sete', 8: 'e oito', 9: 'e nove', 10: 'e dez',
-        11: 'e onze', 12: 'e doze', 13: 'e treze', 14: 'e quatorze', 15: 'e quinze',
-        16: 'e dezesseis', 17: 'e dezessete', 18: 'e dezoito', 19: 'e dezenove',
-        20: 'e vinte', 21: 'e vinte e um', 22: 'e vinte e dois', 23: 'e vinte e três',
-        24: 'e vinte e quatro', 25: 'e vinte e cinco', 26: 'e vinte e seis',
-        27: 'e vinte e sete', 28: 'e vinte e oito', 29: 'e vinte e nove',
-        30: 'e trinta', 31: 'e trinta e um', 32: 'e trinta e dois',
-        33: 'e trinta e três', 34: 'e trinta e quatro', 35: 'e trinta e cinco',
-        36: 'e trinta e seis', 37: 'e trinta e sete', 38: 'e trinta e oito',
-        39: 'e trinta e nove', 40: 'e quarenta', 41: 'e quarenta e um',
-        42: 'e quarenta e dois', 43: 'e quarenta e três', 44: 'e quarenta e quatro',
-        45: 'e quarenta e cinco', 46: 'e quarenta e seis', 47: 'e quarenta e sete',
-        48: 'e quarenta e oito', 49: 'e quarenta e nove', 50: 'e cinquenta',
-        51: 'e cinquenta e um', 52: 'e cinquenta e dois', 53: 'e cinquenta e três',
-        54: 'e cinquenta e quatro', 55: 'e cinquenta e cinco', 56: 'e cinquenta e seis',
-        57: 'e cinquenta e sete', 58: 'e cinquenta e oito', 59: 'e cinquenta e nove',
+        1: 'e um',
+        2: 'e dois',
+        3: 'e três',
+        4: 'e quatro',
+        5: 'e cinco',
+        6: 'e seis',
+        7: 'e sete',
+        8: 'e oito',
+        9: 'e nove',
+        10: 'e dez',
+        11: 'e onze',
+        12: 'e doze',
+        13: 'e treze',
+        14: 'e quatorze',
+        15: 'e quinze',
+        16: 'e dezesseis',
+        17: 'e dezessete',
+        18: 'e dezoito',
+        19: 'e dezenove',
+        20: 'e vinte',
+        21: 'e vinte e um',
+        22: 'e vinte e dois',
+        23: 'e vinte e três',
+        24: 'e vinte e quatro',
+        25: 'e vinte e cinco',
+        26: 'e vinte e seis',
+        27: 'e vinte e sete',
+        28: 'e vinte e oito',
+        29: 'e vinte e nove',
+        30: 'e trinta',
+        31: 'e trinta e um',
+        32: 'e trinta e dois',
+        33: 'e trinta e três',
+        34: 'e trinta e quatro',
+        35: 'e trinta e cinco',
+        36: 'e trinta e seis',
+        37: 'e trinta e sete',
+        38: 'e trinta e oito',
+        39: 'e trinta e nove',
+        40: 'e quarenta',
+        41: 'e quarenta e um',
+        42: 'e quarenta e dois',
+        43: 'e quarenta e três',
+        44: 'e quarenta e quatro',
+        45: 'e quarenta e cinco',
+        46: 'e quarenta e seis',
+        47: 'e quarenta e sete',
+        48: 'e quarenta e oito',
+        49: 'e quarenta e nove',
+        50: 'e cinquenta',
+        51: 'e cinquenta e um',
+        52: 'e cinquenta e dois',
+        53: 'e cinquenta e três',
+        54: 'e cinquenta e quatro',
+        55: 'e cinquenta e cinco',
+        56: 'e cinquenta e seis',
+        57: 'e cinquenta e sete',
+        58: 'e cinquenta e oito',
+        59: 'e cinquenta e nove',
       };
       
       return minuteTexts[m] || `e ${m}`;
@@ -70,25 +111,28 @@ export const useHourAudio = () => {
     const hourText = hourTexts[hour] || `${hour} horas`;
     const minuteText = getMinuteText(minute);
 
+    // Construir frase completa
     if (minute === 0) {
+      // Hora cheia - não adiciona "minutos"
       return hourText;
     } else if (minute === 30) {
+      // Meia hora - usa "e meia"
       return `${hourText} ${minuteText}`;
     } else {
+      // Outros minutos - adiciona "minutos" no final
       return `${hourText} ${minuteText} minutos`;
     }
   };
 
   /**
-   * Reproduzir hora via TTS (frase completa)
+   * Reproduzir hora via ElevenLabs TTS (frase completa)
    */
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
       const text = getHourText(hour, minute);
-      const voiceId = getHourVoiceId();
       
-      console.log(`[useHourAudio] Gerando TTS para: "${text}" com voz ${voiceId}`);
+      console.log(`[useHourAudio] Gerando TTS para: "${text}"`);
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
@@ -101,8 +145,7 @@ export const useHourAudio = () => {
           },
           body: JSON.stringify({ 
             text, 
-            voiceId,
-            skipCache: true,
+            skipCache: true, // Sempre gerar novo áudio
             unitName: 'TimeAnnouncement'
           }),
         }
@@ -138,14 +181,24 @@ export const useHourAudio = () => {
     }
   };
 
-  const checkAudiosExist = async () => {
+  /**
+   * Verificar status (mantido para compatibilidade, mas agora indica uso de API)
+   */
+  const checkAudiosExist = async (): Promise<{ 
+    hours: number; 
+    minutes: number;
+    hasMinutosWord: boolean;
+    missingHours: number[];
+    missingMinutes: number[];
+    usingApi: boolean;
+  }> => {
     return { 
       hours: 24, 
       minutes: 59, 
       hasMinutosWord: true,
       missingHours: [],
       missingMinutes: [],
-      usingApi: true,
+      usingApi: true, // Indica que está usando API
     };
   };
 
