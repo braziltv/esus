@@ -46,7 +46,6 @@ export const useHourAudio = () => {
     // Converter minuto para texto
     const getMinuteText = (m: number): string => {
       if (m === 0) return '';
-      if (m === 30) return 'e meia';
       if (m === 15) return 'e quinze';
       if (m === 45) return 'e quarenta e cinco';
       
@@ -123,14 +122,11 @@ export const useHourAudio = () => {
     if (minute === 0) {
       // Hora cheia - não adiciona "minutos"
       return `${greeting} São ${hourText}.`;
-    } else if (minute === 30) {
-      // Meia hora - usa "e meia"
-      return `${greeting} São ${hourText} ${minuteText}.`;
     } else if (minute === 1) {
       // Um minuto - singular
       return `${greeting} São ${hourText} ${minuteText} minuto.`;
     } else {
-      // Outros minutos - adiciona "minutos" no final (plural)
+      // Outros minutos (incluindo 30) - adiciona "minutos" no final (plural)
       return `${greeting} São ${hourText} ${minuteText} minutos.`;
     }
   };
