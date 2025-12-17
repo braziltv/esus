@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Lightbulb, Quote, Sparkles } from 'lucide-react';
 
 const QUOTES = [
@@ -123,9 +123,28 @@ function getDailyQuoteIndex(): number {
 }
 
 export function DailyQuoteCard() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [showBadge, setShowBadge] = useState(false);
+  const [showQuote, setShowQuote] = useState(false);
+  const [showAuthor, setShowAuthor] = useState(false);
+  const [showInsight, setShowInsight] = useState(false);
+
   const dailyQuote = useMemo(() => {
     const index = getDailyQuoteIndex();
     return QUOTES[index];
+  }, []);
+
+  useEffect(() => {
+    // Staggered animation sequence
+    const timers = [
+      setTimeout(() => setIsVisible(true), 100),
+      setTimeout(() => setShowBadge(true), 400),
+      setTimeout(() => setShowQuote(true), 700),
+      setTimeout(() => setShowAuthor(true), 1000),
+      setTimeout(() => setShowInsight(true), 1300),
+    ];
+
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   return (
@@ -133,50 +152,139 @@ export function DailyQuoteCard() {
       className={`
         relative w-full overflow-hidden rounded-2xl 
         bg-gradient-to-r ${dailyQuote.bgColor} 
-        p-5 sm:p-6 shadow-xl animate-fade-in
+        p-5 sm:p-6 shadow-xl
         border border-white/20
+        transition-all duration-700 ease-out
+        ${isVisible 
+          ? 'opacity-100 translate-y-0 scale-100' 
+          : 'opacity-0 translate-y-8 scale-95'
+        }
       `}
     >
+      {/* Animated gradient overlay */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 
+        animate-[shimmer_3s_ease-in-out_infinite]"
+        style={{
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 3s ease-in-out infinite',
+        }}
+      />
+
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-10 -right-10 text-white/10 text-[120px] rotate-12">
+        <div 
+          className={`
+            absolute -top-10 -right-10 text-[120px] rotate-12
+            transition-all duration-1000 delay-500
+            ${isVisible ? 'text-white/10 translate-x-0' : 'text-white/0 translate-x-20'}
+          `}
+        >
           {dailyQuote.emoji}
         </div>
-        <div className="absolute -bottom-8 -left-8 text-white/5">
+        <div 
+          className={`
+            absolute -bottom-8 -left-8 
+            transition-all duration-1000 delay-700
+            ${isVisible ? 'text-white/5 translate-y-0' : 'text-white/0 translate-y-10'}
+          `}
+        >
           <Lightbulb className="w-32 h-32" />
         </div>
-        <div className="absolute top-4 left-4 text-white/20">
+        <div 
+          className={`
+            absolute top-4 left-4 text-white/20
+            transition-all duration-500 delay-300
+            ${showBadge ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
+          `}
+        >
           <Sparkles className="w-6 h-6 animate-pulse" />
         </div>
-        <div className="absolute bottom-4 right-4 text-white/20">
-          <Sparkles className="w-5 h-5 animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div 
+          className={`
+            absolute bottom-4 right-4 text-white/20
+            transition-all duration-500 delay-1000
+            ${showInsight ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
+          `}
+        >
+          <Sparkles className="w-5 h-5 animate-pulse" />
         </div>
       </div>
       
       {/* Content */}
       <div className="relative z-10">
         {/* Badge */}
-        <div className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 mb-4">
-          <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+        <div 
+          className={`
+            inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 mb-4
+            transition-all duration-500 ease-out
+            ${showBadge 
+              ? 'opacity-100 translate-x-0 scale-100' 
+              : 'opacity-0 -translate-x-4 scale-90'
+            }
+          `}
+        >
+          <Sparkles className={`w-3.5 h-3.5 text-yellow-300 ${showBadge ? 'animate-spin' : ''}`} 
+            style={{ animationDuration: '2s', animationIterationCount: 1 }} 
+          />
           <span className="text-white text-xs font-semibold tracking-wide">FRASE DO DIA</span>
         </div>
 
         {/* Quote */}
-        <div className="flex items-start gap-2 mb-3">
-          <Quote className="w-6 h-6 text-white/60 flex-shrink-0 mt-1" />
+        <div 
+          className={`
+            flex items-start gap-2 mb-3
+            transition-all duration-600 ease-out
+            ${showQuote 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-4'
+            }
+          `}
+        >
+          <Quote 
+            className={`
+              w-6 h-6 text-white/60 flex-shrink-0 mt-1
+              transition-all duration-500
+              ${showQuote ? 'rotate-0 scale-100' : '-rotate-12 scale-0'}
+            `} 
+          />
           <p className="text-white font-bold text-lg sm:text-xl leading-snug drop-shadow-md">
             {dailyQuote.quote}
           </p>
         </div>
         
         {/* Author */}
-        <p className="text-white/90 text-sm font-medium mb-4 pl-8">
+        <p 
+          className={`
+            text-white/90 text-sm font-medium mb-4 pl-8
+            transition-all duration-500 ease-out
+            ${showAuthor 
+              ? 'opacity-100 translate-x-0' 
+              : 'opacity-0 translate-x-4'
+            }
+          `}
+        >
           — {dailyQuote.author}
         </p>
         
         {/* Insight Box */}
-        <div className="flex items-center gap-3 bg-black/20 backdrop-blur-sm rounded-xl px-4 py-3">
-          <div className="flex-shrink-0 w-10 h-10 bg-yellow-400/90 rounded-full flex items-center justify-center shadow-lg">
+        <div 
+          className={`
+            flex items-center gap-3 bg-black/20 backdrop-blur-sm rounded-xl px-4 py-3
+            transition-all duration-700 ease-out
+            ${showInsight 
+              ? 'opacity-100 translate-y-0 scale-100' 
+              : 'opacity-0 translate-y-6 scale-95'
+            }
+          `}
+        >
+          <div 
+            className={`
+              flex-shrink-0 w-10 h-10 bg-yellow-400/90 rounded-full flex items-center justify-center shadow-lg
+              transition-all duration-500 delay-200
+              ${showInsight ? 'scale-100 rotate-0' : 'scale-0 -rotate-180'}
+            `}
+          >
             <Lightbulb className="w-5 h-5 text-yellow-900" />
           </div>
           <div>
@@ -187,6 +295,14 @@ export function DailyQuoteCard() {
           </div>
         </div>
       </div>
+
+      {/* CSS for shimmer animation */}
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+      `}</style>
     </div>
   );
 }
