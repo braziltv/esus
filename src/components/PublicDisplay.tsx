@@ -1044,7 +1044,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Triage Call */}
           <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
             announcingType === 'triage' 
-              ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
+              ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
               : 'border border-slate-700'
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-[1vw] py-[0.8vh] shrink-0">
@@ -1052,7 +1052,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <Activity className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
                 <span>TRIAGEM</span>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-yellow-300 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-red-400 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
@@ -1061,9 +1061,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
                   <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
                     announcingType === 'triage' 
-                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
+                      ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
                       : 'text-white'
-                  }`} style={{ fontSize: 'clamp(1.5rem, 3.5vw, 4rem)', wordBreak: 'break-word' }} key={currentTriageCall.name}>
+                  }`} style={{ fontSize: 'clamp(2rem, 5vw, 6rem)', wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
                   <p className="text-blue-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
@@ -1081,7 +1081,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Doctor Call */}
           <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
             announcingType === 'doctor' 
-              ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
+              ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
               : 'border border-slate-700'
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-[1vw] py-[0.8vh] shrink-0">
@@ -1089,7 +1089,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <Stethoscope className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
                 <span>CONSULTÓRIO</span>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-yellow-300 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-red-400 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
@@ -1098,9 +1098,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
                   <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
                     announcingType === 'doctor' 
-                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
+                      ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
                       : 'text-white'
-                  }`} style={{ fontSize: 'clamp(1.5rem, 3.5vw, 4rem)', wordBreak: 'break-word' }} key={currentDoctorCall.name}>
+                  }`} style={{ fontSize: 'clamp(2rem, 5vw, 6rem)', wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
                   <p className="text-emerald-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
