@@ -545,8 +545,8 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     
-    // George voice - voz masculina madura e autoritativa para português brasileiro
-    const selectedVoiceId = voiceId || "JBFqnCBsd6RMkjVDRZzb"; // George - masculina por padrão
+    // Victor Power voice - mesma voz usada no anúncio de horas
+    const selectedVoiceId = voiceId || "YNOujSUmHtgN6anjqXPf"; // Victor Power - padrão unificado
     
     // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
     // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo
