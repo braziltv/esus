@@ -69,7 +69,24 @@ Deno.serve(async (req) => {
     const historyCount = historyDeleted?.length || 0
     console.log(`Deleted ${historyCount} old call history entries (> 24 hours)`)
 
-    const totalDeleted = completedCount + inactiveCount + historyCount
+    // 4. Apagar pacientes inativos há mais de 15 dias (sem movimentação)
+    const fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { data: oldPatientsDeleted, error: oldPatientsError } = await supabase
+      .from('patient_calls')
+      .delete()
+      .lt('created_at', fifteenDaysAgo)
+      .select('id')
+
+    if (oldPatientsError) {
+      console.error('Error deleting old inactive patients:', oldPatientsError)
+      throw oldPatientsError
+    }
+
+    const oldPatientsCount = oldPatientsDeleted?.length || 0
+    console.log(`Deleted ${oldPatientsCount} old inactive patients (> 15 days)`)
+
+    const totalDeleted = completedCount + inactiveCount + historyCount + oldPatientsCount
 
     console.log(`Cleanup complete. Total deleted: ${totalDeleted}`)
 
@@ -79,6 +96,7 @@ Deno.serve(async (req) => {
         completedDeleted: completedCount,
         inactiveDeleted: inactiveCount,
         historyDeleted: historyCount,
+        oldPatientsDeleted: oldPatientsCount,
         totalDeleted,
         timestamp: new Date().toISOString()
       }),
