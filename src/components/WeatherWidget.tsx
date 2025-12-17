@@ -239,16 +239,27 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
             </div>
           </div>
           
-          {/* Temperature Display */}
+          {/* Current Temperature */}
+          <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-xl px-3 py-1.5 backdrop-blur-sm border border-white/10">
+            <span className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Agora</span>
+            <div className="flex items-baseline">
+              <span className="text-2xl font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
+                {weather.current.temperature}
+              </span>
+              <span className="text-sm font-bold text-emerald-300">°C</span>
+            </div>
+          </div>
+          
+          {/* Max/Min Temperature Display */}
           <div className="flex flex-col items-center">
             <span className={`text-[9px] font-bold uppercase tracking-wider ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}>
               {showMaxTemp ? 'Máxima' : 'Mínima'}
             </span>
             <div className="flex items-baseline">
-              <span className="text-3xl font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
+              <span className="text-2xl font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
                 {showMaxTemp ? maxTemp : minTemp}
               </span>
-              <span className="text-lg font-bold text-amber-300">°C</span>
+              <span className="text-sm font-bold text-amber-300">°C</span>
             </div>
           </div>
           
