@@ -58,9 +58,9 @@ export function ConnectionIndicator() {
       {isChecking ? (
         <span>Conectando...</span>
       ) : isConnected ? (
-        <span>Online</span>
+        <span>Conectado com o servidor</span>
       ) : (
-        <span>Offline</span>
+        <span>Desconectado do servidor</span>
       )}
     </div>
   );
