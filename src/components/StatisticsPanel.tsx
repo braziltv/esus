@@ -41,8 +41,10 @@ import {
   HeartPulse,
   Bandage,
   Scan,
-  Bed
+  Bed,
+  BookOpen
 } from 'lucide-react';
+import { exportTutorialPDF } from '@/utils/exportTutorialPDF';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   ChartContainer,
@@ -1724,6 +1726,10 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           <Button onClick={exportToPDF} className="gap-2">
             <FileDown className="w-4 h-4" />
             Relatório PDF
+          </Button>
+          <Button onClick={exportTutorialPDF} variant="outline" className="gap-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950">
+            <BookOpen className="w-4 h-4" />
+            Tutorial PDF
           </Button>
           <Button onClick={exportBackup} variant="outline" className="gap-2">
             <Download className="w-4 h-4" />
