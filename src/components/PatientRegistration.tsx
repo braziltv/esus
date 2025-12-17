@@ -93,6 +93,16 @@ export function PatientRegistration({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string } | null>(null);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
 
+  // Dicas aleatórias para acentuação
+  const ACCENT_TIPS = [
+    '💡 Dica: Acentue os nomes corretamente (ex: José, João, Luís) para melhor pronúncia no áudio!',
+    '✨ Lembre-se: Nomes acentuados como "André", "Inês", "Márcio" soam mais naturais na chamada.',
+    '🎯 Para melhor qualidade de áudio, use acentos: "Cláudia" ao invés de "Claudia".',
+    '📢 O sistema pronuncia melhor nomes com acentos corretos: José, não Jose.',
+    '🔊 Acentos fazem diferença! "Antônio" soa muito melhor que "Antonio" no alto-falante.',
+  ];
+  const [currentTip] = useState(() => ACCENT_TIPS[Math.floor(Math.random() * ACCENT_TIPS.length)]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
@@ -113,43 +123,46 @@ export function PatientRegistration({
           <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Cadastrar Paciente
         </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <Input
-            type="text"
-            placeholder="Nome completo do paciente"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="flex-1 text-base"
-          />
-          <Select value={selectedPriority} onValueChange={(v) => setSelectedPriority(v as PatientPriority)}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Prioridade" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="normal">
-                <span className="flex items-center gap-2">
-                  <Circle className="w-3 h-3 text-green-600" />
-                  Normal
-                </span>
-              </SelectItem>
-              <SelectItem value="priority">
-                <span className="flex items-center gap-2">
-                  <AlertCircle className="w-3 h-3 text-amber-600" />
-                  Prioridade
-                </span>
-              </SelectItem>
-              <SelectItem value="emergency">
-                <span className="flex items-center gap-2">
-                  <AlertTriangle className="w-3 h-3 text-red-600" />
-                  Emergência
-                </span>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <Button type="submit" disabled={!name.trim()} className="w-full sm:w-auto">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Cadastrar
-          </Button>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <Input
+              type="text"
+              placeholder="Nome completo do paciente"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex-1 text-base"
+            />
+            <Select value={selectedPriority} onValueChange={(v) => setSelectedPriority(v as PatientPriority)}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Prioridade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="normal">
+                  <span className="flex items-center gap-2">
+                    <Circle className="w-3 h-3 text-green-600" />
+                    Normal
+                  </span>
+                </SelectItem>
+                <SelectItem value="priority">
+                  <span className="flex items-center gap-2">
+                    <AlertCircle className="w-3 h-3 text-amber-600" />
+                    Prioridade
+                  </span>
+                </SelectItem>
+                <SelectItem value="emergency">
+                  <span className="flex items-center gap-2">
+                    <AlertTriangle className="w-3 h-3 text-red-600" />
+                    Emergência
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Button type="submit" disabled={!name.trim()} className="w-full sm:w-auto">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Cadastrar
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground italic">{currentTip}</p>
         </form>
       </div>
 
