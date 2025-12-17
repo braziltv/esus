@@ -201,7 +201,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="flex items-center gap-[1.2vw] flex-wrap justify-end">
+    <div className="flex items-center gap-[1.2vw] flex-nowrap justify-end">
       {/* Clock Section */}
       <ClockSection />
       
@@ -210,11 +210,11 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       
       {/* City & Weather Icon */}
       <div className="flex items-center gap-[0.8vw] shrink-0">
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center max-w-[10vw]">
           <span className="font-bold text-white/70 uppercase tracking-wider" style={{ fontSize: 'clamp(0.45rem, 0.7vw, 0.8rem)' }}>Previsão</span>
-          <div className="flex items-center gap-[0.3vw] text-amber-300">
+          <div className="flex items-center gap-[0.3vw] text-amber-300 max-w-full">
             <MapPin className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] animate-bounce shrink-0" />
-            <span className="font-bold whitespace-nowrap" style={{ fontSize: 'clamp(0.55rem, 0.9vw, 1rem)' }}>{displayCity}-MG</span>
+            <span className="font-bold truncate" style={{ fontSize: 'clamp(0.55rem, 0.9vw, 1rem)', maxWidth: '8vw' }} title={`${displayCity}-MG`}>{displayCity}-MG</span>
           </div>
         </div>
         
