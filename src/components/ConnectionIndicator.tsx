@@ -8,33 +8,25 @@ export function ConnectionIndicator() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Create a test channel to monitor connection status
-    const channel = supabase
-      .channel('connection-status')
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          setIsConnected(true);
-          setIsChecking(false);
-        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-          setIsConnected(false);
-          setIsChecking(false);
-        } else {
-          setIsChecking(true);
-        }
-      });
-
-    // Periodic ping check
-    const interval = setInterval(async () => {
+    // Initial connection check
+    const checkConnection = async () => {
       try {
         const { error } = await supabase.from('patient_calls').select('id').limit(1);
         setIsConnected(!error);
+        setIsChecking(false);
       } catch {
         setIsConnected(false);
+        setIsChecking(false);
       }
-    }, 30000); // Check every 30 seconds
+    };
+
+    // Check immediately on mount
+    checkConnection();
+
+    // Periodic ping check every 30 seconds
+    const interval = setInterval(checkConnection, 30000);
 
     return () => {
-      supabase.removeChannel(channel);
       clearInterval(interval);
     };
   }, []);
