@@ -2750,12 +2750,23 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        disabled={isTesting}
+                        disabled={testingVoice !== null}
                         onClick={async () => {
                           setTestingVoice(voiceKey);
                           toast({ title: "Testando voz...", description: voice.name });
-                          await testVoice(voiceKey);
-                          setTestingVoice(null);
+                          try {
+                            const success = await testVoice(voiceKey);
+                            if (success) {
+                              toast({ title: "Teste concluído", description: `${voice.name} reproduzido com sucesso` });
+                            } else {
+                              toast({ title: "Falha no teste", description: "Não foi possível reproduzir o áudio", variant: "destructive" });
+                            }
+                          } catch (err) {
+                            console.error('Voice test error:', err);
+                            toast({ title: "Erro no teste", description: "Erro ao testar a voz", variant: "destructive" });
+                          } finally {
+                            setTestingVoice(null);
+                          }
                         }}
                         className="px-2 text-xs"
                         title={`Testar ${voice.name}`}
@@ -2796,12 +2807,23 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        disabled={isTesting}
+                        disabled={testingVoice !== null}
                         onClick={async () => {
                           setTestingVoice(voiceKey);
                           toast({ title: "Testando voz...", description: voice.name });
-                          await testVoice(voiceKey);
-                          setTestingVoice(null);
+                          try {
+                            const success = await testVoice(voiceKey);
+                            if (success) {
+                              toast({ title: "Teste concluído", description: `${voice.name} reproduzido com sucesso` });
+                            } else {
+                              toast({ title: "Falha no teste", description: "Não foi possível reproduzir o áudio", variant: "destructive" });
+                            }
+                          } catch (err) {
+                            console.error('Voice test error:', err);
+                            toast({ title: "Erro no teste", description: "Erro ao testar a voz", variant: "destructive" });
+                          } finally {
+                            setTestingVoice(null);
+                          }
                         }}
                         className="px-2 text-xs"
                         title={`Testar ${voice.name}`}
