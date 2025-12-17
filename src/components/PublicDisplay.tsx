@@ -1300,79 +1300,95 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       </div>
 
-      {/* News Ticker - Fixed at bottom like TV news */}
+      {/* News Ticker - Fixed at bottom like TV news breaking news style */}
       {newsItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-red-700 via-red-600 to-red-700 border-t-2 border-red-500/50 shrink-0">
-          <div className="flex items-center">
-            <div className="bg-red-800 px-[0.8vw] py-[0.4vh] flex items-center gap-[0.4vw] shrink-0 z-10">
-              <Newspaper className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] text-white shrink-0" />
+        <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0">
+          <div className="flex items-stretch h-[5vh] min-h-[40px]">
+            {/* Left Red Section - Logo */}
+            <div className="bg-gradient-to-r from-rose-700 via-rose-600 to-rose-700 px-[1.5vw] flex items-center justify-center shrink-0 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-rose-800/50 to-transparent" />
+              <div className="flex flex-col items-center relative z-10">
+                <span className="text-white font-black tracking-wider" style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.5rem)' }}>TV</span>
+                <span className="text-rose-200 font-semibold" style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.7rem)', marginTop: '-2px' }}>SAÚDE</span>
+              </div>
+            </div>
+            
+            {/* Blue Section - Breaking News Title */}
+            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-[1vw] flex items-center gap-[0.5vw] shrink-0 relative">
+              <div className="absolute top-0 right-0 bg-red-600 px-[0.5vw] py-[0.1vh] flex items-center gap-[0.3vw]" style={{ fontSize: 'clamp(0.45rem, 0.6vw, 0.6rem)' }}>
+                <span className="w-[0.5vw] h-[0.5vw] min-w-[5px] min-h-[5px] bg-white rounded-full animate-pulse" />
+                <span className="text-white font-bold">AO VIVO</span>
+                <span className="text-white/80 ml-[0.3vw]">{formatBrazilTime(new Date(), 'HH:mm')}</span>
+              </div>
+              <Newspaper className="w-[1.8vw] h-[1.8vw] min-w-[18px] min-h-[18px] text-white shrink-0" />
               <div className="flex flex-col">
-                <span className="text-white font-bold" style={{ fontSize: 'clamp(0.6rem, 1vw, 1rem)' }}>NOTÍCIAS</span>
-                <span className="text-red-200" style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.7rem)' }}>
-                  Atualiza em: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
+                <span className="text-white font-black tracking-wide" style={{ fontSize: 'clamp(0.7rem, 1.2vw, 1.2rem)' }}>
+                  NOTÍCIAS
                 </span>
               </div>
             </div>
-            <div className="flex-1 overflow-hidden py-[0.3vh]">
-              <div className="animate-marquee whitespace-nowrap inline-flex">
+            
+            {/* Scrolling News Section - Dark background */}
+            <div className="flex-1 bg-slate-900 overflow-hidden flex items-center relative">
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
+              <div className="animate-marquee whitespace-nowrap inline-flex py-[0.3vh]">
                 {(() => {
-                  // Insert credits after every 3 news items
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
                   const itemsWithCredits: typeof newsItems = [];
                   newsItems.forEach((item, index) => {
                     itemsWithCredits.push(item);
-                    // After every 3 items, insert credits
                     if ((index + 1) % 3 === 0) {
                       itemsWithCredits.push(creditItem);
                     }
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={index} className="mx-[0.5vw] inline-block text-white" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.3rem)' }}>
-                      <span className={`px-[0.3vw] py-[0.15vh] rounded font-bold mr-[0.3vw] inline-block ${
+                    <span key={index} className="mx-[0.8vw] inline-flex items-center gap-[0.4vw] text-white" style={{ fontSize: 'clamp(0.85rem, 1.3vw, 1.4rem)' }}>
+                      <span className={`px-[0.4vw] py-[0.2vh] rounded font-bold inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'G1' ? 'bg-red-500 text-white' : 
-                        item.source === 'O Globo' ? 'bg-blue-600 text-white' :
+                        item.source === 'G1' ? 'bg-red-500' : 
+                        item.source === 'O Globo' ? 'bg-blue-600' :
                         item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
-                        item.source === 'UOL' ? 'bg-orange-500 text-white' :
-                        item.source === 'Folha' ? 'bg-blue-500 text-white' :
-                        item.source === 'Estadão' ? 'bg-slate-600 text-white' :
-                        item.source === 'CNN' ? 'bg-red-600 text-white' :
-                        item.source === 'Band' ? 'bg-green-600 text-white' :
-                        item.source === 'Terra' ? 'bg-emerald-500 text-white' :
-                        item.source === 'IG' ? 'bg-pink-500 text-white' :
-                        item.source === 'Correio' ? 'bg-sky-600 text-white' :
-                        item.source === 'Metrópoles' ? 'bg-purple-600 text-white' :
-                        item.source === 'Gazeta' ? 'bg-teal-600 text-white' :
-                        item.source === 'Poder360' ? 'bg-indigo-600 text-white' :
-                        item.source === 'Nexo' ? 'bg-rose-600 text-white' :
-                        item.source === 'Ag. Brasil' ? 'bg-cyan-600 text-white' :
-                        item.source === 'InfoMoney' ? 'bg-lime-600 text-white' :
-                        item.source === 'Exame' ? 'bg-amber-600 text-white' :
-                        item.source === 'Época' ? 'bg-fuchsia-600 text-white' :
-                        item.source === 'Valor' ? 'bg-violet-600 text-white' :
-                        item.source === 'O Tempo' ? 'bg-orange-600 text-white' :
-                        item.source === 'Hoje em Dia' ? 'bg-blue-700 text-white' :
-                        item.source === 'EM' ? 'bg-red-700 text-white' :
-                        item.source === 'Super' ? 'bg-yellow-600 text-white' :
-                        item.source === 'Tecmundo' ? 'bg-purple-500 text-white' :
-                        item.source === 'Olhar Digital' ? 'bg-green-500 text-white' :
-                        item.source === 'Canaltech' ? 'bg-blue-400 text-white' :
-                        item.source === 'GE' ? 'bg-green-700 text-white' :
-                        item.source === 'Lance' ? 'bg-red-500 text-white' :
-                        item.source === 'ESPN' ? 'bg-red-800 text-white' :
-                        'bg-gray-500 text-white'
-                      }`} style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.9rem)' }}>
+                        item.source === 'UOL' ? 'bg-orange-500' :
+                        item.source === 'Folha' ? 'bg-blue-500' :
+                        item.source === 'Estadão' ? 'bg-slate-600' :
+                        item.source === 'CNN' ? 'bg-red-600' :
+                        item.source === 'Band' ? 'bg-green-600' :
+                        item.source === 'Terra' ? 'bg-emerald-500' :
+                        item.source === 'IG' ? 'bg-pink-500' :
+                        item.source === 'Correio' ? 'bg-sky-600' :
+                        item.source === 'Metrópoles' ? 'bg-purple-600' :
+                        item.source === 'Gazeta' ? 'bg-teal-600' :
+                        item.source === 'Poder360' ? 'bg-indigo-600' :
+                        item.source === 'Nexo' ? 'bg-rose-600' :
+                        item.source === 'Ag. Brasil' ? 'bg-cyan-600' :
+                        item.source === 'InfoMoney' ? 'bg-lime-600' :
+                        item.source === 'Exame' ? 'bg-amber-600' :
+                        item.source === 'Época' ? 'bg-fuchsia-600' :
+                        item.source === 'Valor' ? 'bg-violet-600' :
+                        item.source === 'O Tempo' ? 'bg-orange-600' :
+                        item.source === 'Hoje em Dia' ? 'bg-blue-700' :
+                        item.source === 'EM' ? 'bg-red-700' :
+                        item.source === 'Super' ? 'bg-yellow-600' :
+                        item.source === 'Tecmundo' ? 'bg-purple-500' :
+                        item.source === 'Olhar Digital' ? 'bg-green-500' :
+                        item.source === 'Canaltech' ? 'bg-blue-400' :
+                        item.source === 'GE' ? 'bg-green-700' :
+                        item.source === 'Lance' ? 'bg-red-500' :
+                        item.source === 'ESPN' ? 'bg-red-800' :
+                        'bg-gray-500'
+                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.85rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span>
+                      <span className="text-slate-100">
                         {item.title}
                       </span>
+                      <span className="text-slate-500 mx-[0.3vw]">•</span>
                     </span>
                   ));
                 })()}
                 {(() => {
-                  // Duplicate for seamless loop - credits after every 3 items
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
                   const itemsWithCredits: typeof newsItems = [];
                   newsItems.forEach((item, index) => {
@@ -1383,46 +1399,47 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={`dup-${index}`} className="mx-[0.5vw] inline-block text-white" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.3rem)' }}>
-                      <span className={`px-[0.3vw] py-[0.15vh] rounded font-bold mr-[0.3vw] inline-block ${
+                    <span key={`dup-${index}`} className="mx-[0.8vw] inline-flex items-center gap-[0.4vw] text-white" style={{ fontSize: 'clamp(0.85rem, 1.3vw, 1.4rem)' }}>
+                      <span className={`px-[0.4vw] py-[0.2vh] rounded font-bold inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'G1' ? 'bg-red-500 text-white' : 
-                        item.source === 'O Globo' ? 'bg-blue-600 text-white' :
+                        item.source === 'G1' ? 'bg-red-500' : 
+                        item.source === 'O Globo' ? 'bg-blue-600' :
                         item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
-                        item.source === 'UOL' ? 'bg-orange-500 text-white' :
-                        item.source === 'Folha' ? 'bg-blue-500 text-white' :
-                        item.source === 'Estadão' ? 'bg-slate-600 text-white' :
-                        item.source === 'CNN' ? 'bg-red-600 text-white' :
-                        item.source === 'Band' ? 'bg-green-600 text-white' :
-                        item.source === 'Terra' ? 'bg-emerald-500 text-white' :
-                        item.source === 'IG' ? 'bg-pink-500 text-white' :
-                        item.source === 'Correio' ? 'bg-sky-600 text-white' :
-                        item.source === 'Metrópoles' ? 'bg-purple-600 text-white' :
-                        item.source === 'Gazeta' ? 'bg-teal-600 text-white' :
-                        item.source === 'Poder360' ? 'bg-indigo-600 text-white' :
-                        item.source === 'Nexo' ? 'bg-rose-600 text-white' :
-                        item.source === 'Ag. Brasil' ? 'bg-cyan-600 text-white' :
-                        item.source === 'InfoMoney' ? 'bg-lime-600 text-white' :
-                        item.source === 'Exame' ? 'bg-amber-600 text-white' :
-                        item.source === 'Época' ? 'bg-fuchsia-600 text-white' :
-                        item.source === 'Valor' ? 'bg-violet-600 text-white' :
-                        item.source === 'O Tempo' ? 'bg-orange-600 text-white' :
-                        item.source === 'Hoje em Dia' ? 'bg-blue-700 text-white' :
-                        item.source === 'EM' ? 'bg-red-700 text-white' :
-                        item.source === 'Super' ? 'bg-yellow-600 text-white' :
-                        item.source === 'Tecmundo' ? 'bg-purple-500 text-white' :
-                        item.source === 'Olhar Digital' ? 'bg-green-500 text-white' :
-                        item.source === 'Canaltech' ? 'bg-blue-400 text-white' :
-                        item.source === 'GE' ? 'bg-green-700 text-white' :
-                        item.source === 'Lance' ? 'bg-red-500 text-white' :
-                        item.source === 'ESPN' ? 'bg-red-800 text-white' :
-                        'bg-gray-500 text-white'
-                      }`} style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.9rem)' }}>
+                        item.source === 'UOL' ? 'bg-orange-500' :
+                        item.source === 'Folha' ? 'bg-blue-500' :
+                        item.source === 'Estadão' ? 'bg-slate-600' :
+                        item.source === 'CNN' ? 'bg-red-600' :
+                        item.source === 'Band' ? 'bg-green-600' :
+                        item.source === 'Terra' ? 'bg-emerald-500' :
+                        item.source === 'IG' ? 'bg-pink-500' :
+                        item.source === 'Correio' ? 'bg-sky-600' :
+                        item.source === 'Metrópoles' ? 'bg-purple-600' :
+                        item.source === 'Gazeta' ? 'bg-teal-600' :
+                        item.source === 'Poder360' ? 'bg-indigo-600' :
+                        item.source === 'Nexo' ? 'bg-rose-600' :
+                        item.source === 'Ag. Brasil' ? 'bg-cyan-600' :
+                        item.source === 'InfoMoney' ? 'bg-lime-600' :
+                        item.source === 'Exame' ? 'bg-amber-600' :
+                        item.source === 'Época' ? 'bg-fuchsia-600' :
+                        item.source === 'Valor' ? 'bg-violet-600' :
+                        item.source === 'O Tempo' ? 'bg-orange-600' :
+                        item.source === 'Hoje em Dia' ? 'bg-blue-700' :
+                        item.source === 'EM' ? 'bg-red-700' :
+                        item.source === 'Super' ? 'bg-yellow-600' :
+                        item.source === 'Tecmundo' ? 'bg-purple-500' :
+                        item.source === 'Olhar Digital' ? 'bg-green-500' :
+                        item.source === 'Canaltech' ? 'bg-blue-400' :
+                        item.source === 'GE' ? 'bg-green-700' :
+                        item.source === 'Lance' ? 'bg-red-500' :
+                        item.source === 'ESPN' ? 'bg-red-800' :
+                        'bg-gray-500'
+                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.85rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span>
+                      <span className="text-slate-100">
                         {item.title}
                       </span>
+                      <span className="text-slate-500 mx-[0.3vw]">•</span>
                     </span>
                   ));
                 })()}
