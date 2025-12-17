@@ -46,25 +46,19 @@ function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
 }
 
-const ALL_CITIES = [
-  'Paineiras', 'Belo Horizonte', 'Uberlândia', 'Contagem', 'Juiz de Fora',
-  'Betim', 'Montes Claros', 'Ribeirão das Neves', 'Uberaba', 'Governador Valadares',
-  'Ipatinga', 'Sete Lagoas', 'Divinópolis', 'Santa Luzia', 'Poços de Caldas',
-  'Patos de Minas', 'Pouso Alegre', 'Teófilo Otoni', 'Barbacena', 'Sabará',
-  'Varginha', 'Conselheiro Lafaiete', 'Araguari', 'Itabira', 'Passos',
-  'Coronel Fabriciano', 'Muriaé', 'Ituiutaba', 'Araxá', 'Lavras'
-];
-
-const OTHER_CITIES = ALL_CITIES.filter(c => c !== 'Paineiras');
+// Cities are dynamically loaded from the database cache
 
 export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const [weatherCache, setWeatherCache] = useState<Record<string, WeatherData>>({});
   const [displayCity, setDisplayCity] = useState('Paineiras');
   const [showMaxTemp, setShowMaxTemp] = useState(true);
   const [rotationCount, setRotationCount] = useState(0);
-  const [otherCityIndex, setOtherCityIndex] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
   const fetchingRef = useRef(false);
+
+  // Get available cities from cache (only show cities that have data)
+  const availableCities = Object.keys(weatherCache);
+  const otherCities = availableCities.filter(c => c !== 'Paineiras');
 
   // Get current weather from cache
   const currentWeather = weatherCache[displayCity];
@@ -118,26 +112,30 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     return () => clearInterval(interval);
   }, [loadWeatherFromDB]);
 
-  // Rotate display city every 10 seconds
+  // Rotate display city every 10 seconds (only among cities in cache)
   useEffect(() => {
+    if (availableCities.length === 0) return;
+    
+    let currentIndex = 0;
+    
     const interval = setInterval(() => {
       setRotationCount(prev => {
         const next = prev + 1;
-        // Every 5th rotation shows Paineiras
-        if (next % 5 === 0) {
+        // Every 5th rotation shows Paineiras (if available)
+        if (next % 5 === 0 && weatherCache['Paineiras']) {
           setDisplayCity('Paineiras');
-        } else {
-          setOtherCityIndex(prevIdx => {
-            const nextIdx = (prevIdx + 1) % OTHER_CITIES.length;
-            setDisplayCity(OTHER_CITIES[nextIdx]);
-            return nextIdx;
-          });
+        } else if (otherCities.length > 0) {
+          currentIndex = (currentIndex + 1) % otherCities.length;
+          setDisplayCity(otherCities[currentIndex]);
+        } else if (availableCities.length > 0) {
+          currentIndex = (currentIndex + 1) % availableCities.length;
+          setDisplayCity(availableCities[currentIndex]);
         }
         return next;
       });
     }, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [availableCities.length, otherCities.length, weatherCache]);
 
   // Alternate between min and max temp every 3 seconds
   useEffect(() => {
