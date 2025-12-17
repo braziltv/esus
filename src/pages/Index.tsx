@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { useTTSPreCache } from '@/hooks/useTTSPreCache';
-import { useHourAudio } from '@/hooks/useHourAudio';
+
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -11,7 +11,7 @@ import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Volume2, Clock } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -108,21 +108,46 @@ const Index = () => {
   } = useCallPanel();
 
   const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
-  const { playHourAudio, getHourText } = useHourAudio();
 
-  // Função para testar anúncio de hora (temporário)
-  const handleTestHourAnnouncement = async () => {
-    const now = new Date();
-    const hour = now.getHours();
-    const minute = now.getMinutes();
-    const text = getHourText(hour, minute);
-    toast.info(`Testando: "${text}"`);
+  // Função para testar chamada de paciente (temporário)
+  const handleTestPatientTTS = async () => {
+    const testText = "Maria Silva. Por favor, dirija-se à sala de triagem.";
+    toast.info(`Testando voz Victor Power...`);
     
-    const success = await playHourAudio(hour, minute);
-    if (success) {
-      toast.success('Anúncio de hora reproduzido!');
-    } else {
-      toast.error('Erro ao reproduzir anúncio de hora');
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            text: testText,
+            skipCache: true,
+            unitName: 'TestPatientCall'
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        toast.error('Erro ao testar chamada');
+        return;
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.volume = 1.0;
+      
+      audio.onended = () => URL.revokeObjectURL(audioUrl);
+      await audio.play();
+      toast.success('Chamada reproduzida com sucesso!');
+    } catch (error) {
+      console.error('Erro ao testar TTS:', error);
+      toast.error('Erro ao reproduzir áudio');
     }
   };
 
@@ -252,15 +277,15 @@ const Index = () => {
             />
             
             {/* Botão de teste temporário - REMOVER DEPOIS */}
-            <div className="mt-4 p-4 border border-dashed border-amber-500 rounded-lg bg-amber-500/10">
-              <p className="text-amber-600 dark:text-amber-400 text-sm mb-3 font-medium">🧪 Teste de Anúncio de Hora</p>
+            <div className="mt-4 p-4 border border-dashed border-blue-500 rounded-lg bg-blue-500/10">
+              <p className="text-blue-600 dark:text-blue-400 text-sm mb-3 font-medium">🧪 Teste de Chamada de Paciente (Victor Power)</p>
               <Button 
-                onClick={handleTestHourAnnouncement}
+                onClick={handleTestPatientTTS}
                 variant="outline"
                 className="gap-2"
               >
-                <Clock className="w-4 h-4" />
-                Testar Hora Atual
+                <Volume2 className="w-4 h-4" />
+                Testar Chamada
               </Button>
             </div>
           </main>
