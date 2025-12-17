@@ -270,7 +270,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       
       {/* Forecast Cards */}
       <div className="flex gap-[0.8vw] shrink-0">
-        {weather.forecast?.slice(0, 4).map((day, index) => {
+        {weather.forecast?.slice(0, 2).map((day, index) => {
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
           // Use currentTime to calculate day names based on today
           const today = currentTime || new Date();
@@ -281,16 +281,16 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
           return (
             <div 
               key={index} 
-              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-xl px-[1.2vw] py-[1vh] flex flex-col items-center justify-center backdrop-blur-sm border border-white/20 min-w-[4.5vw] min-h-[8vh]`}
+              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-xl px-[1vw] py-[0.6vh] flex flex-col items-center backdrop-blur-sm border border-white/20 min-w-[4vw]`}
             >
-              <span className="font-bold text-white" style={{ fontSize: 'clamp(0.7rem, 1vw, 1.1rem)' }}>{dayName}</span>
-              <div className="my-[0.6vh]">
+              <span className="font-bold text-white" style={{ fontSize: 'clamp(0.6rem, 0.9vw, 1rem)' }}>{dayName}</span>
+              <div className="my-[0.4vh]">
                 {getWeatherIcon(day.icon || 'cloud', 'lg')}
               </div>
-              <div className="flex items-center gap-[0.5vw]">
-                <span className="text-cyan-300 font-bold tabular-nums" style={{ fontSize: 'clamp(0.75rem, 1.1vw, 1.2rem)' }}>{day.minTemp}°</span>
+              <div className="flex items-center gap-[0.4vw]">
+                <span className="text-cyan-300 font-bold tabular-nums" style={{ fontSize: 'clamp(0.65rem, 1vw, 1.1rem)' }}>{day.minTemp}°</span>
                 <span className="text-white/50 font-bold">/</span>
-                <span className="text-orange-300 font-bold tabular-nums" style={{ fontSize: 'clamp(0.75rem, 1.1vw, 1.2rem)' }}>{day.maxTemp}°</span>
+                <span className="text-orange-300 font-bold tabular-nums" style={{ fontSize: 'clamp(0.65rem, 1vw, 1.1rem)' }}>{day.maxTemp}°</span>
               </div>
             </div>
           );
