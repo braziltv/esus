@@ -35,6 +35,45 @@ export type Database = {
         }
         Relationships: []
       }
+      appointments: {
+        Row: {
+          checked_in_at: string | null
+          created_at: string
+          id: string
+          observations: string | null
+          patient_name: string
+          priority: string
+          scheduled_date: string
+          scheduled_time: string
+          status: string
+          unit_name: string
+        }
+        Insert: {
+          checked_in_at?: string | null
+          created_at?: string
+          id?: string
+          observations?: string | null
+          patient_name: string
+          priority?: string
+          scheduled_date: string
+          scheduled_time: string
+          status?: string
+          unit_name: string
+        }
+        Update: {
+          checked_in_at?: string | null
+          created_at?: string
+          id?: string
+          observations?: string | null
+          patient_name?: string
+          priority?: string
+          scheduled_date?: string
+          scheduled_time?: string
+          status?: string
+          unit_name?: string
+        }
+        Relationships: []
+      }
       call_history: {
         Row: {
           call_type: string
