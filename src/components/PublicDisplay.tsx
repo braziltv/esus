@@ -1190,11 +1190,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
         
-        {/* Right: Weather + Clock together - moved left */}
-        <div className="flex items-center overflow-visible min-w-0 mr-auto ml-[2vw]">
-          <div className="shrink-0">
-            <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
-          </div>
+        {/* Right: Weather + Clock together - extends to right edge */}
+        <div className="flex-1 flex items-center justify-end overflow-visible min-w-0">
+          <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
         </div>
       </div>
 
