@@ -186,7 +186,116 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, []);
 
-  // Initialize audio context on mount if already unlocked
+  // Anti-standby: Prevent TV from entering standby mode when idle
+  useEffect(() => {
+    let wakeLock: WakeLockSentinel | null = null;
+    let activityInterval: NodeJS.Timeout | null = null;
+    let reloadTimeout: NodeJS.Timeout | null = null;
+    const lastActivityRef = { current: Date.now() };
+    const IDLE_THRESHOLD = 5 * 60 * 1000; // 5 minutes before reload
+    const ACTIVITY_INTERVAL = 30 * 1000; // Simulate activity every 30 seconds
+
+    // Request Wake Lock to prevent screen from sleeping
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await (navigator as any).wakeLock.request('screen');
+          console.log('🔒 Wake Lock ativado - TV não entrará em standby');
+          
+          wakeLock.addEventListener('release', () => {
+            console.log('🔓 Wake Lock liberado');
+            // Try to re-acquire wake lock
+            setTimeout(requestWakeLock, 1000);
+          });
+        }
+      } catch (err) {
+        console.log('Wake Lock não disponível:', err);
+      }
+    };
+
+    // Simulate user activity to prevent standby on older TVs
+    const simulateActivity = () => {
+      // Dispatch synthetic mouse move event
+      const event = new MouseEvent('mousemove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: Math.random() * window.innerWidth,
+        clientY: Math.random() * window.innerHeight,
+      });
+      document.dispatchEvent(event);
+
+      // Also dispatch a video play event if there's a video
+      const videos = document.querySelectorAll('video');
+      videos.forEach(video => {
+        if (video.paused && video.readyState >= 2) {
+          video.play().catch(() => {});
+        }
+      });
+
+      console.log('📺 Atividade simulada para evitar standby');
+    };
+
+    // Check for prolonged inactivity and reload if needed
+    const checkIdleAndReload = () => {
+      const idleTime = Date.now() - lastActivityRef.current;
+      if (idleTime >= IDLE_THRESHOLD) {
+        console.log('⏰ Recarregando página após inatividade prolongada...');
+        window.location.reload();
+      }
+    };
+
+    // Update last activity time when patient calls happen
+    const updateActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    // Listen to patient call changes to reset idle timer
+    window.addEventListener('patientCallActivity', updateActivity);
+    
+    // Also reset on any user interaction
+    window.addEventListener('click', updateActivity);
+    window.addEventListener('touchstart', updateActivity);
+    window.addEventListener('keydown', updateActivity);
+
+    // Start wake lock
+    requestWakeLock();
+
+    // Re-acquire wake lock when page becomes visible again
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        requestWakeLock();
+        updateActivity();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Start activity simulation interval
+    activityInterval = setInterval(simulateActivity, ACTIVITY_INTERVAL);
+
+    // Start idle check interval (check every minute)
+    reloadTimeout = setInterval(checkIdleAndReload, 60 * 1000);
+
+    // Initial activity simulation
+    simulateActivity();
+
+    return () => {
+      if (wakeLock) {
+        wakeLock.release().catch(() => {});
+      }
+      if (activityInterval) {
+        clearInterval(activityInterval);
+      }
+      if (reloadTimeout) {
+        clearInterval(reloadTimeout);
+      }
+      window.removeEventListener('patientCallActivity', updateActivity);
+      window.removeEventListener('click', updateActivity);
+      window.removeEventListener('touchstart', updateActivity);
+      window.removeEventListener('keydown', updateActivity);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   useEffect(() => {
     if (audioUnlocked && !audioContextRef.current) {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -898,6 +1007,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             } else {
               setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
             }
+            
+            // Dispatch activity event to reset idle timer (anti-standby)
+            window.dispatchEvent(new CustomEvent('patientCallActivity'));
             
             // Play audio announcement
             console.log('About to call speakName...');
