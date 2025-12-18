@@ -105,6 +105,11 @@ export function ServicePanel({
   onSendToEnfermariaQueue,
   soundKey,
 }: ServicePanelProps) {
+  // Debug log to check if props are received
+  console.log(`[ServicePanel ${serviceKey}] Triagem props:`, { 
+    hasForwardToTriage: !!onForwardToTriage, 
+    hasSendToTriageQueue: !!onSendToTriageQueue 
+  });
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'service' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound(soundKey, waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
@@ -215,12 +220,10 @@ export function ServicePanel({
                     <DropdownMenuLabel>Encaminhar Paciente</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs text-green-600">Com voz na TV</DropdownMenuLabel>
-                    {onForwardToTriage && (
-                      <DropdownMenuItem onClick={() => onForwardToTriage(currentCall.id)} className="cursor-pointer">
-                        <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                        Triagem (com voz)
-                      </DropdownMenuItem>
-                    )}
+<DropdownMenuItem onClick={() => onForwardToTriage?.(currentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Triagem (com voz)
+                    </DropdownMenuItem>
                     {onForwardToDoctor && (
                       <>
                         <DropdownMenuItem onClick={() => onForwardToDoctor(currentCall.id, 'Consultório 1')} className="cursor-pointer">
@@ -259,11 +262,9 @@ export function ServicePanel({
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs text-muted-foreground">Interno (sem voz)</DropdownMenuLabel>
-                    {onSendToTriageQueue && (
-                      <DropdownMenuItem onClick={() => onSendToTriageQueue(currentCall.id)} className="cursor-pointer">
-                        Triagem (interno)
-                      </DropdownMenuItem>
-                    )}
+<DropdownMenuItem onClick={() => onSendToTriageQueue?.(currentCall.id)} className="cursor-pointer">
+                      Triagem (interno)
+                    </DropdownMenuItem>
                     {onSendToDoctorQueue && (
                       <>
                         <DropdownMenuItem onClick={() => onSendToDoctorQueue(currentCall.id, 'Consultório 1')} className="cursor-pointer">
