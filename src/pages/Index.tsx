@@ -234,6 +234,34 @@ const Index = () => {
                 <span className="truncate">Médico</span>
               </TabsTrigger>
               <TabsTrigger 
+                value="ecg" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-blue-500/20 flex-1 sm:flex-none min-w-0"
+              >
+                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">ECG</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="curativos" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-amber-500/20 flex-1 sm:flex-none min-w-0"
+              >
+                <Bandage className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Curativos</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="raiox" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-purple-500/20 flex-1 sm:flex-none min-w-0"
+              >
+                <Scan className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Raio X</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="enfermaria" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-rose-500/20 flex-1 sm:flex-none min-w-0"
+              >
+                <BedDouble className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Enfermaria</span>
+              </TabsTrigger>
+              <TabsTrigger 
                 value="administrativo" 
                 className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
               >
@@ -301,6 +329,86 @@ const Index = () => {
             />
           </main>
           <InternalChat station="medico" />
+        </TabsContent>
+
+        {/* ECG */}
+        <TabsContent value="ecg" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
+            <ServicePanel
+              serviceName="Sala de Eletrocardiograma"
+              serviceIcon="💓"
+              serviceColor="blue"
+              waitingPatients={waitingForEcg}
+              currentCall={currentEcgCall}
+              onCallPatient={callPatientToEcg}
+              onFinishService={finishEcg}
+              onRecall={recallEcg}
+              onFinishWithoutCall={finishWithoutCall}
+              onUpdateObservations={updatePatientObservations}
+              soundKey="ecg"
+            />
+          </main>
+          <InternalChat station="cadastro" />
+        </TabsContent>
+
+        {/* Curativos */}
+        <TabsContent value="curativos" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
+            <ServicePanel
+              serviceName="Sala de Curativos"
+              serviceIcon="🩹"
+              serviceColor="amber"
+              waitingPatients={waitingForCurativos}
+              currentCall={currentCurativosCall}
+              onCallPatient={callPatientToCurativos}
+              onFinishService={finishCurativos}
+              onRecall={recallCurativos}
+              onFinishWithoutCall={finishWithoutCall}
+              onUpdateObservations={updatePatientObservations}
+              soundKey="curativos"
+            />
+          </main>
+          <InternalChat station="cadastro" />
+        </TabsContent>
+
+        {/* Raio X */}
+        <TabsContent value="raiox" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
+            <ServicePanel
+              serviceName="Sala de Raio X"
+              serviceIcon="📡"
+              serviceColor="purple"
+              waitingPatients={waitingForRaiox}
+              currentCall={currentRaioxCall}
+              onCallPatient={callPatientToRaiox}
+              onFinishService={finishRaiox}
+              onRecall={recallRaiox}
+              onFinishWithoutCall={finishWithoutCall}
+              onUpdateObservations={updatePatientObservations}
+              soundKey="raiox"
+            />
+          </main>
+          <InternalChat station="cadastro" />
+        </TabsContent>
+
+        {/* Enfermaria */}
+        <TabsContent value="enfermaria" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
+            <ServicePanel
+              serviceName="Enfermaria"
+              serviceIcon="🛏️"
+              serviceColor="rose"
+              waitingPatients={waitingForEnfermaria}
+              currentCall={currentEnfermariaCall}
+              onCallPatient={callPatientToEnfermaria}
+              onFinishService={finishEnfermaria}
+              onRecall={recallEnfermaria}
+              onFinishWithoutCall={finishWithoutCall}
+              onUpdateObservations={updatePatientObservations}
+              soundKey="enfermaria"
+            />
+          </main>
+          <InternalChat station="cadastro" />
         </TabsContent>
 
         {/* Administrativo */}
