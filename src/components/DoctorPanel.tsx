@@ -70,6 +70,8 @@ interface DoctorPanelProps {
   onFinishConsultation: (id: string) => void;
   onRecall: (destination?: string) => void;
   onFinishWithoutCall: (id: string) => void;
+  onForwardToTriage?: (id: string, destination?: string) => void;
+  onSendToTriageQueue?: (id: string) => void;
   onForwardToEcg?: (id: string) => void;
   onForwardToCurativos?: (id: string) => void;
   onForwardToRaiox?: (id: string) => void;
@@ -88,6 +90,8 @@ export function DoctorPanel({
   onFinishConsultation,
   onRecall,
   onFinishWithoutCall,
+  onForwardToTriage,
+  onSendToTriageQueue,
   onForwardToEcg,
   onForwardToCurativos,
   onForwardToRaiox,
@@ -221,6 +225,24 @@ export function DoctorPanel({
                   <DropdownMenuContent className="bg-card border border-border z-50 min-w-[200px]">
                     <DropdownMenuLabel>Encaminhar para</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+
+                    {/* Triagem */}
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="cursor-pointer">
+                        <Activity className="w-4 h-4 mr-2 text-cyan-500" />
+                        Triagem
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="bg-card border border-border">
+                        <DropdownMenuItem onClick={() => onForwardToTriage?.(myCurrentCall.id, 'Triagem')} className="cursor-pointer">
+                          <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                          Com voz na TV
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onSendToTriageQueue?.(myCurrentCall.id)} className="cursor-pointer">
+                          <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                          Interno (sem voz)
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
                     
                     {/* ECG */}
                     <DropdownMenuSub>
