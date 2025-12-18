@@ -272,9 +272,9 @@ export function DailyQuoteCard() {
     <div 
       key={animationKey}
       className={`
-        relative w-full overflow-hidden rounded-2xl 
+        relative w-full overflow-hidden rounded-xl 
         bg-gradient-to-r ${dailyQuote.bgColor} 
-        p-5 sm:p-6 shadow-xl
+        p-3 sm:p-4 shadow-lg
         border border-white/20
         transition-all duration-500 ease-out
         ${isClosing 
@@ -288,11 +288,11 @@ export function DailyQuoteCard() {
       {/* Close Button */}
       <button
         onClick={handleDismiss}
-        className="absolute top-3 right-3 z-20 p-1.5 rounded-full bg-black/20 hover:bg-black/40 
+        className="absolute top-2 right-2 z-20 p-1 rounded-full bg-black/20 hover:bg-black/40 
           text-white/70 hover:text-white transition-all duration-200 hover:scale-110"
         title="Fechar (volta depois)"
       >
-        <X className="w-4 h-4" />
+        <X className="w-3 h-3" />
       </button>
 
       {/* Animated gradient overlay */}
@@ -324,7 +324,7 @@ export function DailyQuoteCard() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
           className={`
-            absolute -top-10 -right-10 text-[120px] rotate-12
+            absolute -top-6 -right-6 text-[80px] rotate-12
             transition-all duration-1000 delay-300
             ${isVisible ? 'text-white/10 translate-x-0 rotate-12' : 'text-white/0 translate-x-20 rotate-45'}
           `}
@@ -333,30 +333,21 @@ export function DailyQuoteCard() {
         </div>
         <div 
           className={`
-            absolute -bottom-8 -left-8 
+            absolute -bottom-6 -left-6 
             transition-all duration-1000 delay-500
             ${isVisible ? 'text-white/5 translate-y-0 rotate-0' : 'text-white/0 translate-y-10 -rotate-12'}
           `}
         >
-          <Lightbulb className="w-32 h-32" />
+          <Lightbulb className="w-20 h-20" />
         </div>
         <div 
           className={`
-            absolute top-4 left-4 text-white/20
+            absolute top-2 left-2 text-white/20
             transition-all duration-700 delay-200
             ${showBadge ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
           `}
         >
-          <Sparkles className="w-6 h-6 animate-pulse" />
-        </div>
-        <div 
-          className={`
-            absolute bottom-4 right-12 text-white/20
-            transition-all duration-700 delay-800
-            ${showInsight ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
-          `}
-        >
-          <Sparkles className="w-5 h-5 animate-pulse" />
+          <Sparkles className="w-4 h-4 animate-pulse" />
         </div>
       </div>
       
@@ -365,7 +356,7 @@ export function DailyQuoteCard() {
         {/* Badge */}
         <div 
           className={`
-            inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 mb-4
+            inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5 mb-2
             transition-all duration-700 ease-out
             ${showBadge 
               ? 'opacity-100 translate-x-0 scale-100' 
@@ -374,15 +365,15 @@ export function DailyQuoteCard() {
           `}
         >
           <Sparkles 
-            className={`w-3.5 h-3.5 text-yellow-300 transition-transform duration-1000 ${showBadge ? 'rotate-[360deg]' : 'rotate-0'}`} 
+            className={`w-3 h-3 text-yellow-300 transition-transform duration-1000 ${showBadge ? 'rotate-[360deg]' : 'rotate-0'}`} 
           />
-          <span className="text-white text-xs font-semibold tracking-wide">FRASE DO DIA</span>
+          <span className="text-white text-[10px] font-semibold tracking-wide">FRASE DO DIA</span>
         </div>
 
         {/* Quote */}
         <div 
           className={`
-            flex items-start gap-2 mb-3 pr-8
+            flex items-start gap-1.5 mb-2 pr-6
             transition-all duration-800 ease-out
             ${showQuote 
               ? 'opacity-100 translate-y-0' 
@@ -392,12 +383,12 @@ export function DailyQuoteCard() {
         >
           <Quote 
             className={`
-              w-6 h-6 text-white/60 flex-shrink-0 mt-1
+              w-4 h-4 text-white/60 flex-shrink-0 mt-0.5
               transition-all duration-700
               ${showQuote ? 'rotate-0 scale-100' : '-rotate-45 scale-0'}
             `} 
           />
-          <p className="text-white font-bold text-lg sm:text-xl leading-snug drop-shadow-md">
+          <p className="text-white font-bold text-sm sm:text-base leading-snug drop-shadow-md">
             {dailyQuote.quote}
           </p>
         </div>
@@ -405,7 +396,7 @@ export function DailyQuoteCard() {
         {/* Author */}
         <p 
           className={`
-            text-white/90 text-sm font-medium mb-4 pl-8
+            text-white/90 text-xs font-medium mb-2 pl-5
             transition-all duration-700 ease-out
             ${showAuthor 
               ? 'opacity-100 translate-x-0' 
@@ -419,7 +410,7 @@ export function DailyQuoteCard() {
         {/* Insight Box */}
         <div 
           className={`
-            flex items-center gap-3 bg-black/20 backdrop-blur-sm rounded-xl px-4 py-3
+            flex items-center gap-2 bg-black/20 backdrop-blur-sm rounded-lg px-2.5 py-2
             transition-all duration-900 ease-out
             ${showInsight 
               ? 'opacity-100 translate-y-0 scale-100' 
@@ -429,16 +420,16 @@ export function DailyQuoteCard() {
         >
           <div 
             className={`
-              flex-shrink-0 w-10 h-10 bg-yellow-400/90 rounded-full flex items-center justify-center shadow-lg
+              flex-shrink-0 w-7 h-7 bg-yellow-400/90 rounded-full flex items-center justify-center shadow-md
               transition-all duration-700 delay-100
               ${showInsight ? 'scale-100 rotate-0' : 'scale-0 -rotate-180'}
             `}
           >
-            <Lightbulb className="w-5 h-5 text-yellow-900" />
+            <Lightbulb className="w-3.5 h-3.5 text-yellow-900" />
           </div>
           <div>
-            <p className="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-0.5">Insight</p>
-            <p className="text-white text-sm leading-tight">
+            <p className="text-yellow-300 text-[10px] font-semibold uppercase tracking-wider">Insight</p>
+            <p className="text-white text-xs leading-tight">
               {dailyQuote.insight}
             </p>
           </div>
