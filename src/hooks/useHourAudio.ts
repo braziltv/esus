@@ -1,13 +1,9 @@
 /**
- * Hook para reprodução de áudios de hora via ElevenLabs TTS
+ * Hook para reprodução de áudios de hora via Google Cloud TTS
  * Gera anúncio completo com som de notificação, repetição e voz masculina
  */
 
 import { toast } from "@/hooks/use-toast";
-
-// Voice IDs do ElevenLabs
-const VOICE_FEMALE = 'Xb7hH8MSUJpSbSDYk0k2'; // Alice - voz feminina padrão
-const VOICE_MALE_DEEP = 'onwK4e9ZLuTAKqWW03F9'; // Brian - voz masculina grave
 
 export const useHourAudio = () => {
   
@@ -141,13 +137,13 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Reproduzir áudio via ElevenLabs TTS com voz específica
+   * Reproduzir áudio via Google Cloud TTS
    */
-  const generateTTSAudio = async (text: string, voiceId: string): Promise<ArrayBuffer> => {
-    console.log(`[useHourAudio] Gerando TTS para: "${text}" com voz ${voiceId}`);
+  const generateTTSAudio = async (text: string, voice: 'female' | 'male'): Promise<ArrayBuffer> => {
+    console.log(`[useHourAudio] Gerando TTS Google Cloud para: "${text}" com voz ${voice}`);
 
     const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
       {
         method: 'POST',
         headers: {
@@ -157,24 +153,23 @@ export const useHourAudio = () => {
         },
         body: JSON.stringify({ 
           text, 
-          skipCache: true,
-          voiceId,
-          unitName: 'TimeAnnouncement'
+          voice,
+          speakingRate: 1.0
         }),
       }
     );
 
     if (!response.ok) {
-      // Tentar ler o corpo do erro para identificar quota exceeded
-      let errorMessage = `TTS error: ${response.status}`;
+      let errorMessage = `Google Cloud TTS error: ${response.status}`;
       try {
         const errorBody = await response.json();
-        if (errorBody?.error?.includes('401') || 
-            errorBody?.error?.includes('quota') ||
-            response.status === 401) {
+        errorMessage = errorBody?.error || errorMessage;
+        
+        // Verificar se é erro de quota/autenticação
+        if (response.status === 401 || response.status === 403 || 
+            errorMessage.includes('quota') || errorMessage.includes('limit')) {
           throw new Error('QUOTA_EXCEEDED');
         }
-        errorMessage = errorBody?.error || errorMessage;
       } catch (parseError) {
         if (parseError instanceof Error && parseError.message === 'QUOTA_EXCEEDED') {
           throw parseError;
@@ -243,12 +238,12 @@ export const useHourAudio = () => {
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
       const timeText = getHourText(hour, minute);
       
-      console.log(`[useHourAudio] Iniciando anúncio de hora: "${timeText}"`);
+      console.log(`[useHourAudio] Iniciando anúncio de hora via Google Cloud TTS: "${timeText}"`);
 
       // Pré-gerar os áudios em paralelo para melhor performance
       const [timeAudioBuffer, repitaAudioBuffer] = await Promise.all([
-        generateTTSAudio(timeText, VOICE_FEMALE),
-        generateTTSAudio('Repita.', VOICE_MALE_DEEP),
+        generateTTSAudio(timeText, 'female'),
+        generateTTSAudio('Repita.', 'male'),
       ]);
 
       // 1. Som de notificação
@@ -265,7 +260,7 @@ export const useHourAudio = () => {
       // 3. Pausa antes do "Repita"
       await wait(800);
 
-      // 4. "Repita" (voz masculina grave)
+      // 4. "Repita" (voz masculina)
       console.log('[useHourAudio] Passo 3: Repita (voz masculina)');
       await playAudioBuffer(repitaAudioBuffer, timeAnnouncementVolume);
       
@@ -276,7 +271,7 @@ export const useHourAudio = () => {
       console.log('[useHourAudio] Passo 4: Repetição do anúncio');
       await playAudioBuffer(timeAudioBuffer, timeAnnouncementVolume);
 
-      console.log('[useHourAudio] Anúncio completo finalizado');
+      console.log('[useHourAudio] Anúncio completo finalizado via Google Cloud TTS');
       return true;
     } catch (error) {
       console.error('[useHourAudio] Erro ao reproduzir anúncio de hora:', error);
@@ -285,7 +280,7 @@ export const useHourAudio = () => {
       if (error instanceof Error && error.message === 'QUOTA_EXCEEDED') {
         toast({
           title: "Créditos TTS esgotados",
-          description: "A cota de texto-para-voz foi excedida. O anúncio de hora está temporariamente indisponível.",
+          description: "A cota de texto-para-voz do Google Cloud foi excedida.",
           variant: "destructive",
           duration: 5000,
         });
@@ -296,7 +291,7 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Verificar status (mantido para compatibilidade, mas agora indica uso de API)
+   * Verificar status (mantido para compatibilidade)
    */
   const checkAudiosExist = async (): Promise<{ 
     hours: number; 
