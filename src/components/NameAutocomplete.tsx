@@ -75,14 +75,19 @@ export function NameAutocomplete({
     
     words[index] = suggestion;
     
-    const newValue = words.join(' ');
-    onChange(newValue + ' ');
+    const newValue = words.join(' ') + ' ';
+    onChange(newValue);
     setShowSuggestions(false);
     setSuggestions([]);
     
-    // Foca no input após seleção
+    // Foca no input e move cursor para o final após seleção
     setTimeout(() => {
-      inputRef.current?.focus();
+      if (inputRef.current) {
+        inputRef.current.focus();
+        // Move cursor para o final do texto
+        const len = newValue.length;
+        inputRef.current.setSelectionRange(len, len);
+      }
     }, 10);
   }, [value, getCurrentWord, onChange]);
 
