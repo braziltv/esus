@@ -597,7 +597,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
       const cleanDestination = destinationPhrase.trim();
-      console.log('Speaking with Google Cloud TTS (concatenated):', { name: cleanName, destinationPhrase: cleanDestination });
+      console.log('🔊 Speaking with Google Cloud TTS (concatenated):', { name: cleanName, destinationPhrase: cleanDestination });
 
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
@@ -613,6 +613,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       } as const;
 
+      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: configuredVoice });
+
       // Generate unified audio with name + destination in a single API call
       const response = await fetch(url, {
         method: 'POST',
@@ -627,22 +629,35 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         }),
       });
 
+      console.log('📡 TTS API response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Google Cloud TTS error:', errorData);
+        console.error('❌ Google Cloud TTS error:', errorData);
         throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
       const audioBlob = await response.blob();
-      console.log('Google Cloud TTS audio received:', { size: audioBlob.size });
+      console.log('✅ Google Cloud TTS audio received:', { size: audioBlob.size, type: audioBlob.type });
+
+      if (audioBlob.size === 0) {
+        console.error('❌ Audio blob is empty!');
+        throw new Error('Audio blob is empty');
+      }
 
       const audioUrl = URL.createObjectURL(audioBlob);
+      console.log('🎵 Audio URL created:', audioUrl);
 
       try {
         // Play the unified audio (name + destination in one natural speech)
-        console.log('Playing unified audio...');
-        await playAmplifiedAudio(new Audio(audioUrl), gain);
-        console.log('Unified audio finished');
+        console.log('▶️ Playing unified audio...');
+        const audio = new Audio(audioUrl);
+        audio.volume = 1.0; // Max volume, amplification handled by gain
+        await playAmplifiedAudio(audio, gain);
+        console.log('✅ Unified audio finished');
+      } catch (playError) {
+        console.error('❌ Error playing audio:', playError);
+        throw playError;
       } finally {
         URL.revokeObjectURL(audioUrl);
       }
@@ -1035,22 +1050,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       destination?: string
     ) => {
       const now = Date.now();
-      console.log('speakName called with:', { name, caller, destination, timestamp: now });
+      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now });
 
       // Debounce: ignore calls within 2 seconds of each other
       if (now - lastSpeakCallRef.current < 2000) {
-        console.log('Debounce: ignoring duplicate call within 2s window');
+        console.log('⏸️ Debounce: ignoring duplicate call within 2s window');
         return;
       }
       
-      // Prevent duplicate TTS calls
+      // Prevent duplicate TTS calls - but add a timeout safety
       if (isSpeakingRef.current) {
-        console.log('Already speaking, skipping duplicate call');
+        console.log('⏸️ Already speaking, skipping duplicate call');
         return;
       }
       
       lastSpeakCallRef.current = now;
       isSpeakingRef.current = true;
+      console.log('🎤 isSpeakingRef set to TRUE');
+
+      // Safety timeout: reset isSpeakingRef after 30 seconds max (in case of errors)
+      const safetyTimeout = setTimeout(() => {
+        if (isSpeakingRef.current) {
+          console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 30s');
+          isSpeakingRef.current = false;
+        }
+      }, 30000);
 
       // Start visual alert; it will auto-stop after 10s in the effect below
       // (We keep the UI as triage vs non-triage for now)
@@ -1067,30 +1091,35 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       const location = destination || defaultLocationByCaller[caller];
       const destinationPhrase = getDestinationPhrase(location);
-      console.log('TTS - Name:', name, 'Destination phrase:', destinationPhrase);
+      console.log('🎯 TTS - Name:', name, 'Destination phrase:', destinationPhrase);
 
       try {
         // Repeat the announcement 2 times (to ensure patient hears it)
         for (let i = 0; i < 2; i++) {
-          console.log(`Patient announcement iteration ${i + 1}/2`);
+          console.log(`🔄 Patient announcement iteration ${i + 1}/2`);
           
           // Play notification sound first (mandatory)
+          console.log('🔔 Playing notification sound...');
           await playNotificationSound();
+          console.log('✅ Notification sound done');
 
           // Use Google Cloud TTS with concatenated mode (Brazilian Portuguese)
+          console.log('🎙️ Calling TTS for name:', name);
           await speakWithConcatenatedTTS(name, destinationPhrase);
-          console.log(`TTS iteration ${i + 1} completed`);
+          console.log(`✅ TTS iteration ${i + 1} completed`);
           
           // Small pause between repetitions (only if not the last iteration)
           if (i < 1) {
             await new Promise((resolve) => setTimeout(resolve, 800));
           }
         }
-        console.log('TTS completed (2x repetition - Google Cloud TTS Brazilian Portuguese)');
+        console.log('✅ TTS completed (2x repetition - Google Cloud TTS Brazilian Portuguese)');
       } catch (e) {
-        console.error('Google Cloud TTS failed:', e);
+        console.error('❌ Google Cloud TTS failed:', e);
       } finally {
+        clearTimeout(safetyTimeout);
         isSpeakingRef.current = false;
+        console.log('🎤 isSpeakingRef set to FALSE');
       }
     },
     [playNotificationSound, speakWithConcatenatedTTS, getDestinationPhrase]
