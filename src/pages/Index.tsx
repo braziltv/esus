@@ -239,7 +239,6 @@ const Index = () => {
               onSendToTriageQueue={sendToTriageQueue}
               onUpdatePriority={updatePatientPriority}
               onUpdateObservations={updatePatientObservations}
-              unitName={unitName}
             />
           </main>
           <InternalChat station="cadastro" />
@@ -258,7 +257,6 @@ const Index = () => {
               onFinishWithoutCall={finishWithoutCall}
               onSendToDoctorQueue={sendToDoctorQueue}
               onUpdateObservations={updatePatientObservations}
-              unitName={unitName}
             />
           </main>
           <InternalChat station="triagem" />
@@ -275,7 +273,6 @@ const Index = () => {
               onRecall={recallDoctor}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
-              unitName={unitName}
             />
           </main>
           <InternalChat station="medico" />

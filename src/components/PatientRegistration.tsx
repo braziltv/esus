@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { usePatientAddedSound } from '@/hooks/usePatientAddedSound';
-import { useFrequentPatients } from '@/hooks/useFrequentPatients';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
-import { FrequentPatientBadge } from '@/components/FrequentPatientBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -57,7 +55,6 @@ interface PatientRegistrationProps {
   onSendToTriageQueue?: (id: string) => void;
   onUpdatePriority?: (id: string, priority: PatientPriority) => void;
   onUpdateObservations?: (id: string, observations: string) => void;
-  unitName: string;
 }
 
 const SALAS = [
@@ -94,17 +91,13 @@ export function PatientRegistration({
   onForwardToDoctor,
   onSendToTriageQueue,
   onUpdatePriority,
-  onUpdateObservations,
-  unitName
+  onUpdateObservations
 }: PatientRegistrationProps) {
   const [name, setName] = useState('');
   const [selectedPriority, setSelectedPriority] = useState<PatientPriority>('normal');
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string } | null>(null);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Hook para identificar pacientes frequentes
-  const { isFrequentPatient } = useFrequentPatients(unitName);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -234,12 +227,6 @@ export function PatientRegistration({
                             PRIORIDADE
                           </span>
                         )}
-                        {(() => {
-                          const frequentData = isFrequentPatient(patient.name);
-                          return frequentData ? (
-                            <FrequentPatientBadge visitCount={frequentData.visitCount} lastVisit={frequentData.lastVisit} />
-                          ) : null;
-                        })()}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
