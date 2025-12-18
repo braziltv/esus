@@ -297,7 +297,7 @@ export const BRAZILIAN_NAMES = {
     
     // F
     "Fábres", "Fagúndes", "Falcão", "Faria", "Farias", "Fariâs", "Feitosa", "Fernandes", "Ferrari",
-    "Ferraz", "Ferrazô", "Ferreira", "Fêrrer", "Figueiredo", "Fígueredo", "Figueira", "Figueirâ",
+    "Ferraz", "Ferrazô", "Ferrão", "Ferreira", "Fêrrer", "Figueiredo", "Fígueredo", "Figueira", "Figueirâ",
     "Flores", "Flôres", "Fonseca", "Fontes", "Fontês", "França", "Frânça", "Franco", "Freire",
     "Freitas", "Fróes",
     
