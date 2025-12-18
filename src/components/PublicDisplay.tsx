@@ -1075,11 +1075,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       destination?: string
     ) => {
       const now = Date.now();
-      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now });
+      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now, isSpeaking: isSpeakingRef.current });
 
-      // Debounce: ignore calls within 2 seconds of each other
-      if (now - lastSpeakCallRef.current < 2000) {
-        console.log('⏸️ Debounce: ignoring duplicate call within 2s window');
+      // Debounce: ignore calls within 2 seconds of each other FOR THE SAME NAME
+      const lastCallKey = `${name}-${caller}`;
+      const lastCallTime = (window as any).__lastSpeakCall || 0;
+      const lastCallName = (window as any).__lastSpeakName || '';
+      
+      if (lastCallName === lastCallKey && now - lastCallTime < 2000) {
+        console.log('⏸️ Debounce: ignoring duplicate call for same name within 2s window');
         return;
       }
       
@@ -1089,6 +1093,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         return;
       }
       
+      (window as any).__lastSpeakCall = now;
+      (window as any).__lastSpeakName = lastCallKey;
       lastSpeakCallRef.current = now;
       isSpeakingRef.current = true;
       console.log('🎤 isSpeakingRef set to TRUE');
@@ -1398,6 +1404,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
     const poll = async () => {
       try {
+        console.log('🛰️ Polling patient_calls...', { unitName, pollInitialized: pollInitializedRef.current, processedCount: processedCallsRef.current.size });
+        
         const { data, error } = await supabase
           .from('patient_calls')
           .select('id, unit_name, call_type, patient_name, destination, status, created_at')
@@ -1413,21 +1421,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           return;
         }
 
+        console.log('🛰️ Poll result:', { count: data?.length || 0, calls: data?.map(c => ({ id: c.id.substring(0,8), name: c.patient_name, type: c.call_type })) });
+
         if (!data) return;
 
         // First run: track current actives without speaking (avoid replay after reload)
         if (!pollInitializedRef.current) {
           data.forEach((c) => processedCallsRef.current.add(c.id));
           pollInitializedRef.current = true;
-          console.log('🛰️ Poll initialized. Active calls tracked:', data.length);
+          console.log('🛰️ Poll initialized. Active calls tracked:', data.length, 'IDs:', data.map(c => c.id.substring(0,8)));
           return;
         }
 
         for (const call of data) {
-          if (processedCallsRef.current.has(call.id)) continue;
+          const isProcessed = processedCallsRef.current.has(call.id);
+          if (isProcessed) continue;
           processedCallsRef.current.add(call.id);
 
-          console.log('🛰️ Poll detected new active call:', call.patient_name, call.call_type);
+          console.log('🛰️ Poll detected NEW active call - WILL SPEAK:', call.patient_name, call.call_type);
 
           // Reset idle timer (anti-standby)
           window.dispatchEvent(new CustomEvent('patientCallActivity'));
@@ -1448,6 +1459,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
           }
 
+          console.log('🔊 About to call speakNameRef.current for:', call.patient_name, callType);
           speakNameRef.current(call.patient_name, callType, call.destination || undefined);
         }
       } catch (e) {
