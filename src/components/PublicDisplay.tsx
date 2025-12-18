@@ -1122,17 +1122,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'patient_calls',
-          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
-          console.log('🔔 Received INSERT event:', payload);
           const call = payload.new as any;
           
-          // Skip empty unit_name calls
-          if (!call.unit_name) {
-            console.log('Skipping call with empty unit_name');
+          // Filter by unit name in handler (to handle spaces/special chars)
+          const normalizedUnit = (unitName || '').trim().toLowerCase();
+          const callUnit = (call.unit_name || '').trim().toLowerCase();
+          if (!normalizedUnit || callUnit !== normalizedUnit) {
             return;
           }
+          
+          console.log('🔔 Received INSERT event:', payload);
           
           if (processedCallsRef.current.has(call.id)) {
             console.log('Skipping already processed call:', call.id);
@@ -1179,12 +1180,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'UPDATE',
           schema: 'public',
           table: 'patient_calls',
-          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const call = payload.new as any;
           
-          if (!call.unit_name) return;
+          // Filter by unit name in handler
+          const normalizedUnit = (unitName || '').trim().toLowerCase();
+          const callUnit = (call.unit_name || '').trim().toLowerCase();
+          if (!normalizedUnit || callUnit !== normalizedUnit) {
+            return;
+          }
 
           if (call.status === 'completed') {
             if (call.call_type === 'triage') {
@@ -1201,12 +1206,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'call_history',
-          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const historyItem = payload.new as any;
           
-          if (!historyItem.unit_name) return;
+          // Filter by unit name in handler
+          const normalizedUnit = (unitName || '').trim().toLowerCase();
+          const itemUnit = (historyItem.unit_name || '').trim().toLowerCase();
+          if (!normalizedUnit || itemUnit !== normalizedUnit) {
+            return;
+          }
 
           setHistoryItems(prev => [{
             id: historyItem.id,
@@ -1222,10 +1231,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'DELETE',
           schema: 'public',
           table: 'call_history',
-          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const deletedItem = payload.old as any;
+          
+          // Filter by unit name in handler
+          const normalizedUnit = (unitName || '').trim().toLowerCase();
+          const itemUnit = (deletedItem?.unit_name || '').trim().toLowerCase();
+          if (!normalizedUnit || itemUnit !== normalizedUnit) {
+            return;
+          }
+          
           if (deletedItem?.id) {
             setHistoryItems(prev => prev.filter(item => item.id !== deletedItem.id));
           } else {
