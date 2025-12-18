@@ -3,6 +3,8 @@
  * Gera anúncio completo com som de notificação, repetição e voz masculina
  */
 
+import { toast } from "@/hooks/use-toast";
+
 // Voice IDs do ElevenLabs
 const VOICE_FEMALE = 'Xb7hH8MSUJpSbSDYk0k2'; // Alice - voz feminina padrão
 const VOICE_MALE_DEEP = 'onwK4e9ZLuTAKqWW03F9'; // Brian - voz masculina grave
@@ -163,7 +165,22 @@ export const useHourAudio = () => {
     );
 
     if (!response.ok) {
-      throw new Error(`TTS error: ${response.status}`);
+      // Tentar ler o corpo do erro para identificar quota exceeded
+      let errorMessage = `TTS error: ${response.status}`;
+      try {
+        const errorBody = await response.json();
+        if (errorBody?.error?.includes('401') || 
+            errorBody?.error?.includes('quota') ||
+            response.status === 401) {
+          throw new Error('QUOTA_EXCEEDED');
+        }
+        errorMessage = errorBody?.error || errorMessage;
+      } catch (parseError) {
+        if (parseError instanceof Error && parseError.message === 'QUOTA_EXCEEDED') {
+          throw parseError;
+        }
+      }
+      throw new Error(errorMessage);
     }
 
     return response.arrayBuffer();
@@ -263,6 +280,17 @@ export const useHourAudio = () => {
       return true;
     } catch (error) {
       console.error('[useHourAudio] Erro ao reproduzir anúncio de hora:', error);
+      
+      // Verificar se é erro de quota exceeded
+      if (error instanceof Error && error.message === 'QUOTA_EXCEEDED') {
+        toast({
+          title: "Créditos TTS esgotados",
+          description: "A cota de texto-para-voz foi excedida. O anúncio de hora está temporariamente indisponível.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+      
       return false;
     }
   };
