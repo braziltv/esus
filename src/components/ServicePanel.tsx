@@ -506,7 +506,7 @@ export function ServicePanel({
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 justify-end ml-9 sm:ml-0 flex-wrap">
-                    {/* Unified Forward Menu */}
+                    {/* Menu Encaminhar Paciente Unificado com Submenus */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm" className="text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20">
@@ -514,78 +514,152 @@ export function ServicePanel({
                           <ChevronDown className="w-3 h-3 ml-0.5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-card border border-border z-50 max-h-[400px] overflow-y-auto">
-                        <DropdownMenuLabel>Encaminhar Paciente</DropdownMenuLabel>
+                      <DropdownMenuContent align="end" className="bg-card border border-border z-50 min-w-[200px]">
+                        <DropdownMenuLabel>Encaminhar para</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuLabel className="text-xs text-green-600">Com voz na TV</DropdownMenuLabel>
-                        {onForwardToDoctor && (
-                          <>
-                            <DropdownMenuItem onClick={() => onForwardToDoctor(patient.id, 'Consultório 1')} className="cursor-pointer">
+
+                        {/* Triagem */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Activity className="w-4 h-4 mr-2 text-cyan-600" />
+                            Triagem
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuItem onClick={() => onForwardToTriage?.(patient.id, 'Triagem')} className="cursor-pointer">
                               <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                              Consultório 1 (com voz)
+                              Com voz na TV
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onForwardToDoctor(patient.id, 'Consultório 2')} className="cursor-pointer">
-                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                              Consultório 2 (com voz)
-                            </DropdownMenuItem>
-                          </>
+                            {onSendToTriageQueue && (
+                              <DropdownMenuItem onClick={() => onSendToTriageQueue(patient.id)} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+
+                        {/* ECG */}
+                        {serviceKey !== 'ecg' && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="cursor-pointer">
+                              <Heart className="w-4 h-4 mr-2 text-pink-500" />
+                              ECG
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-card border border-border">
+                              <DropdownMenuItem onClick={() => onForwardToEcg?.(patient.id)} className="cursor-pointer">
+                                <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                                Com voz na TV
+                              </DropdownMenuItem>
+                              {onSendToEcgQueue && (
+                                <DropdownMenuItem onClick={() => onSendToEcgQueue(patient.id)} className="cursor-pointer">
+                                  <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                  Interno (sem voz)
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
                         )}
-                        {serviceKey !== 'ecg' && onForwardToEcg && (
-                          <DropdownMenuItem onClick={() => onForwardToEcg(patient.id)} className="cursor-pointer">
-                            <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                            ECG (com voz)
-                          </DropdownMenuItem>
+
+                        {/* Curativos */}
+                        {serviceKey !== 'curativos' && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="cursor-pointer">
+                              <Bandage className="w-4 h-4 mr-2 text-orange-500" />
+                              Curativos
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-card border border-border">
+                              <DropdownMenuItem onClick={() => onForwardToCurativos?.(patient.id)} className="cursor-pointer">
+                                <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                                Com voz na TV
+                              </DropdownMenuItem>
+                              {onSendToCurativosQueue && (
+                                <DropdownMenuItem onClick={() => onSendToCurativosQueue(patient.id)} className="cursor-pointer">
+                                  <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                  Interno (sem voz)
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
                         )}
-                        {serviceKey !== 'curativos' && onForwardToCurativos && (
-                          <DropdownMenuItem onClick={() => onForwardToCurativos(patient.id)} className="cursor-pointer">
-                            <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                            Curativos (com voz)
-                          </DropdownMenuItem>
+
+                        {/* Raio X */}
+                        {serviceKey !== 'raiox' && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="cursor-pointer">
+                              <Scan className="w-4 h-4 mr-2 text-purple-500" />
+                              Raio X
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-card border border-border">
+                              <DropdownMenuItem onClick={() => onForwardToRaiox?.(patient.id)} className="cursor-pointer">
+                                <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                                Com voz na TV
+                              </DropdownMenuItem>
+                              {onSendToRaioxQueue && (
+                                <DropdownMenuItem onClick={() => onSendToRaioxQueue(patient.id)} className="cursor-pointer">
+                                  <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                  Interno (sem voz)
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
                         )}
-                        {serviceKey !== 'raiox' && onForwardToRaiox && (
-                          <DropdownMenuItem onClick={() => onForwardToRaiox(patient.id)} className="cursor-pointer">
-                            <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                            Raio X (com voz)
-                          </DropdownMenuItem>
+
+                        {/* Enfermaria */}
+                        {serviceKey !== 'enfermaria' && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="cursor-pointer">
+                              <BedDouble className="w-4 h-4 mr-2 text-teal-500" />
+                              Enfermaria
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-card border border-border">
+                              <DropdownMenuItem onClick={() => onForwardToEnfermaria?.(patient.id)} className="cursor-pointer">
+                                <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                                Com voz na TV
+                              </DropdownMenuItem>
+                              {onSendToEnfermariaQueue && (
+                                <DropdownMenuItem onClick={() => onSendToEnfermariaQueue(patient.id)} className="cursor-pointer">
+                                  <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                  Interno (sem voz)
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
                         )}
-                        {serviceKey !== 'enfermaria' && onForwardToEnfermaria && (
-                          <DropdownMenuItem onClick={() => onForwardToEnfermaria(patient.id)} className="cursor-pointer">
-                            <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                            Enfermaria (com voz)
-                          </DropdownMenuItem>
-                        )}
+
                         <DropdownMenuSeparator />
-                        <DropdownMenuLabel className="text-xs text-muted-foreground">Interno (sem voz)</DropdownMenuLabel>
-                        {onSendToDoctorQueue && (
-                          <>
-                            <DropdownMenuItem onClick={() => onSendToDoctorQueue(patient.id, 'Consultório 1')} className="cursor-pointer">
-                              Consultório 1 (interno)
+
+                        {/* Médico */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Stethoscope className="w-4 h-4 mr-2 text-green-600" />
+                            Médico
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuLabel className="text-xs">Consultório 1</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => onForwardToDoctor?.(patient.id, 'Consultório 1')} className="cursor-pointer">
+                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                              Com voz na TV
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onSendToDoctorQueue(patient.id, 'Consultório 2')} className="cursor-pointer">
-                              Consultório 2 (interno)
+                            {onSendToDoctorQueue && (
+                              <DropdownMenuItem onClick={() => onSendToDoctorQueue(patient.id, 'Consultório 1')} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel className="text-xs">Consultório 2</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => onForwardToDoctor?.(patient.id, 'Consultório 2')} className="cursor-pointer">
+                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                              Com voz na TV
                             </DropdownMenuItem>
-                          </>
-                        )}
-                        {serviceKey !== 'ecg' && onSendToEcgQueue && (
-                          <DropdownMenuItem onClick={() => onSendToEcgQueue(patient.id)} className="cursor-pointer">
-                            ECG (interno)
-                          </DropdownMenuItem>
-                        )}
-                        {serviceKey !== 'curativos' && onSendToCurativosQueue && (
-                          <DropdownMenuItem onClick={() => onSendToCurativosQueue(patient.id)} className="cursor-pointer">
-                            Curativos (interno)
-                          </DropdownMenuItem>
-                        )}
-                        {serviceKey !== 'raiox' && onSendToRaioxQueue && (
-                          <DropdownMenuItem onClick={() => onSendToRaioxQueue(patient.id)} className="cursor-pointer">
-                            Raio X (interno)
-                          </DropdownMenuItem>
-                        )}
-                        {serviceKey !== 'enfermaria' && onSendToEnfermariaQueue && (
-                          <DropdownMenuItem onClick={() => onSendToEnfermariaQueue(patient.id)} className="cursor-pointer">
-                            Enfermaria (interno)
-                          </DropdownMenuItem>
-                        )}
+                            {onSendToDoctorQueue && (
+                              <DropdownMenuItem onClick={() => onSendToDoctorQueue(patient.id, 'Consultório 2')} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
                       </DropdownMenuContent>
                     </DropdownMenu>
 
