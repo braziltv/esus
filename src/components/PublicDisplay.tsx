@@ -909,6 +909,57 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     [unitName, playAmplifiedAudio]
   );
 
+  // Speak custom text (no destination, just the raw text)
+  const speakCustomText = useCallback(
+    async (text: string) => {
+      const now = Date.now();
+      console.log('speakCustomText called with:', { text, timestamp: now });
+
+      // Debounce: ignore calls within 2 seconds of each other
+      if (now - lastSpeakCallRef.current < 2000) {
+        console.log('Debounce: ignoring duplicate call within 2s window');
+        return;
+      }
+      
+      // Prevent duplicate TTS calls
+      if (isSpeakingRef.current) {
+        console.log('Already speaking, skipping duplicate call');
+        return;
+      }
+      
+      lastSpeakCallRef.current = now;
+      isSpeakingRef.current = true;
+
+      // Start visual alert (use triage color for custom announcements)
+      setAnnouncingType('triage');
+
+      try {
+        // Repeat the announcement 2 times (to ensure it's heard)
+        for (let i = 0; i < 2; i++) {
+          console.log(`Custom announcement iteration ${i + 1}/2`);
+          
+          // Play notification sound first (mandatory)
+          await playNotificationSound();
+
+          // Use ElevenLabs API to speak just the custom text
+          await speakWithElevenLabs(text);
+          console.log(`Custom TTS iteration ${i + 1} completed`);
+          
+          // Small pause between repetitions (only if not the last iteration)
+          if (i < 1) {
+            await new Promise((resolve) => setTimeout(resolve, 800));
+          }
+        }
+        console.log('Custom TTS completed (2x repetition)');
+      } catch (e) {
+        console.error('Custom TTS failed:', e);
+      } finally {
+        isSpeakingRef.current = false;
+      }
+    },
+    [playNotificationSound, speakWithElevenLabs]
+  );
+
   const speakName = useCallback(
     async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
       const now = Date.now();
@@ -1061,18 +1112,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           console.log('Processing call:', call.patient_name, call.call_type, call.status);
           
           if (call.status === 'active') {
-            if (call.call_type === 'triage') {
-              setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
-            } else {
-              setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
-            }
-            
             // Dispatch activity event to reset idle timer (anti-standby)
             window.dispatchEvent(new CustomEvent('patientCallActivity'));
             
-            // Play audio announcement
-            console.log('About to call speakName...');
-            speakName(call.patient_name, call.call_type, call.destination || undefined);
+            // Handle custom announcements (just speak the text, no destination display)
+            if (call.call_type === 'custom') {
+              console.log('Custom announcement:', call.patient_name);
+              speakCustomText(call.patient_name);
+            } else {
+              if (call.call_type === 'triage') {
+                setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
+              } else {
+                setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
+              }
+              
+              // Play audio announcement
+              console.log('About to call speakName...');
+              speakName(call.patient_name, call.call_type, call.destination || undefined);
+            }
           }
         }
       )
