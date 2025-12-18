@@ -138,9 +138,16 @@ export const useHourAudio = () => {
 
   /**
    * Reproduzir áudio via Google Cloud TTS
+   * Usa as vozes configuradas pelo usuário ou fallback para padrão
    */
   const generateTTSAudio = async (text: string, voice: 'female' | 'male'): Promise<ArrayBuffer> => {
-    console.log(`[useHourAudio] Gerando TTS Google Cloud para: "${text}" com voz ${voice}`);
+    // Obter vozes configuradas pelo usuário
+    const configuredFemaleVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+    const configuredMaleVoice = localStorage.getItem('googleVoiceMale') || 'pt-BR-Neural2-B';
+    
+    const voiceName = voice === 'female' ? configuredFemaleVoice : configuredMaleVoice;
+    
+    console.log(`[useHourAudio] Gerando TTS Google Cloud para: "${text}" com voz ${voiceName}`);
 
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
@@ -153,7 +160,7 @@ export const useHourAudio = () => {
         },
         body: JSON.stringify({ 
           text, 
-          voice,
+          voiceName,
           speakingRate: 1.0
         }),
       }

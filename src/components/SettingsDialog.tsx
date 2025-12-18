@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import { setManualThemeOverride } from './AutoNightMode';
 
@@ -20,6 +21,23 @@ interface VolumeSettings {
   timeAnnouncement: number;
 }
 
+// Vozes Google Cloud TTS disponíveis para pt-BR
+const GOOGLE_VOICES = {
+  female: [
+    { id: 'pt-BR-Neural2-A', name: 'Neural2-A (Recomendada)', quality: 'premium' },
+    { id: 'pt-BR-Neural2-C', name: 'Neural2-C', quality: 'premium' },
+    { id: 'pt-BR-Wavenet-A', name: 'Wavenet-A', quality: 'high' },
+    { id: 'pt-BR-Wavenet-C', name: 'Wavenet-C', quality: 'high' },
+    { id: 'pt-BR-Standard-A', name: 'Standard-A', quality: 'standard' },
+    { id: 'pt-BR-Standard-C', name: 'Standard-C', quality: 'standard' },
+  ],
+  male: [
+    { id: 'pt-BR-Neural2-B', name: 'Neural2-B (Recomendada)', quality: 'premium' },
+    { id: 'pt-BR-Wavenet-B', name: 'Wavenet-B', quality: 'high' },
+    { id: 'pt-BR-Standard-B', name: 'Standard-B', quality: 'standard' },
+  ]
+};
+
 const DEFAULT_VOLUMES: VolumeSettings = {
   notification: 1,
   tts: 1,
@@ -28,16 +46,27 @@ const DEFAULT_VOLUMES: VolumeSettings = {
 };
 
 const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
+const GOOGLE_VOICE_FEMALE_KEY = 'googleVoiceFemale';
+const GOOGLE_VOICE_MALE_KEY = 'googleVoiceMale';
 
 export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
   const [isTesting, setIsTesting] = useState(false);
+  const [isTestingGoogleTTS, setIsTestingGoogleTTS] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   const [volumes, setVolumes] = useState<VolumeSettings>(DEFAULT_VOLUMES);
   const [autoNightMode, setAutoNightMode] = useState(() => localStorage.getItem(AUTO_NIGHT_KEY) !== 'false');
+  
+  // Google Cloud TTS voice settings
+  const [googleVoiceFemale, setGoogleVoiceFemale] = useState(() => 
+    localStorage.getItem(GOOGLE_VOICE_FEMALE_KEY) || 'pt-BR-Neural2-A'
+  );
+  const [googleVoiceMale, setGoogleVoiceMale] = useState(() => 
+    localStorage.getItem(GOOGLE_VOICE_MALE_KEY) || 'pt-BR-Neural2-B'
+  );
 
   // Load volumes from localStorage on mount
   useEffect(() => {
@@ -123,6 +152,95 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
     
     return new Promise<void>(resolve => setTimeout(resolve, 600));
   }, [volumes.timeNotification]);
+
+  // Função para testar vozes do Google Cloud TTS
+  const testGoogleTTS = useCallback(async () => {
+    setIsTestingGoogleTTS(true);
+    
+    try {
+      // Função auxiliar para reproduzir áudio
+      const playAudioBuffer = (buffer: ArrayBuffer): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          const blob = new Blob([buffer], { type: 'audio/mpeg' });
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          audio.volume = volumes.timeAnnouncement;
+          
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            resolve();
+          };
+          audio.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Audio playback failed'));
+          };
+          audio.play().catch(reject);
+        });
+      };
+
+      // Testar voz feminina
+      toast.info('Testando voz feminina...');
+      const femaleResponse = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            text: 'Olá, boa tarde. Hora certa, são quinze horas.',
+            voiceName: googleVoiceFemale,
+          }),
+        }
+      );
+
+      if (!femaleResponse.ok) {
+        const error = await femaleResponse.json();
+        throw new Error(error.error || 'Erro na voz feminina');
+      }
+
+      const femaleAudio = await femaleResponse.arrayBuffer();
+      await playAudioBuffer(femaleAudio);
+
+      // Pequena pausa
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Testar voz masculina
+      toast.info('Testando voz masculina...');
+      const maleResponse = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            text: 'Repita.',
+            voiceName: googleVoiceMale,
+          }),
+        }
+      );
+
+      if (!maleResponse.ok) {
+        const error = await maleResponse.json();
+        throw new Error(error.error || 'Erro na voz masculina');
+      }
+
+      const maleAudio = await maleResponse.arrayBuffer();
+      await playAudioBuffer(maleAudio);
+
+      toast.success('Teste de vozes Google Cloud concluído!');
+    } catch (error) {
+      console.error('Erro ao testar Google TTS:', error);
+      toast.error(`Erro: ${error instanceof Error ? error.message : 'Falha no teste'}`);
+    } finally {
+      setIsTestingGoogleTTS(false);
+    }
+  }, [googleVoiceFemale, googleVoiceMale, volumes.timeAnnouncement]);
 
   const testTTS = useCallback(async () => {
     setIsTesting(true);
@@ -346,11 +464,112 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
             </div>
           </div>
 
+          {/* Google Cloud TTS Voice Settings */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-medium border-b pb-2">
+              <Mic className="w-4 h-4" />
+              Vozes Google Cloud TTS (pt-BR)
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label className="text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
+                  Voz Feminina (Anúncio de Hora)
+                </Label>
+                <Select 
+                  value={googleVoiceFemale} 
+                  onValueChange={(value) => {
+                    setGoogleVoiceFemale(value);
+                    localStorage.setItem(GOOGLE_VOICE_FEMALE_KEY, value);
+                    toast.success('Voz feminina atualizada');
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GOOGLE_VOICES.female.map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">
+                          {voice.name}
+                          {voice.quality === 'premium' && (
+                            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">Premium</span>
+                          )}
+                          {voice.quality === 'high' && (
+                            <span className="text-xs bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">Alta</span>
+                          )}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  Voz Masculina ("Repita")
+                </Label>
+                <Select 
+                  value={googleVoiceMale} 
+                  onValueChange={(value) => {
+                    setGoogleVoiceMale(value);
+                    localStorage.setItem(GOOGLE_VOICE_MALE_KEY, value);
+                    toast.success('Voz masculina atualizada');
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GOOGLE_VOICES.male.map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">
+                          {voice.name}
+                          {voice.quality === 'premium' && (
+                            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">Premium</span>
+                          )}
+                          {voice.quality === 'high' && (
+                            <span className="text-xs bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">Alta</span>
+                          )}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button 
+                variant="outline"
+                onClick={testGoogleTTS} 
+                disabled={isTestingGoogleTTS}
+                className="w-full gap-2"
+              >
+                {isTestingGoogleTTS ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Testando...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    Testar Vozes Google Cloud
+                  </>
+                )}
+              </Button>
+
+              <p className="text-xs text-muted-foreground">
+                Neural2 = melhor qualidade, Wavenet = alta qualidade, Standard = econômico
+              </p>
+            </div>
+          </div>
+
           {/* TTS Test Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium border-b pb-2">
               <Volume2 className="w-4 h-4" />
-              Testar Áudio TTS
+              Testar Áudio TTS (Navegador)
             </div>
 
             <div className="space-y-3">
