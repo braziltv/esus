@@ -1306,7 +1306,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     {currentTriageCall.name}
                   </h2>
                   <p className="text-blue-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
-                    Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
+                    {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
@@ -1343,7 +1343,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     {currentDoctorCall.name}
                   </h2>
                   <p className="text-emerald-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
-                    Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
+                    {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
