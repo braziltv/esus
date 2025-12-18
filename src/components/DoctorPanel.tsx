@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, FileText, Pencil } from 'lucide-react';
-import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
@@ -115,9 +114,8 @@ export function DoctorPanel({
         </div>
       )}
 
-      {/* Controls Row */}
-      <div className="flex justify-end gap-2">
-        <CustomAnnouncementButton />
+      {/* Sound Toggle */}
+      <div className="flex justify-end">
         <Button 
           onClick={toggleSound} 
           variant="outline" 
