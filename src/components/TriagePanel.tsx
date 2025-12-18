@@ -42,6 +42,16 @@ const PRIORITY_CONFIG = {
   normal: { label: 'Normal', color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-500', icon: Circle },
 };
 
+const ORIGIN_CONFIG: Record<string, { label: string; color: string }> = {
+  cadastro: { label: 'Cadastro', color: 'bg-blue-500 text-white' },
+  triage: { label: 'Triagem', color: 'bg-amber-500 text-white' },
+  doctor: { label: 'Médico', color: 'bg-green-500 text-white' },
+  ecg: { label: 'ECG', color: 'bg-pink-500 text-white' },
+  curativos: { label: 'Curativos', color: 'bg-orange-500 text-white' },
+  raiox: { label: 'Raio X', color: 'bg-purple-500 text-white' },
+  enfermaria: { label: 'Enfermaria', color: 'bg-teal-500 text-white' },
+};
+
 interface TriagePanelProps {
   waitingPatients: Patient[];
   currentCall: Patient | null;
@@ -325,9 +335,14 @@ export function TriagePanel({
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <p className="text-xs sm:text-sm">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
                         <span className="text-amber-500 font-medium">Chegou às {formatBrazilTime(patient.createdAt, 'HH:mm')}</span>
-                      </p>
+                        {patient.calledBy && ORIGIN_CONFIG[patient.calledBy] && (
+                          <span className={`px-2 py-0.5 text-[10px] font-medium rounded ${ORIGIN_CONFIG[patient.calledBy].color}`}>
+                            Veio: {ORIGIN_CONFIG[patient.calledBy].label}
+                          </span>
+                        )}
+                      </div>
                       {/* Observações */}
                       {editingObservation?.id === patient.id ? (
                         <div className="mt-2 flex flex-col gap-2">
