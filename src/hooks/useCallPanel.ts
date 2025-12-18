@@ -669,16 +669,11 @@ export function useCallPanel() {
 
   const finishTriage = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
-    setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledBy: 'triage' as const } : p
-    ));
-    if (currentTriageCall?.id === patientId) {
-      setCurrentTriageCall(null);
-      completeCall('triage', 'completed');
-    }
-    // Sync to database for real-time updates across all modules
-    if (unitName && patient) {
-      await supabase
+    if (!patient) return;
+    
+    // FIRST update database, then update local state
+    if (unitName) {
+      const { error } = await supabase
         .from('patient_calls')
         .update({ 
           status: 'waiting', 
@@ -687,8 +682,20 @@ export function useCallPanel() {
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      if (error) {
+        console.error('Error finishing triage:', error);
+        return;
+      }
     }
-  }, [currentTriageCall, completeCall, unitName]);
+    
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledBy: 'triage' as const } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [currentTriageCall, unitName]);
 
   const finishConsultation = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
@@ -818,18 +825,11 @@ export function useCallPanel() {
   // Send to doctor queue WITHOUT TV announcement (triage uses this)
   const sendToDoctorQueue = useCallback(async (patientId: string, destination?: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
-    setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, destination, calledBy: 'triage' } : p
-    ));
-    // Clear current triage call if this patient was being triaged
-    if (currentTriageCall?.id === patientId) {
-      setCurrentTriageCall(null);
-      completeCall('triage', 'completed');
-    }
+    if (!patient) return;
     
-    // Sync to database for real-time updates across all modules
-    if (unitName && patient) {
-      await supabase
+    // FIRST update database, then update local state
+    if (unitName) {
+      const { error } = await supabase
         .from('patient_calls')
         .update({ 
           status: 'waiting', 
@@ -839,8 +839,21 @@ export function useCallPanel() {
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      if (error) {
+        console.error('Error forwarding to Doctor:', error);
+        return;
+      }
     }
-  }, [currentTriageCall, completeCall, unitName]);
+    
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, destination, calledBy: 'triage' } : p
+    ));
+    // Clear current triage call if this patient was being triaged
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [currentTriageCall, unitName]);
 
   // Forward to doctor WITH voice call on TV (doctor panel uses this)
   const forwardToDoctor = useCallback(async (patientId: string, destination?: string) => {
@@ -1014,16 +1027,11 @@ export function useCallPanel() {
   // Send to service queues WITHOUT TV announcement - with database sync
   const sendToEcgQueue = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
-    setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-ecg' as PatientStatus, destination: 'Sala de Eletrocardiograma', calledBy: 'triage' as const } : p
-    ));
-    if (currentTriageCall?.id === patientId) {
-      setCurrentTriageCall(null);
-      completeCall('triage', 'completed');
-    }
-    // Sync to database for real-time updates
-    if (unitName && patient) {
-      await supabase
+    if (!patient) return;
+    
+    // FIRST update database, then update local state
+    if (unitName) {
+      const { error } = await supabase
         .from('patient_calls')
         .update({ 
           status: 'waiting', 
@@ -1033,21 +1041,28 @@ export function useCallPanel() {
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      if (error) {
+        console.error('Error forwarding to ECG:', error);
+        return;
+      }
     }
-  }, [currentTriageCall, completeCall, unitName]);
-
-  const sendToCurativosQueue = useCallback(async (patientId: string) => {
-    const patient = patientsRef.current.find(p => p.id === patientId);
+    
+    // Only update local state after DB success
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-curativos' as PatientStatus, destination: 'Sala de Curativos', calledBy: 'triage' as const } : p
+      p.id === patientId ? { ...p, status: 'waiting-ecg' as PatientStatus, destination: 'Sala de Eletrocardiograma', calledBy: 'triage' as const } : p
     ));
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
-      completeCall('triage', 'completed');
     }
-    // Sync to database for real-time updates
-    if (unitName && patient) {
-      await supabase
+  }, [currentTriageCall, unitName]);
+
+  const sendToCurativosQueue = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    if (!patient) return;
+    
+    if (unitName) {
+      const { error } = await supabase
         .from('patient_calls')
         .update({ 
           status: 'waiting', 
@@ -1057,21 +1072,27 @@ export function useCallPanel() {
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      if (error) {
+        console.error('Error forwarding to Curativos:', error);
+        return;
+      }
     }
-  }, [currentTriageCall, completeCall, unitName]);
-
-  const sendToRaioxQueue = useCallback(async (patientId: string) => {
-    const patient = patientsRef.current.find(p => p.id === patientId);
+    
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-raiox' as PatientStatus, destination: 'Sala de Raio X', calledBy: 'triage' as const } : p
+      p.id === patientId ? { ...p, status: 'waiting-curativos' as PatientStatus, destination: 'Sala de Curativos', calledBy: 'triage' as const } : p
     ));
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
-      completeCall('triage', 'completed');
     }
-    // Sync to database for real-time updates
-    if (unitName && patient) {
-      await supabase
+  }, [currentTriageCall, unitName]);
+
+  const sendToRaioxQueue = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    if (!patient) return;
+    
+    if (unitName) {
+      const { error } = await supabase
         .from('patient_calls')
         .update({ 
           status: 'waiting', 
@@ -1081,21 +1102,27 @@ export function useCallPanel() {
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      if (error) {
+        console.error('Error forwarding to Raio X:', error);
+        return;
+      }
     }
-  }, [currentTriageCall, completeCall, unitName]);
-
-  const sendToEnfermariaQueue = useCallback(async (patientId: string) => {
-    const patient = patientsRef.current.find(p => p.id === patientId);
+    
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-enfermaria' as PatientStatus, destination: 'Enfermaria', calledBy: 'triage' as const } : p
+      p.id === patientId ? { ...p, status: 'waiting-raiox' as PatientStatus, destination: 'Sala de Raio X', calledBy: 'triage' as const } : p
     ));
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
-      completeCall('triage', 'completed');
     }
-    // Sync to database for real-time updates
-    if (unitName && patient) {
-      await supabase
+  }, [currentTriageCall, unitName]);
+
+  const sendToEnfermariaQueue = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    if (!patient) return;
+    
+    if (unitName) {
+      const { error } = await supabase
         .from('patient_calls')
         .update({ 
           status: 'waiting', 
@@ -1105,8 +1132,20 @@ export function useCallPanel() {
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      if (error) {
+        console.error('Error forwarding to Enfermaria:', error);
+        return;
+      }
     }
-  }, [currentTriageCall, completeCall, unitName]);
+    
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-enfermaria' as PatientStatus, destination: 'Enfermaria', calledBy: 'triage' as const } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [currentTriageCall, unitName]);
 
   // Forward to ECG WITH voice call on TV
   const forwardToEcg = useCallback((patientId: string) => {
