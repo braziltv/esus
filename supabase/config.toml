@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.update-cache]
 verify_jwt = false
+
+[functions.google-cloud-tts]
+verify_jwt = false
