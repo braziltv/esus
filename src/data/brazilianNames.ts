@@ -13,6 +13,11 @@ export const BRAZILIAN_NAMES = {
     "Ari", "Ariel", "Ariosto", "Aristides", "Arlindo", "Armando", "Arnaldo", "Artur", "Arthur",
     "Astrogildo", "Átila", "Augusto", "Aurélio", "Ayrton",
     
+    // Nomes com acentuação especial (adicionais)
+    "Élder", "Érico", "Fábian", "Frâncio", "Gélson", "Gérson", "Léo", "Mílton", "Môises", "Nílson",
+    "Núncio", "Páblo", "Péricles", "Rául", "Régis", "Rêmulo", "Rênan", "Sálvio", "Sávio", "Tácito",
+    "Tálisson", "Tércio", "Vânio", "Vívian", "Wálace", "Wéverton", "Ygor", "Zéferino",
+    
     // B
     "Baltazar", "Barnabé", "Bartolomeu", "Belchior", "Benedito", "Bené", "Benjamin", "Bento",
     "Bernardino", "Bernardo", "Bonifácio", "Bráulio", "Breno", "Bruno", "Bryan", "Caetano",
@@ -135,9 +140,14 @@ export const BRAZILIAN_NAMES = {
     "Abigail", "Ada", "Adélia", "Adelina", "Adilene", "Adriana", "Adriane", "Adriele", "Agda",
     "Ágata", "Aída", "Aila", "Ailza", "Alaíde", "Alcione", "Alda", "Aldenir", "Aléxia", "Alice",
     "Alícia", "Aline", "Alzira", "Amanda", "Amélia", "Ana", "Anália", "Anastácia", "Andréa",
-    "Andrea", "Andréia", "Andreia", "Andressa", "Ângela", "Angela", "Angélica", "Angelica",
+    "Andrea", "Andréia", "Andreia", "Andreína", "Andressa", "Anelíse", "Ângela", "Angela", "Angélica", "Angelica",
     "Angelina", "Anísia", "Anita", "Antônia", "Antonia", "Aparecida", "Ariane", "Ariela",
     "Arlete", "Áurea", "Aurora",
+    
+    // Nomes femininos com acentuação especial (adicionais)
+    "Bênia", "Dóris", "Édna", "Élen", "Estéfany", "Gênesis", "Graziéla", "Ísis", "Ivânia",
+    "Jaíne", "Joélma", "Lázara", "Léia", "Máriam", "Nívea", "Ólivia", "Prímula", "Ráissa",
+    "Rêgina", "Ríta", "Rôsana", "Sálvia", "Tábata", "Társila", "Váléria", "Víviane", "Yásmin", "Zínia",
     
     // B
     "Bárbara", "Barbara", "Beatriz", "Belém", "Benedita", "Berenice", "Bernadete", "Betânia",
