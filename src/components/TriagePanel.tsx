@@ -169,28 +169,6 @@ export function TriagePanel({
                   <span className="hidden xs:inline">Chamar</span> Novamente
                 </Button>
                 
-                {/* Menu Salas */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm">
-                      <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Direcionar para</span> Sala
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-card border border-border z-50">
-                    <DropdownMenuLabel>Escolha a Sala</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {SALAS.map((sala) => (
-                      <DropdownMenuItem
-                        key={sala.id}
-                        onClick={() => onDirectPatient(currentCall.name, sala.name)}
-                        className="cursor-pointer"
-                      >
-                        {sala.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
 
 
                 {/* Menu Encaminhar para outros serviços */}
