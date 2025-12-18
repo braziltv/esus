@@ -351,27 +351,34 @@ export function ServicePanel({
                         Médico
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-card border border-border">
-                        <DropdownMenuLabel className="text-xs">Com voz na TV</DropdownMenuLabel>
-                        {CONSULTORIOS.map((cons) => (
-                          <DropdownMenuItem key={cons.id} onClick={() => onForwardToDoctor?.(currentCall.id, cons.name)} className="cursor-pointer">
-                            <Volume2 className="w-4 h-4 mr-2 text-green-600" />
-                            {cons.name}
-                          </DropdownMenuItem>
-                        ))}
+                        <DropdownMenuLabel className="text-xs">Consultório 1</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => onForwardToDoctor?.(currentCall.id, 'Consultório 1')} className="cursor-pointer">
+                          <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                          Com voz na TV
+                        </DropdownMenuItem>
                         {onSendToDoctorQueue && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel className="text-xs">Interno (sem voz)</DropdownMenuLabel>
-                            {CONSULTORIOS.map((cons) => (
-                              <DropdownMenuItem key={`silent-${cons.id}`} onClick={() => {
-                                onSendToDoctorQueue(currentCall.id, cons.name);
-                                toast.success(`${currentCall.name} encaminhado para ${cons.name} (interno)`);
-                              }} className="cursor-pointer">
-                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
-                                {cons.name}
-                              </DropdownMenuItem>
-                            ))}
-                          </>
+                          <DropdownMenuItem onClick={() => {
+                            onSendToDoctorQueue(currentCall.id, 'Consultório 1');
+                            toast.success(`${currentCall.name} encaminhado para Consultório 1 (interno)`);
+                          }} className="cursor-pointer">
+                            <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                            Interno (sem voz)
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="text-xs">Consultório 2</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => onForwardToDoctor?.(currentCall.id, 'Consultório 2')} className="cursor-pointer">
+                          <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                          Com voz na TV
+                        </DropdownMenuItem>
+                        {onSendToDoctorQueue && (
+                          <DropdownMenuItem onClick={() => {
+                            onSendToDoctorQueue(currentCall.id, 'Consultório 2');
+                            toast.success(`${currentCall.name} encaminhado para Consultório 2 (interno)`);
+                          }} className="cursor-pointer">
+                            <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                            Interno (sem voz)
+                          </DropdownMenuItem>
                         )}
                       </DropdownMenuSubContent>
                     </DropdownMenuSub>
