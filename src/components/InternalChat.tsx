@@ -72,6 +72,7 @@ export function InternalChat({ station }: InternalChatProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [notification, setNotification] = useState<{ sender: string; message: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<any>(null);
@@ -89,6 +90,14 @@ export function InternalChat({ station }: InternalChatProps) {
       setUnreadCount(0);
     }
   }, [messages, isOpen]);
+
+  // Show notification popup
+  const showNotification = (sender: string, message: string) => {
+    setNotification({ sender, message });
+    setTimeout(() => {
+      setNotification(null);
+    }, 4000); // Disappears after 4 seconds
+  };
 
   // Load initial messages
   useEffect(() => {
@@ -124,12 +133,23 @@ export function InternalChat({ station }: InternalChatProps) {
           const newMsg = payload.new as ChatMessage;
           setMessages((prev) => [...prev, newMsg]);
           
-          // Increment unread if chat is closed and message is for this station or all
+          // Check if message is for this station
           const isForMe = newMsg.recipient === 'todos' || newMsg.recipient === station;
-          if (!isOpen && newMsg.sender_station !== station && isForMe) {
-            setUnreadCount((prev) => prev + 1);
-            // Play notification sound based on sender station
+          const isFromOther = newMsg.sender_station !== station;
+          
+          if (isFromOther && isForMe) {
+            // Play notification sound
             playNotificationSound(newMsg.sender_station);
+            
+            // Show popup notification
+            showNotification(
+              STATION_LABELS[newMsg.sender_station] || newMsg.sender_station,
+              newMsg.message.length > 50 ? newMsg.message.substring(0, 50) + '...' : newMsg.message
+            );
+            
+            // Auto-open the chat
+            setIsOpen(true);
+            setUnreadCount(0);
           }
         }
       )
@@ -138,7 +158,7 @@ export function InternalChat({ station }: InternalChatProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [unitName, station, isOpen]);
+  }, [unitName, station]);
 
   // Presence channel for typing indicators
   useEffect(() => {
@@ -447,6 +467,33 @@ export function InternalChat({ station }: InternalChatProps) {
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Notification Popup */}
+      {notification && (
+        <div className="absolute bottom-16 right-0 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden animate-in slide-in-from-right-5 fade-in z-50">
+          <div className={`${STATION_COLORS[Object.keys(STATION_LABELS).find(k => STATION_LABELS[k] === notification.sender) || 'cadastro']} px-3 py-1.5`}>
+            <div className="flex items-center gap-2 text-white text-sm font-medium">
+              <MessageCircle className="w-4 h-4" />
+              <span>Nova mensagem de {notification.sender}</span>
+            </div>
+          </div>
+          <div className="p-3 bg-background">
+            <p className="text-sm text-foreground">{notification.message}</p>
+          </div>
+          <div 
+            className="h-1 bg-primary animate-[shrink_4s_linear_forwards]"
+            style={{
+              animation: 'shrink 4s linear forwards',
+            }}
+          />
+          <style>{`
+            @keyframes shrink {
+              from { width: 100%; }
+              to { width: 0%; }
+            }
+          `}</style>
         </div>
       )}
 
