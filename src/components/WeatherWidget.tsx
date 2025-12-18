@@ -55,12 +55,27 @@ function getWeatherIcon(description: string, size: 'sm' | 'md' | 'lg' | 'xl' = '
 export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const [weatherCache, setWeatherCache] = useState<Record<string, WeatherData>>({});
   const [displayCity, setDisplayCity] = useState('Paineiras');
+  const [previousCity, setPreviousCity] = useState('Paineiras');
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const fetchingRef = useRef(false);
 
   const availableCities = Object.keys(weatherCache);
   const otherCities = availableCities.filter(c => c !== 'Paineiras');
   const currentWeather = weatherCache[displayCity];
+
+  // Handle city transition animation
+  const changeCityWithAnimation = useCallback((newCity: string) => {
+    if (newCity === displayCity) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setPreviousCity(displayCity);
+      setDisplayCity(newCity);
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 200);
+  }, [displayCity]);
 
   const loadWeatherFromDB = useCallback(async () => {
     if (fetchingRef.current) return;
@@ -113,17 +128,17 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     
     const interval = setInterval(() => {
       if (weatherCache['Paineiras'] && Math.random() < 0.2) {
-        setDisplayCity('Paineiras');
+        changeCityWithAnimation('Paineiras');
       } else if (otherCities.length > 0) {
         currentIndex = (currentIndex + 1) % otherCities.length;
-        setDisplayCity(otherCities[currentIndex]);
+        changeCityWithAnimation(otherCities[currentIndex]);
       } else if (availableCities.length > 0) {
         currentIndex = (currentIndex + 1) % availableCities.length;
-        setDisplayCity(availableCities[currentIndex]);
+        changeCityWithAnimation(availableCities[currentIndex]);
       }
     }, 10000);
     return () => clearInterval(interval);
-  }, [availableCities.length, otherCities.length, weatherCache]);
+  }, [availableCities.length, otherCities.length, weatherCache, changeCityWithAnimation]);
 
   // Clock section component
   const ClockSection = () => {
@@ -233,8 +248,8 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
         </div>
       </div>
       
-      {/* City Name - Prominent Badge */}
-      <div className="flex flex-col items-center bg-gradient-to-br from-emerald-600/50 to-teal-700/50 rounded-xl px-3 sm:px-4 md:px-5 py-2 sm:py-3 backdrop-blur-sm border border-white/20 shadow-lg shrink-0">
+      {/* City Name - Prominent Badge with Animation */}
+      <div className={`flex flex-col items-center bg-gradient-to-br from-emerald-600/50 to-teal-700/50 rounded-xl px-3 sm:px-4 md:px-5 py-2 sm:py-3 backdrop-blur-sm border border-white/20 shadow-lg shrink-0 transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
         <MapPin className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-amber-300 animate-bounce shrink-0" />
         <span className="font-black text-white uppercase tracking-wider text-sm sm:text-base md:text-lg lg:text-xl whitespace-nowrap">
           {displayCity}
