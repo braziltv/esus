@@ -593,6 +593,35 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Google Cloud TTS via backend function - plays MP3 audio (works on any device)
   // Calls API directly for reliability
+  // Simple audio playback (same method as useHourAudio which works correctly)
+  const playSimpleAudio = useCallback(
+    (buffer: ArrayBuffer, volume: number): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const blob = new Blob([buffer], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.volume = Math.min(1.0, volume);
+        
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          console.log('✅ Simple audio playback finished');
+          resolve();
+        };
+        audio.onerror = (err) => {
+          URL.revokeObjectURL(url);
+          console.error('❌ Simple audio playback error:', err);
+          reject(new Error('Audio playback failed'));
+        };
+        audio.play().catch((err) => {
+          URL.revokeObjectURL(url);
+          console.error('❌ Simple audio play() failed:', err);
+          reject(err);
+        });
+      });
+    },
+    []
+  );
+
   const speakWithConcatenatedTTS = useCallback(
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
@@ -601,7 +630,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
-      const gain = 2.5 * ttsVolume;
       
       // Get configured voice from localStorage
       const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
@@ -637,32 +665,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
-      const audioBlob = await response.blob();
-      console.log('✅ Google Cloud TTS audio received:', { size: audioBlob.size, type: audioBlob.type });
+      // Use arrayBuffer() like useHourAudio does (this method works on TV)
+      const audioBuffer = await response.arrayBuffer();
+      console.log('✅ Google Cloud TTS audio received:', { size: audioBuffer.byteLength });
 
-      if (audioBlob.size === 0) {
-        console.error('❌ Audio blob is empty!');
-        throw new Error('Audio blob is empty');
+      if (audioBuffer.byteLength === 0) {
+        console.error('❌ Audio buffer is empty!');
+        throw new Error('Audio buffer is empty');
       }
 
-      const audioUrl = URL.createObjectURL(audioBlob);
-      console.log('🎵 Audio URL created:', audioUrl);
-
-      try {
-        // Play the unified audio (name + destination in one natural speech)
-        console.log('▶️ Playing unified audio...');
-        const audio = new Audio(audioUrl);
-        audio.volume = 1.0; // Max volume, amplification handled by gain
-        await playAmplifiedAudio(audio, gain);
-        console.log('✅ Unified audio finished');
-      } catch (playError) {
-        console.error('❌ Error playing audio:', playError);
-        throw playError;
-      } finally {
-        URL.revokeObjectURL(audioUrl);
-      }
+      // Play using simple method (same as useHourAudio which works)
+      console.log('▶️ Playing audio with simple method...');
+      await playSimpleAudio(audioBuffer, ttsVolume);
+      console.log('✅ Audio playback finished');
     },
-    [playAmplifiedAudio]
+    [playSimpleAudio]
   );
 
   const speakWithGoogleTTS = useCallback(
