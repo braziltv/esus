@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UserPlus, Trash2, Users, Volume2, VolumeX, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
-import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { toast } from 'sonner';
@@ -123,11 +122,6 @@ export function PatientRegistration({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Custom Announcement Button */}
-      <div className="flex justify-end">
-        <CustomAnnouncementButton />
-      </div>
-
       {/* Registration Form */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">

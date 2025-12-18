@@ -4,7 +4,6 @@ import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
-import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
@@ -104,9 +103,8 @@ export function TriagePanel({
         </div>
       )}
 
-      {/* Controls Row */}
-      <div className="flex justify-end gap-2">
-        <CustomAnnouncementButton />
+      {/* Sound Toggle */}
+      <div className="flex justify-end">
         <Button 
           onClick={toggleSound} 
           variant="outline" 
