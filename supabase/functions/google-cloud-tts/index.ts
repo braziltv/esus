@@ -102,17 +102,24 @@ async function getAccessToken(credentials: any): Promise<string> {
 }
 
 // Vozes disponíveis no Google Cloud TTS para pt-BR
-const VOICES = {
-  female: {
-    languageCode: 'pt-BR',
-    name: 'pt-BR-Neural2-A', // Voz feminina neural de alta qualidade
-    ssmlGender: 'FEMALE'
-  },
-  male: {
-    languageCode: 'pt-BR', 
-    name: 'pt-BR-Neural2-B', // Voz masculina neural de alta qualidade
-    ssmlGender: 'MALE'
-  }
+const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
+  // Vozes Femininas
+  'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
+  'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
+  'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
+  'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
+  'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
+  'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
+  // Vozes Masculinas
+  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
+  'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
+  'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
+};
+
+// Vozes padrão por gênero
+const DEFAULT_VOICES = {
+  female: 'pt-BR-Neural2-A',
+  male: 'pt-BR-Neural2-B'
 };
 
 serve(async (req) => {
@@ -122,7 +129,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice = 'female', speakingRate = 1.0 } = await req.json();
+    const { text, voice = 'female', voiceName, speakingRate = 1.0 } = await req.json();
 
     if (!text) {
       return new Response(
@@ -131,7 +138,21 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[google-cloud-tts] Gerando áudio para: "${text}" com voz ${voice}`);
+    // Determinar qual voz usar
+    let selectedVoiceName: string;
+    
+    if (voiceName && VOICES[voiceName]) {
+      // Usar voz específica se fornecida
+      selectedVoiceName = voiceName;
+    } else if (voice === 'male') {
+      selectedVoiceName = DEFAULT_VOICES.male;
+    } else {
+      selectedVoiceName = DEFAULT_VOICES.female;
+    }
+    
+    const selectedVoice = VOICES[selectedVoiceName];
+
+    console.log(`[google-cloud-tts] Gerando áudio para: "${text}" com voz ${selectedVoiceName}`);
 
     // Carregar credenciais
     const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
@@ -143,9 +164,6 @@ serve(async (req) => {
     
     // Obter access token
     const accessToken = await getAccessToken(credentials);
-    
-    // Selecionar voz
-    const selectedVoice = voice === 'male' ? VOICES.male : VOICES.female;
 
     // Chamar Google Cloud TTS API
     const ttsResponse = await fetch(
