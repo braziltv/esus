@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SuccessAnimation } from '@/components/SuccessAnimation';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
-import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, FileText, Pencil } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, FileText, Pencil, ArrowRight } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
@@ -23,6 +23,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
@@ -41,6 +49,16 @@ const PRIORITY_CONFIG = {
   normal: { label: 'Normal', color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-500', icon: Circle },
 };
 
+const ORIGIN_CONFIG: Record<string, { label: string; color: string }> = {
+  cadastro: { label: 'Cadastro', color: 'bg-blue-500 text-white' },
+  triage: { label: 'Triagem', color: 'bg-amber-500 text-white' },
+  doctor: { label: 'Médico', color: 'bg-green-500 text-white' },
+  ecg: { label: 'ECG', color: 'bg-pink-500 text-white' },
+  curativos: { label: 'Curativos', color: 'bg-orange-500 text-white' },
+  raiox: { label: 'Raio X', color: 'bg-purple-500 text-white' },
+  enfermaria: { label: 'Enfermaria', color: 'bg-teal-500 text-white' },
+};
+
 interface DoctorPanelProps {
   waitingPatients: Patient[];
   currentCall: Patient | null;
@@ -48,6 +66,14 @@ interface DoctorPanelProps {
   onFinishConsultation: (id: string) => void;
   onRecall: (destination?: string) => void;
   onFinishWithoutCall: (id: string) => void;
+  onForwardToEcg?: (id: string) => void;
+  onForwardToCurativos?: (id: string) => void;
+  onForwardToRaiox?: (id: string) => void;
+  onForwardToEnfermaria?: (id: string) => void;
+  onSendToEcgQueue?: (id: string) => void;
+  onSendToCurativosQueue?: (id: string) => void;
+  onSendToRaioxQueue?: (id: string) => void;
+  onSendToEnfermariaQueue?: (id: string) => void;
   onUpdateObservations?: (id: string, observations: string) => void;
 }
 
@@ -58,6 +84,14 @@ export function DoctorPanel({
   onFinishConsultation,
   onRecall,
   onFinishWithoutCall,
+  onForwardToEcg,
+  onForwardToCurativos,
+  onForwardToRaiox,
+  onForwardToEnfermaria,
+  onSendToEcgQueue,
+  onSendToCurativosQueue,
+  onSendToRaioxQueue,
+  onSendToEnfermariaQueue,
   onUpdateObservations
 }: DoctorPanelProps) {
   const consultorios = [
@@ -171,6 +205,52 @@ export function DoctorPanel({
                   <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden xs:inline">Chamar</span> Novamente
                 </Button>
+
+                {/* Menu Encaminhar para outros serviços */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm text-blue-600 hover:text-blue-700 border-blue-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                      <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                      Encaminhar
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-card border border-border z-50">
+                    <DropdownMenuLabel>Encaminhar para Serviço</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="text-xs text-green-600">Com voz na TV</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => onForwardToEcg?.(myCurrentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      ECG (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onForwardToCurativos?.(myCurrentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Curativos (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onForwardToRaiox?.(myCurrentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Raio X (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onForwardToEnfermaria?.(myCurrentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Enfermaria (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">Interno (sem voz)</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => onSendToEcgQueue?.(myCurrentCall.id)} className="cursor-pointer">
+                      ECG (interno)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onSendToCurativosQueue?.(myCurrentCall.id)} className="cursor-pointer">
+                      Curativos (interno)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onSendToRaioxQueue?.(myCurrentCall.id)} className="cursor-pointer">
+                      Raio X (interno)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onSendToEnfermariaQueue?.(myCurrentCall.id)} className="cursor-pointer">
+                      Enfermaria (interno)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Button onClick={() => setConfirmFinish({ id: myCurrentCall.id, name: myCurrentCall.name, type: 'consultation' })} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Concluir Consulta
@@ -239,9 +319,14 @@ export function DoctorPanel({
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Triagem finalizada às {formatBrazilTime(patient.calledAt || patient.createdAt, 'HH:mm')}
-                      </p>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                        <span>Triagem finalizada às {formatBrazilTime(patient.calledAt || patient.createdAt, 'HH:mm')}</span>
+                        {patient.calledBy && ORIGIN_CONFIG[patient.calledBy] && (
+                          <span className={`px-2 py-0.5 text-[10px] font-medium rounded ${ORIGIN_CONFIG[patient.calledBy].color}`}>
+                            Veio: {ORIGIN_CONFIG[patient.calledBy].label}
+                          </span>
+                        )}
+                      </div>
                       {/* Observações */}
                       {editingObservation?.id === patient.id ? (
                         <div className="mt-2 flex flex-col gap-2">
