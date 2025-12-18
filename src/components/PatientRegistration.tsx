@@ -7,8 +7,8 @@ import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { UserPlus, Trash2, Users, Volume2, VolumeX, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
-import { Patient, PatientPriority } from '@/types/patient';
+import { UserPlus, Trash2, Users, Volume2, VolumeX, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil, Heart, Bandage, Scan, BedDouble, ArrowRight } from 'lucide-react';
+import { Patient, PatientPriority, PatientStatus } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { toast } from 'sonner';
 import {
@@ -18,6 +18,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
   Select,
@@ -53,16 +56,21 @@ interface PatientRegistrationProps {
   onForwardToTriage: (id: string, destination?: string) => void;
   onForwardToDoctor: (id: string, destination?: string) => void;
   onSendToTriageQueue?: (id: string) => void;
+  onSendToDoctorQueue?: (id: string, destination?: string) => void;
+  onSendToEcgQueue?: (id: string) => void;
+  onSendToCurativosQueue?: (id: string) => void;
+  onSendToRaioxQueue?: (id: string) => void;
+  onSendToEnfermariaQueue?: (id: string) => void;
   onUpdatePriority?: (id: string, priority: PatientPriority) => void;
   onUpdateObservations?: (id: string, observations: string) => void;
 }
 
 const SALAS = [
-  { id: 'triagem', name: 'Triagem' },
-  { id: 'eletro', name: 'Sala de Eletrocardiograma' },
-  { id: 'curativo', name: 'Sala de Curativos' },
-  { id: 'raiox', name: 'Sala do Raio X' },
-  { id: 'enfermaria', name: 'Enfermaria' },
+  { id: 'triagem', name: 'Triagem', icon: Activity, color: 'text-blue-600' },
+  { id: 'eletro', name: 'Sala de Eletrocardiograma', icon: Heart, color: 'text-blue-500' },
+  { id: 'curativo', name: 'Sala de Curativos', icon: Bandage, color: 'text-amber-600' },
+  { id: 'raiox', name: 'Sala de Raio X', icon: Scan, color: 'text-purple-600' },
+  { id: 'enfermaria', name: 'Enfermaria', icon: BedDouble, color: 'text-rose-600' },
 ];
 
 const CONSULTORIOS = [
@@ -70,15 +78,47 @@ const CONSULTORIOS = [
   { id: 'cons2', name: 'Consultório 2' },
 ];
 
-const CONSULTORIOS_MEDICO = [
-  { id: 'med1', name: 'Consultório 1' },
-  { id: 'med2', name: 'Consultório 2' },
-];
-
 const PRIORITY_CONFIG = {
   emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
   priority: { label: 'Prioridade', color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-500', icon: AlertCircle },
   normal: { label: 'Normal', color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-500', icon: Circle },
+};
+
+// Helper to get status display info
+const getStatusInfo = (status: PatientStatus, destination?: string) => {
+  const statusMap: Record<string, { text: string; color: string }> = {
+    'waiting': { text: 'Aguardando triagem', color: 'text-amber-500' },
+    'in-triage': { text: 'Em triagem', color: 'text-blue-500' },
+    'waiting-doctor': { text: `Aguardando médico${destination ? ` - ${destination}` : ''}`, color: 'text-purple-500' },
+    'in-consultation': { text: 'Em consulta', color: 'text-green-500' },
+    'waiting-ecg': { text: 'Aguardando ECG', color: 'text-blue-500' },
+    'in-ecg': { text: 'Em ECG', color: 'text-blue-600' },
+    'waiting-curativos': { text: 'Aguardando Curativos', color: 'text-amber-500' },
+    'in-curativos': { text: 'Em Curativos', color: 'text-amber-600' },
+    'waiting-raiox': { text: 'Aguardando Raio X', color: 'text-purple-500' },
+    'in-raiox': { text: 'Em Raio X', color: 'text-purple-600' },
+    'waiting-enfermaria': { text: 'Aguardando Enfermaria', color: 'text-rose-500' },
+    'in-enfermaria': { text: 'Em Enfermaria', color: 'text-rose-600' },
+    'attended': { text: 'Atendido', color: 'text-green-600' },
+  };
+  return statusMap[status] || { text: status, color: 'text-muted-foreground' };
+};
+
+// Helper to get origin badge
+const getOriginBadge = (destination?: string) => {
+  if (!destination) return null;
+  
+  const originMap: Record<string, { bg: string; text: string; icon: typeof Activity }> = {
+    'Sala de Eletrocardiograma': { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', icon: Heart },
+    'Sala de Curativos': { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', icon: Bandage },
+    'Sala de Raio X': { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300', icon: Scan },
+    'Enfermaria': { bg: 'bg-rose-100 dark:bg-rose-900/30', text: 'text-rose-700 dark:text-rose-300', icon: BedDouble },
+    'Triagem': { bg: 'bg-cyan-100 dark:bg-cyan-900/30', text: 'text-cyan-700 dark:text-cyan-300', icon: Activity },
+    'Consultório 1': { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', icon: Stethoscope },
+    'Consultório 2': { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', icon: Stethoscope },
+  };
+  
+  return originMap[destination] || null;
 };
 
 export function PatientRegistration({ 
@@ -90,6 +130,11 @@ export function PatientRegistration({
   onForwardToTriage,
   onForwardToDoctor,
   onSendToTriageQueue,
+  onSendToDoctorQueue,
+  onSendToEcgQueue,
+  onSendToCurativosQueue,
+  onSendToRaioxQueue,
+  onSendToEnfermariaQueue,
   onUpdatePriority,
   onUpdateObservations
 }: PatientRegistrationProps) {
@@ -99,13 +144,9 @@ export function PatientRegistration({
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
-
-  // Som de notificação ao adicionar paciente
   const { playAddedSound } = usePatientAddedSound();
 
-  // Dicas aleatórias para acentuação
   const ACCENT_TIPS = [
     '💡 Dica: Acentue os nomes corretamente (ex: José, João, Luís) para melhor pronúncia no áudio!',
     '✨ Lembre-se: Nomes acentuados como "André", "Inês", "Márcio" soam mais naturais na chamada.',
@@ -120,7 +161,7 @@ export function PatientRegistration({
     if (name.trim()) {
       setIsLoading(true);
       try {
-        await new Promise(resolve => setTimeout(resolve, 300)); // Brief visual feedback
+        await new Promise(resolve => setTimeout(resolve, 300));
         onAddPatient(name, selectedPriority);
         setName('');
         setSelectedPriority('normal');
@@ -133,6 +174,14 @@ export function PatientRegistration({
   };
 
   const activePatients = patients.filter(p => p.status !== 'attended');
+
+  // Helper functions for silent queue sending
+  const handleSendToQueue = (patientId: string, patientName: string, queueType: string, sendFn?: (id: string) => void) => {
+    if (sendFn) {
+      sendFn(patientId);
+      toast.success(`${patientName} encaminhado para ${queueType} (interno)`);
+    }
+  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -199,6 +248,8 @@ export function PatientRegistration({
             {activePatients.map((patient, index) => {
               const priorityConfig = PRIORITY_CONFIG[patient.priority || 'normal'];
               const PriorityIcon = priorityConfig.icon;
+              const statusInfo = getStatusInfo(patient.status, patient.destination);
+              const originBadge = getOriginBadge(patient.destination);
               
               return (
                 <div
@@ -238,21 +289,22 @@ export function PatientRegistration({
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <p className="text-xs sm:text-sm">
-                        <span className="text-amber-500 font-medium">Cadastrado às {formatBrazilTime(patient.createdAt, 'HH:mm')}</span>
-                        {' • '}
-                        <span className={`font-medium ${
-                          patient.status === 'waiting' ? 'text-amber-500' :
-                          patient.status === 'in-triage' ? 'text-blue-500' :
-                          patient.status === 'waiting-doctor' ? 'text-purple-500' :
-                          'text-green-500'
-                        }`}>
-                          {patient.status === 'waiting' && 'Aguardando triagem'}
-                          {patient.status === 'in-triage' && 'Em triagem'}
-                          {patient.status === 'waiting-doctor' && 'Aguardando médico'}
-                          {patient.status === 'in-consultation' && 'Em consulta'}
+                      <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                        <span className="text-amber-500 font-medium text-xs sm:text-sm">
+                          Cadastrado às {formatBrazilTime(patient.createdAt, 'HH:mm')}
                         </span>
-                      </p>
+                        <span className="text-muted-foreground">•</span>
+                        <span className={`font-medium text-xs sm:text-sm ${statusInfo.color}`}>
+                          {statusInfo.text}
+                        </span>
+                        {/* Origin badge - show where patient came from */}
+                        {originBadge && patient.status !== 'waiting' && (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${originBadge.bg} ${originBadge.text}`}>
+                            <originBadge.icon className="w-3 h-3" />
+                            {patient.destination}
+                          </span>
+                        )}
+                      </div>
                       {/* Observações */}
                       {editingObservation?.id === patient.id ? (
                         <div className="mt-2 flex flex-col gap-2">
@@ -324,181 +376,194 @@ export function PatientRegistration({
                         <DropdownMenuContent className="bg-card border border-border z-50">
                           <DropdownMenuLabel>Alterar Prioridade</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => onUpdatePriority(patient.id, 'emergency')}
-                            className="cursor-pointer text-red-600"
-                          >
+                          <DropdownMenuItem onClick={() => onUpdatePriority(patient.id, 'emergency')} className="cursor-pointer text-red-600">
                             <AlertTriangle className="w-4 h-4 mr-2" />
                             Emergência
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onUpdatePriority(patient.id, 'priority')}
-                            className="cursor-pointer text-amber-600"
-                          >
+                          <DropdownMenuItem onClick={() => onUpdatePriority(patient.id, 'priority')} className="cursor-pointer text-amber-600">
                             <AlertCircle className="w-4 h-4 mr-2" />
                             Prioridade
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onUpdatePriority(patient.id, 'normal')}
-                            className="cursor-pointer text-green-600"
-                          >
+                          <DropdownMenuItem onClick={() => onUpdatePriority(patient.id, 'normal')} className="cursor-pointer text-green-600">
                             <Circle className="w-4 h-4 mr-2" />
                             Normal
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     )}
-                  {/* Encaminhar para próxima etapa - apenas para pacientes aguardando */}
-                  {patient.status === 'waiting' && (
-                    <>
-                      {/* Fila Triagem Silenciosa */}
-                      {onSendToTriageQueue && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  onSendToTriageQueue(patient.id);
-                                  toast.success(`${patient.name} encaminhado para fila de triagem`);
-                                }}
-                                className="gap-1 text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-                              >
-                                <VolumeX className="w-3 h-3 sm:w-4 sm:h-4" />
-                                <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Encaminhar para triagem (sem áudio)</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
 
-                      {/* Menu Triagem com áudio */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-                          >
-                            <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-                            <span className="hidden xs:inline">Triagem</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-card border border-border z-50">
-                          <DropdownMenuLabel>Direcionar para (com áudio)</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {SALAS.map((sala) => (
-                            <DropdownMenuItem
-                              key={sala.id}
-                              onClick={() => onForwardToTriage(patient.id, sala.name)}
-                              className="cursor-pointer"
-                            >
-                              {sala.name}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      {/* Menu Médico */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-                          >
-                            <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4" />
-                            <span className="hidden xs:inline">Médico</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-card border border-border z-50">
-                          <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {CONSULTORIOS_MEDICO.map((cons) => (
-                            <DropdownMenuItem
-                              key={cons.id}
-                              onClick={() => onForwardToDoctor(patient.id, cons.name)}
-                              className="cursor-pointer"
-                            >
-                              {cons.name}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  )}
-
-                  {/* Menu Salas */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
-                        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="hidden xs:inline">Sala</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-card border border-border z-50">
-                      <DropdownMenuLabel>Direcionar para Sala</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {SALAS.map((sala) => (
-                        <DropdownMenuItem
-                          key={sala.id}
-                          onClick={() => onDirectPatient(patient.name, sala.name)}
-                          className="cursor-pointer"
+                    {/* Main Actions Dropdown - Encaminhar */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-primary hover:text-primary/80 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                         >
-                          {sala.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden xs:inline">Encaminhar</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-card border border-border z-50 w-64">
+                        {/* Triagem */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Activity className="w-4 h-4 mr-2 text-cyan-600" />
+                            Triagem
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuItem onClick={() => onForwardToTriage(patient.id, 'Triagem')} className="cursor-pointer">
+                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                              Com voz na TV
+                            </DropdownMenuItem>
+                            {onSendToTriageQueue && (
+                              <DropdownMenuItem onClick={() => handleSendToQueue(patient.id, patient.name, 'Triagem', onSendToTriageQueue)} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
 
-                  {/* Menu Consultórios */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
-                        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="hidden xs:inline">Consultório</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-card border border-border z-50">
-                      <DropdownMenuLabel>Direcionar para Consultório</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {CONSULTORIOS.map((cons) => (
-                        <DropdownMenuItem
-                          key={cons.id}
-                          onClick={() => onDirectPatient(patient.name, cons.name)}
-                          className="cursor-pointer"
-                        >
-                          {cons.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuSeparator />
 
-                  {/* Finalizar sem chamar */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setConfirmFinish({ id: patient.id, name: patient.name })}
-                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-                  >
-                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden xs:inline">Finalizar</span>
-                  </Button>
+                        {/* ECG */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Heart className="w-4 h-4 mr-2 text-blue-500" />
+                            Eletrocardiograma
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Sala de Eletrocardiograma')} className="cursor-pointer">
+                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                              Com voz na TV
+                            </DropdownMenuItem>
+                            {onSendToEcgQueue && (
+                              <DropdownMenuItem onClick={() => handleSendToQueue(patient.id, patient.name, 'ECG', onSendToEcgQueue)} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onRemovePatient(patient.id)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 sm:h-9 sm:w-9"
-                  >
-                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
+                        {/* Curativos */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Bandage className="w-4 h-4 mr-2 text-amber-600" />
+                            Curativos
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Sala de Curativos')} className="cursor-pointer">
+                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                              Com voz na TV
+                            </DropdownMenuItem>
+                            {onSendToCurativosQueue && (
+                              <DropdownMenuItem onClick={() => handleSendToQueue(patient.id, patient.name, 'Curativos', onSendToCurativosQueue)} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+
+                        {/* Raio X */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Scan className="w-4 h-4 mr-2 text-purple-600" />
+                            Raio X
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Sala de Raio X')} className="cursor-pointer">
+                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                              Com voz na TV
+                            </DropdownMenuItem>
+                            {onSendToRaioxQueue && (
+                              <DropdownMenuItem onClick={() => handleSendToQueue(patient.id, patient.name, 'Raio X', onSendToRaioxQueue)} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+
+                        {/* Enfermaria */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <BedDouble className="w-4 h-4 mr-2 text-rose-600" />
+                            Enfermaria
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Enfermaria')} className="cursor-pointer">
+                              <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                              Com voz na TV
+                            </DropdownMenuItem>
+                            {onSendToEnfermariaQueue && (
+                              <DropdownMenuItem onClick={() => handleSendToQueue(patient.id, patient.name, 'Enfermaria', onSendToEnfermariaQueue)} className="cursor-pointer">
+                                <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Interno (sem voz)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+
+                        <DropdownMenuSeparator />
+
+                        {/* Médico */}
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Stethoscope className="w-4 h-4 mr-2 text-green-600" />
+                            Médico
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent className="bg-card border border-border">
+                            <DropdownMenuLabel className="text-xs">Com voz na TV</DropdownMenuLabel>
+                            {CONSULTORIOS.map((cons) => (
+                              <DropdownMenuItem key={cons.id} onClick={() => onForwardToDoctor(patient.id, cons.name)} className="cursor-pointer">
+                                <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                                {cons.name}
+                              </DropdownMenuItem>
+                            ))}
+                            {onSendToDoctorQueue && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel className="text-xs">Interno (sem voz)</DropdownMenuLabel>
+                                {CONSULTORIOS.map((cons) => (
+                                  <DropdownMenuItem key={`silent-${cons.id}`} onClick={() => {
+                                    onSendToDoctorQueue(patient.id, cons.name);
+                                    toast.success(`${patient.name} encaminhado para ${cons.name} (interno)`);
+                                  }} className="cursor-pointer">
+                                    <VolumeX className="w-4 h-4 mr-2 text-muted-foreground" />
+                                    {cons.name}
+                                  </DropdownMenuItem>
+                                ))}
+                              </>
+                            )}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* Finalizar */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setConfirmFinish({ id: patient.id, name: patient.name })}
+                      className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                    >
+                      <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Finalizar</span>
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onRemovePatient(patient.id)}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 sm:h-9 sm:w-9"
+                    >
+                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
               );
             })}
           </div>
