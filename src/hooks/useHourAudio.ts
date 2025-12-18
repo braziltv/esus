@@ -157,7 +157,8 @@ export const useHourAudio = () => {
             text, 
             voiceId: MATILDA_VOICE_ID,
             skipCache: true,
-            unitName: 'TimeAnnouncement'
+            unitName: 'TimeAnnouncement',
+            speed: 0.85 // Velocidade um pouco mais lenta para clareza
           }),
         }
       );

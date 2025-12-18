@@ -537,7 +537,7 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache, skipCache } = await req.json();
+    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache, skipCache, speed } = await req.json();
 
     const supabase = supabaseUrl && supabaseServiceKey 
       ? createClient(supabaseUrl, supabaseServiceKey) 
@@ -547,6 +547,11 @@ serve(async (req) => {
     
     // Victor Power voice - mesma voz do anúncio de horas, otimizada para português brasileiro
     const selectedVoiceId = voiceId || "YNOujSUmHtgN6anjqXPf"; // Victor Power - voz unificada
+    
+    // Configurações de voz com suporte a velocidade customizada
+    const voiceSettings = speed 
+      ? { ...OPTIMIZED_VOICE_SETTINGS, speed: speed }
+      : OPTIMIZED_VOICE_SETTINGS;
     
     // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
     // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo
@@ -585,7 +590,7 @@ serve(async (req) => {
             text: processedText,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: OPTIMIZED_VOICE_SETTINGS,
+            voice_settings: voiceSettings,
           }),
         }
       );
@@ -732,7 +737,7 @@ serve(async (req) => {
             text: processedText,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: OPTIMIZED_VOICE_SETTINGS,
+            voice_settings: voiceSettings,
           }),
         }
       );
@@ -843,8 +848,8 @@ serve(async (req) => {
           text: processedText,
           model_id: "eleven_multilingual_v2",
           output_format: "mp3_44100_128",
-          // USAR CONFIGURAÇÕES OTIMIZADAS UNIFICADAS
-          voice_settings: OPTIMIZED_VOICE_SETTINGS,
+          // USAR CONFIGURAÇÕES OTIMIZADAS (com speed customizado se fornecido)
+          voice_settings: voiceSettings,
         }),
       }
     );
