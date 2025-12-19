@@ -726,6 +726,7 @@ export function DailyQuoteCard() {
   const [showAuthor, setShowAuthor] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const dailyQuote = useMemo(() => QUOTES[quoteIndex], [quoteIndex]);
 
@@ -801,40 +802,60 @@ export function DailyQuoteCard() {
   }, [quoteIndex]);
 
   const runAnimation = useCallback(() => {
-    setIsVisible(false);
+    setIsVisible(true);
     setShowBadge(false);
     setShowQuote(false);
     setShowAuthor(false);
     setShowInsight(false);
 
     const timers = [
-      setTimeout(() => setIsVisible(true), 100),
-      setTimeout(() => setShowBadge(true), 500),
-      setTimeout(() => setShowQuote(true), 900),
-      setTimeout(() => setShowAuthor(true), 1300),
-      setTimeout(() => setShowInsight(true), 1700),
+      setTimeout(() => setShowBadge(true), 300),
+      setTimeout(() => setShowQuote(true), 600),
+      setTimeout(() => setShowAuthor(true), 900),
+      setTimeout(() => setShowInsight(true), 1200),
     ];
 
     return timers;
   }, []);
 
+  // Smooth crossfade transition to next quote
+  const transitionToNextQuote = useCallback(() => {
+    setIsTransitioning(true);
+    
+    // Fade out current content smoothly
+    setShowInsight(false);
+    setTimeout(() => setShowAuthor(false), 100);
+    setTimeout(() => setShowQuote(false), 200);
+    setTimeout(() => setShowBadge(false), 300);
+    
+    // After fade out, change quote and fade in
+    setTimeout(() => {
+      setQuoteIndex(prev => getRandomQuoteIndex(prev));
+      setAnimationKey(prev => prev + 1);
+      setIsTransitioning(false);
+      
+      // Fade in new content with staggered delays
+      setTimeout(() => setShowBadge(true), 200);
+      setTimeout(() => setShowQuote(true), 500);
+      setTimeout(() => setShowAuthor(true), 800);
+      setTimeout(() => setShowInsight(true), 1100);
+    }, 600);
+  }, []);
+
   useEffect(() => {
     if (isHidden) return;
 
-    let timers = runAnimation();
+    const timers = runAnimation();
 
     const interval = setInterval(() => {
-      timers.forEach(clearTimeout);
-      setQuoteIndex(prev => getRandomQuoteIndex(prev));
-      setAnimationKey(prev => prev + 1);
-      timers = runAnimation();
+      transitionToNextQuote();
     }, QUOTE_ROTATION_INTERVAL);
 
     return () => {
       timers.forEach(clearTimeout);
       clearInterval(interval);
     };
-  }, [runAnimation, isHidden]);
+  }, [runAnimation, isHidden, transitionToNextQuote]);
 
   if (isHidden) return null;
 
@@ -846,13 +867,14 @@ export function DailyQuoteCard() {
         bg-gradient-to-r ${dailyQuote.bgColor} 
         p-3 sm:p-4 shadow-lg
         border border-white/20
-        transition-all duration-500 ease-out
+        transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${isClosing 
           ? 'opacity-0 scale-95 translate-y-4' 
           : isVisible 
             ? 'opacity-100 translate-y-0 scale-100' 
             : 'opacity-0 translate-y-6 scale-98'
         }
+        ${isTransitioning ? 'bg-opacity-95' : 'bg-opacity-100'}
       `}
     >
       {/* Close Button - More Visible */}
@@ -930,15 +952,15 @@ export function DailyQuoteCard() {
         <div 
           className={`
             inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5 mb-2
-            transition-all duration-700 ease-out
+            transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
             ${showBadge 
               ? 'opacity-100 translate-x-0 scale-100' 
-              : 'opacity-0 -translate-x-8 scale-90'
+              : 'opacity-0 -translate-x-6 scale-90'
             }
           `}
         >
           <Sparkles 
-            className={`w-3 h-3 text-yellow-300 transition-transform duration-1000 ${showBadge ? 'rotate-[360deg]' : 'rotate-0'}`} 
+            className={`w-3 h-3 text-yellow-300 transition-transform duration-700 ease-out ${showBadge ? 'rotate-[360deg]' : 'rotate-0'}`} 
           />
           <span className="text-white text-[10px] font-semibold tracking-wide">FRASE DO DIA</span>
         </div>
@@ -947,21 +969,21 @@ export function DailyQuoteCard() {
         <div 
           className={`
             flex items-start gap-1.5 mb-2 pr-6
-            transition-all duration-800 ease-out
+            transition-all duration-600 ease-[cubic-bezier(0.4,0,0.2,1)]
             ${showQuote 
-              ? 'opacity-100 translate-y-0' 
-              : 'opacity-0 translate-y-6'
+              ? 'opacity-100 translate-y-0 blur-0' 
+              : 'opacity-0 translate-y-4 blur-[2px]'
             }
           `}
         >
           <Quote 
             className={`
               w-4 h-4 text-white/60 flex-shrink-0 mt-0.5
-              transition-all duration-700
+              transition-all duration-500 ease-out
               ${showQuote ? 'rotate-0 scale-100' : '-rotate-45 scale-0'}
             `} 
           />
-          <p className="text-white font-bold text-sm sm:text-base leading-snug drop-shadow-md">
+          <p className="text-white font-bold text-sm sm:text-base leading-snug drop-shadow-md transition-all duration-500">
             {dailyQuote.quote}
           </p>
         </div>
@@ -970,10 +992,10 @@ export function DailyQuoteCard() {
         <p 
           className={`
             text-white/90 text-xs font-medium mb-2 pl-5
-            transition-all duration-700 ease-out
+            transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
             ${showAuthor 
-              ? 'opacity-100 translate-x-0' 
-              : 'opacity-0 translate-x-8'
+              ? 'opacity-100 translate-x-0 blur-0' 
+              : 'opacity-0 translate-x-6 blur-[1px]'
             }
           `}
         >
@@ -984,23 +1006,23 @@ export function DailyQuoteCard() {
         <div 
           className={`
             flex items-center gap-2 bg-black/20 backdrop-blur-sm rounded-lg px-2.5 py-2
-            transition-all duration-900 ease-out
+            transition-all duration-600 ease-[cubic-bezier(0.4,0,0.2,1)]
             ${showInsight 
-              ? 'opacity-100 translate-y-0 scale-100' 
-              : 'opacity-0 translate-y-8 scale-95'
+              ? 'opacity-100 translate-y-0 scale-100 blur-0' 
+              : 'opacity-0 translate-y-6 scale-95 blur-[2px]'
             }
           `}
         >
           <div 
             className={`
               flex-shrink-0 w-7 h-7 bg-yellow-400/90 rounded-full flex items-center justify-center shadow-md
-              transition-all duration-700 delay-100
+              transition-all duration-500 ease-out delay-75
               ${showInsight ? 'scale-100 rotate-0' : 'scale-0 -rotate-180'}
             `}
           >
             <Lightbulb className="w-3.5 h-3.5 text-yellow-900" />
           </div>
-          <div>
+          <div className="transition-all duration-400">
             <p className="text-yellow-300 text-[10px] font-semibold uppercase tracking-wider">Insight</p>
             <p className="text-white text-xs leading-tight">
               {dailyQuote.insight}
