@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import { Lightbulb, Quote, Sparkles, X } from 'lucide-react';
+import { Lightbulb, Quote, Sparkles, X, ChevronRight } from 'lucide-react';
 
 const QUOTES = [
   {
@@ -877,18 +877,36 @@ export function DailyQuoteCard() {
         ${isTransitioning ? 'bg-opacity-95' : 'bg-opacity-100'}
       `}
     >
-      {/* Close Button - More Visible */}
-      <button
-        onClick={handleDismiss}
-        className="absolute top-2 right-2 z-20 p-1.5 rounded-full 
-          bg-white/30 hover:bg-white/50 backdrop-blur-sm
-          text-white hover:text-white shadow-md
-          transition-all duration-200 hover:scale-110
-          border border-white/40"
-        title="Fechar (volta em 1 hora)"
-      >
-        <X className="w-4 h-4" />
-      </button>
+      {/* Action Buttons */}
+      <div className="absolute top-2 right-2 z-20 flex gap-1.5">
+        {/* Next Quote Button */}
+        <button
+          onClick={transitionToNextQuote}
+          disabled={isTransitioning}
+          className="p-1.5 rounded-full 
+            bg-white/30 hover:bg-white/50 backdrop-blur-sm
+            text-white hover:text-white shadow-md
+            transition-all duration-200 hover:scale-110
+            border border-white/40
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          title="Próxima frase"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+        
+        {/* Close Button */}
+        <button
+          onClick={handleDismiss}
+          className="p-1.5 rounded-full 
+            bg-white/30 hover:bg-white/50 backdrop-blur-sm
+            text-white hover:text-white shadow-md
+            transition-all duration-200 hover:scale-110
+            border border-white/40"
+          title="Fechar (volta em 1 hora)"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
 
       {/* Animated gradient overlay */}
       <div 
