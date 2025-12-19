@@ -1481,8 +1481,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           backgroundSize: '50px 50px'
         }} />
         
-        {/* Floating particles */}
-        <FloatingParticles />
+        {/* Floating particles - reactive to call type */}
+        <FloatingParticles activeCallType={announcingType} />
       </div>
 
       {/* Flash overlay during announcement */}
