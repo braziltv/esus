@@ -855,32 +855,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
 
-  // Generate 3 random announcement times per hour with minimum 10 min between them
+  // Generate a single announcement at the start of each hour (minute 0)
   const generateRandomAnnouncements = useCallback((hour: number): number[] => {
-    const announcements: number[] = [];
-    const minGap = 10; // mínimo de 10 minutos entre anúncios
-    
-    // Gerar 3 momentos aleatórios
-    for (let i = 0; i < 3; i++) {
-      let attempts = 0;
-      let minute: number;
-      
-      do {
-        minute = Math.floor(Math.random() * 60); // 0-59
-        attempts++;
-        
-        // Verificar se há pelo menos 10 min de distância dos outros
-        const isValid = announcements.every(m => Math.abs(minute - m) >= minGap);
-        
-        if (isValid || attempts > 50) {
-          if (isValid) announcements.push(minute);
-          break;
-        }
-      } while (attempts <= 50);
-    }
-    
-    console.log(`Hour ${hour} scheduled announcements at minutes:`, announcements.sort((a, b) => a - b));
-    return announcements.sort((a, b) => a - b);
+    console.log(`Hour ${hour} scheduled announcement at minute: 0`);
+    return [0]; // Apenas no início da hora
   }, []);
 
   // Expose test function on window for manual testing
@@ -903,7 +881,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [currentTime, playHourAnnouncement]);
 
-  // Announce time 3 times per hour at random moments (quiet hours: 23h-05h)
+  // Announce time once per hour at minute 0 (quiet hours: 22h-06h)
   useEffect(() => {
     if (!currentTime || !audioUnlocked || !isSynced) return;
 
