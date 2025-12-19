@@ -11,6 +11,7 @@ import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
+import { VoiceSelector } from '@/components/VoiceSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -137,8 +138,9 @@ export function TriagePanel({
         </div>
       )}
 
-      {/* Sound Toggle */}
-      <div className="flex justify-end">
+      {/* Sound Toggle & Voice Selector */}
+      <div className="flex justify-end gap-2 flex-wrap">
+        <VoiceSelector compact />
         <Button 
           onClick={toggleSound} 
           variant="outline" 
