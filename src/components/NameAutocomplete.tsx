@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { searchNames, searchSurnames } from '@/data/brazilianNames';
 import { cn } from '@/lib/utils';
-import { correctAccents, suggestCorrection, hasAccents } from '@/utils/accentCorrection';
+import { correctAccents, suggestCorrection, hasAccents, getAccentCorrection } from '@/utils/accentCorrection';
+import { Undo2 } from 'lucide-react';
 
 interface NameAutocompleteProps {
   value: string;
@@ -23,6 +24,7 @@ export function NameAutocomplete({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [accentSuggestion, setAccentSuggestion] = useState<{ original: string; suggestion: string } | null>(null);
+  const [recentCorrections, setRecentCorrections] = useState<{ original: string; corrected: string; position: number }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +44,23 @@ export function NameAutocomplete({
     
     return { word: words[words.length - 1], index: words.length - 1, isFirstWord: words.length <= 1 };
   }, [value]);
+
+  // Aplica correção automática a uma palavra específica
+  const autoCorrectWord = useCallback((word: string): { corrected: string; wasChanged: boolean } => {
+    if (!word || word.length < 2) return { corrected: word, wasChanged: false };
+    
+    // Verifica se já tem acentos - não corrige
+    if (hasAccents(word)) return { corrected: word, wasChanged: false };
+    
+    const correction = getAccentCorrection(word);
+    if (correction && correction.toLowerCase() !== word.toLowerCase()) {
+      return { corrected: correction, wasChanged: true };
+    }
+    
+    // Capitaliza a primeira letra se não houver correção
+    const capitalized = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    return { corrected: capitalized, wasChanged: false };
+  }, []);
 
   // Atualiza sugestões baseado no texto atual
   const updateSuggestions = useCallback(() => {
@@ -92,7 +111,6 @@ export function NameAutocomplete({
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
-        // Move cursor para o final do texto
         const len = newValue.length;
         inputRef.current.setSelectionRange(len, len);
       }
@@ -106,10 +124,49 @@ export function NameAutocomplete({
     setAccentSuggestion(null);
   }, [value, onChange]);
 
-  // Handler de mudança (sem auto-correção - apenas sugestão)
+  // Desfaz uma correção recente
+  const undoCorrection = useCallback((correction: { original: string; corrected: string; position: number }) => {
+    const words = value.split(' ');
+    if (words[correction.position] === correction.corrected) {
+      words[correction.position] = correction.original.charAt(0).toUpperCase() + correction.original.slice(1).toLowerCase();
+      const newValue = words.join(' ');
+      onChange(newValue);
+      setRecentCorrections(prev => prev.filter(c => c.position !== correction.position));
+    }
+  }, [value, onChange]);
+
+  // Handler de mudança com correção automática ao digitar espaço
   const handleChange = useCallback((newValue: string) => {
+    const oldValue = value;
+    const oldWords = oldValue.split(' ');
+    const newWords = newValue.split(' ');
+    
+    // Detecta se acabou de adicionar um espaço (terminou uma palavra)
+    if (newValue.endsWith(' ') && !oldValue.endsWith(' ') && newWords.length > oldWords.length) {
+      // Pega a palavra que acabou de ser terminada (penúltima palavra no novo valor)
+      const wordIndex = newWords.length - 2;
+      const wordToCorrect = newWords[wordIndex];
+      
+      if (wordToCorrect && wordToCorrect.length >= 2) {
+        const { corrected, wasChanged } = autoCorrectWord(wordToCorrect);
+        
+        if (wasChanged) {
+          newWords[wordIndex] = corrected;
+          const correctedValue = newWords.join(' ');
+          onChange(correctedValue);
+          
+          // Adiciona à lista de correções recentes para permitir desfazer
+          setRecentCorrections(prev => {
+            const filtered = prev.filter(c => c.position !== wordIndex);
+            return [...filtered, { original: wordToCorrect, corrected, position: wordIndex }].slice(-5);
+          });
+          return;
+        }
+      }
+    }
+    
     onChange(newValue);
-  }, [onChange]);
+  }, [value, onChange, autoCorrectWord]);
 
   // Handlers de teclado
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -153,6 +210,13 @@ export function NameAutocomplete({
     updateSuggestions();
   }, [value, updateSuggestions]);
 
+  // Limpa correções quando o valor é limpo
+  useEffect(() => {
+    if (!value.trim()) {
+      setRecentCorrections([]);
+    }
+  }, [value]);
+
   // Fecha sugestões ao clicar fora
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -187,6 +251,26 @@ export function NameAutocomplete({
         spellCheck={false}
       />
       
+      {/* Indicadores de correção recente com opção de desfazer */}
+      {recentCorrections.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {recentCorrections.map((correction, idx) => (
+            <button
+              key={`${correction.position}-${idx}`}
+              type="button"
+              onClick={() => undoCorrection(correction)}
+              className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
+              title={`Clique para manter "${correction.original}" sem correção`}
+            >
+              <span className="line-through text-muted-foreground">{correction.original}</span>
+              <span>→</span>
+              <span className="font-medium">{correction.corrected}</span>
+              <Undo2 className="w-3 h-3 ml-0.5" />
+            </button>
+          ))}
+        </div>
+      )}
+      
       {showSuggestions && (suggestions.length > 0 || accentSuggestion) && (
         <div
           ref={suggestionsRef}
@@ -203,13 +287,15 @@ export function NameAutocomplete({
                   <span className="text-foreground">→</span>
                   <span className="font-semibold text-amber-700 dark:text-amber-300">{accentSuggestion.suggestion}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => selectSuggestion(accentSuggestion.suggestion)}
-                  className="px-2 py-1 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded transition-colors"
-                >
-                  Aplicar
-                </button>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => selectSuggestion(accentSuggestion.suggestion)}
+                    className="px-2 py-1 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded transition-colors"
+                  >
+                    Aplicar
+                  </button>
+                </div>
               </div>
             </div>
           )}
