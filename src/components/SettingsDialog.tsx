@@ -21,26 +21,59 @@ interface VolumeSettings {
   timeAnnouncement: number;
 }
 
-// Vozes Google Cloud TTS disponíveis para pt-BR
-const GOOGLE_VOICES = {
+// Vozes Google Cloud TTS disponíveis para pt-BR organizadas por qualidade
+// Neural2 = Mais avançado, melhor pronúncia de nomes
+// Journey = Conversacional natural
+// Studio = Qualidade de estúdio profissional
+// Wavenet = Alta qualidade
+// Standard = Econômico
+
+type VoiceQuality = 'neural2' | 'journey' | 'studio' | 'wavenet' | 'standard';
+
+interface VoiceOption {
+  id: string;
+  name: string;
+  quality: VoiceQuality;
+  description: string;
+}
+
+const GOOGLE_VOICES: { female: VoiceOption[]; male: VoiceOption[] } = {
   female: [
-    { id: 'pt-BR-Journey-F', name: 'Journey-F (Mais Natural)', quality: 'ultra' },
-    { id: 'pt-BR-Journey-O', name: 'Journey-O', quality: 'ultra' },
-    { id: 'pt-BR-Studio-C', name: 'Studio-C (Profissional)', quality: 'premium' },
-    { id: 'pt-BR-Neural2-A', name: 'Neural2-A', quality: 'premium' },
-    { id: 'pt-BR-Neural2-C', name: 'Neural2-C', quality: 'premium' },
-    { id: 'pt-BR-Wavenet-A', name: 'Wavenet-A', quality: 'high' },
-    { id: 'pt-BR-Wavenet-C', name: 'Wavenet-C', quality: 'high' },
-    { id: 'pt-BR-Standard-A', name: 'Standard-A', quality: 'standard' },
-    { id: 'pt-BR-Standard-C', name: 'Standard-C', quality: 'standard' },
+    // Neural2 - Mais Avançado (melhor para nomes)
+    { id: 'pt-BR-Neural2-A', name: 'Neural2-A', quality: 'neural2', description: 'Voz feminina clara' },
+    { id: 'pt-BR-Neural2-C', name: 'Neural2-C', quality: 'neural2', description: 'Voz feminina suave' },
+    // Journey - Natural Conversacional
+    { id: 'pt-BR-Journey-F', name: 'Journey-F', quality: 'journey', description: 'Conversacional natural' },
+    { id: 'pt-BR-Journey-O', name: 'Journey-O', quality: 'journey', description: 'Conversacional amigável' },
+    // Studio - Profissional
+    { id: 'pt-BR-Studio-C', name: 'Studio-C', quality: 'studio', description: 'Estúdio profissional' },
+    // Wavenet - Alta Qualidade
+    { id: 'pt-BR-Wavenet-A', name: 'Wavenet-A', quality: 'wavenet', description: 'Alta qualidade' },
+    { id: 'pt-BR-Wavenet-C', name: 'Wavenet-C', quality: 'wavenet', description: 'Alta qualidade suave' },
+    // Standard - Econômico
+    { id: 'pt-BR-Standard-A', name: 'Standard-A', quality: 'standard', description: 'Básico' },
+    { id: 'pt-BR-Standard-C', name: 'Standard-C', quality: 'standard', description: 'Básico suave' },
   ],
   male: [
-    { id: 'pt-BR-Journey-D', name: 'Journey-D (Mais Natural)', quality: 'ultra' },
-    { id: 'pt-BR-Studio-B', name: 'Studio-B (Profissional)', quality: 'premium' },
-    { id: 'pt-BR-Neural2-B', name: 'Neural2-B', quality: 'premium' },
-    { id: 'pt-BR-Wavenet-B', name: 'Wavenet-B', quality: 'high' },
-    { id: 'pt-BR-Standard-B', name: 'Standard-B', quality: 'standard' },
+    // Neural2 - Mais Avançado (melhor para nomes)
+    { id: 'pt-BR-Neural2-B', name: 'Neural2-B', quality: 'neural2', description: 'Voz masculina clara' },
+    // Journey - Natural Conversacional
+    { id: 'pt-BR-Journey-D', name: 'Journey-D', quality: 'journey', description: 'Conversacional natural' },
+    // Studio - Profissional
+    { id: 'pt-BR-Studio-B', name: 'Studio-B', quality: 'studio', description: 'Estúdio profissional' },
+    // Wavenet - Alta Qualidade
+    { id: 'pt-BR-Wavenet-B', name: 'Wavenet-B', quality: 'wavenet', description: 'Alta qualidade' },
+    // Standard - Econômico
+    { id: 'pt-BR-Standard-B', name: 'Standard-B', quality: 'standard', description: 'Básico' },
   ]
+};
+
+const QUALITY_LABELS: Record<VoiceQuality, { label: string; color: string }> = {
+  neural2: { label: 'Neural2', color: 'bg-emerald-500/20 text-emerald-600' },
+  journey: { label: 'Journey', color: 'bg-purple-500/20 text-purple-600' },
+  studio: { label: 'Studio', color: 'bg-amber-500/20 text-amber-600' },
+  wavenet: { label: 'Wavenet', color: 'bg-blue-500/20 text-blue-600' },
+  standard: { label: 'Standard', color: 'bg-muted text-muted-foreground' },
 };
 
 const DEFAULT_VOLUMES: VolumeSettings = {
@@ -498,12 +531,9 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                       <SelectItem key={voice.id} value={voice.id}>
                         <span className="flex items-center gap-2">
                           {voice.name}
-                          {voice.quality === 'premium' && (
-                            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">Premium</span>
-                          )}
-                          {voice.quality === 'high' && (
-                            <span className="text-xs bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">Alta</span>
-                          )}
+                          <span className={`text-xs px-1.5 py-0.5 rounded ${QUALITY_LABELS[voice.quality].color}`}>
+                            {QUALITY_LABELS[voice.quality].label}
+                          </span>
                         </span>
                       </SelectItem>
                     ))}
@@ -532,12 +562,9 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                       <SelectItem key={voice.id} value={voice.id}>
                         <span className="flex items-center gap-2">
                           {voice.name}
-                          {voice.quality === 'premium' && (
-                            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">Premium</span>
-                          )}
-                          {voice.quality === 'high' && (
-                            <span className="text-xs bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">Alta</span>
-                          )}
+                          <span className={`text-xs px-1.5 py-0.5 rounded ${QUALITY_LABELS[voice.quality].color}`}>
+                            {QUALITY_LABELS[voice.quality].label}
+                          </span>
                         </span>
                       </SelectItem>
                     ))}
@@ -565,7 +592,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
               </Button>
 
               <p className="text-xs text-muted-foreground">
-                Neural2 = melhor qualidade, Wavenet = alta qualidade, Standard = econômico
+                <strong>Neural2</strong> = melhor pronúncia de nomes | <strong>Journey</strong> = mais natural | <strong>Studio</strong> = profissional | <strong>Wavenet</strong> = alta qualidade | <strong>Standard</strong> = econômico
               </p>
             </div>
           </div>
