@@ -12,7 +12,7 @@ interface AdminPasswordProtectionProps {
 }
 
 // Default admin password - can be changed in localStorage
-const DEFAULT_ADMIN_PASSWORD = '1234';
+const DEFAULT_ADMIN_PASSWORD = 'Paineiras@1';
 const PASSWORD_STORAGE_KEY = 'adminPassword';
 const AUTH_SESSION_KEY = 'adminAuthenticated';
 const AUTH_EXPIRY_KEY = 'adminAuthExpiry';
@@ -273,7 +273,7 @@ export function ChangeAdminPassword() {
           </div>
         </form>
         <p className="text-xs text-muted-foreground mt-4">
-          Senha padrão: <code className="bg-muted px-1 rounded">1234</code>. 
+          Senha padrão: <code className="bg-muted px-1 rounded">Paineiras@1</code>. 
           Altere para uma senha segura.
         </p>
       </CardContent>

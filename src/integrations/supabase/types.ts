@@ -201,7 +201,9 @@ export type Database = {
         Row: {
           audio_cache_url: string | null
           audio_generated_at: string | null
+          audio_type: string
           created_at: string
+          custom_audio_url: string | null
           days_of_week: number[]
           end_time: string
           id: string
@@ -220,7 +222,9 @@ export type Database = {
         Insert: {
           audio_cache_url?: string | null
           audio_generated_at?: string | null
+          audio_type?: string
           created_at?: string
+          custom_audio_url?: string | null
           days_of_week?: number[]
           end_time?: string
           id?: string
@@ -239,7 +243,9 @@ export type Database = {
         Update: {
           audio_cache_url?: string | null
           audio_generated_at?: string | null
+          audio_type?: string
           created_at?: string
+          custom_audio_url?: string | null
           days_of_week?: number[]
           end_time?: string
           id?: string
