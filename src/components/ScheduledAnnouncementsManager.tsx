@@ -54,6 +54,8 @@ interface ScheduledAnnouncement {
   valid_until: string;
   last_played_at: string | null;
   created_at: string;
+  audio_cache_url: string | null;
+  audio_generated_at: string | null;
 }
 
 interface Props {
@@ -80,6 +82,7 @@ export function ScheduledAnnouncementsManager({ unitName }: Props) {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<ScheduledAnnouncement | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
+  const [generating, setGenerating] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -171,6 +174,69 @@ export function ScheduledAnnouncementsManager({ unitName }: Props) {
     setDialogOpen(true);
   };
 
+  const generateAudioCache = async (announcementId: string, text: string) => {
+    setGenerating(announcementId);
+    try {
+      const voice = localStorage.getItem('patientCallVoice') || 'pt-BR-Chirp3-HD-Achernar';
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-announcement-audio`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            announcementId,
+            text,
+            voiceName: voice,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to generate audio');
+      
+      const data = await response.json();
+      toast({ title: 'Áudio gerado', description: 'O áudio foi gerado e salvo no cache.' });
+      loadAnnouncements();
+      return data.audioUrl;
+    } catch (err) {
+      console.error('Error generating audio:', err);
+      toast({
+        title: 'Erro ao gerar áudio',
+        description: 'Não foi possível gerar o áudio. Tente novamente.',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setGenerating(null);
+    }
+  };
+
+  const deleteAudioCache = async (announcementId: string) => {
+    try {
+      await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-announcement-audio`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            announcementId,
+            deleteOnly: true,
+          }),
+        }
+      );
+    } catch (err) {
+      console.error('Error deleting audio cache:', err);
+    }
+  };
+
   const handleSave = async () => {
     if (!formData.title.trim() || !formData.text_content.trim()) {
       toast({
@@ -192,6 +258,10 @@ export function ScheduledAnnouncementsManager({ unitName }: Props) {
 
     setSaving(true);
     try {
+      // Check if text changed - need to invalidate cache
+      const textChanged = selectedAnnouncement && 
+        selectedAnnouncement.text_content.trim() !== formData.text_content.trim();
+      
       const payload = {
         unit_name: unitName,
         title: formData.title.trim(),
@@ -204,25 +274,45 @@ export function ScheduledAnnouncementsManager({ unitName }: Props) {
         is_active: formData.is_active,
         valid_from: formData.valid_from,
         valid_until: formData.valid_until,
+        // Clear cache if text changed
+        ...(textChanged ? { audio_cache_url: null, audio_generated_at: null } : {}),
       };
 
+      let announcementId: string;
+
       if (selectedAnnouncement) {
+        // If text changed, delete old cached audio
+        if (textChanged && selectedAnnouncement.audio_cache_url) {
+          await deleteAudioCache(selectedAnnouncement.id);
+        }
+        
         const { error } = await supabase
           .from('scheduled_announcements')
           .update(payload)
           .eq('id', selectedAnnouncement.id);
         if (error) throw error;
+        announcementId = selectedAnnouncement.id;
         toast({ title: 'Áudio atualizado', description: 'As alterações foram salvas.' });
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('scheduled_announcements')
-          .insert(payload);
+          .insert(payload)
+          .select('id')
+          .single();
         if (error) throw error;
+        announcementId = data.id;
         toast({ title: 'Áudio criado', description: 'O áudio programado foi adicionado.' });
       }
 
       setDialogOpen(false);
       loadAnnouncements();
+      
+      // Auto-generate audio for new announcements or if text changed
+      if (!selectedAnnouncement || textChanged) {
+        setTimeout(() => {
+          generateAudioCache(announcementId, formData.text_content.trim());
+        }, 500);
+      }
     } catch (err) {
       console.error('Error saving announcement:', err);
       toast({
@@ -240,6 +330,11 @@ export function ScheduledAnnouncementsManager({ unitName }: Props) {
     
     setSaving(true);
     try {
+      // Delete cached audio first
+      if (selectedAnnouncement.audio_cache_url) {
+        await deleteAudioCache(selectedAnnouncement.id);
+      }
+      
       const { error } = await supabase
         .from('scheduled_announcements')
         .delete()
@@ -421,8 +516,37 @@ export function ScheduledAnnouncementsManager({ unitName }: Props) {
                         {' até '} 
                         {format(new Date(announcement.valid_until), 'dd/MM/yyyy', { locale: ptBR })}
                       </div>
+                      {/* Audio cache status */}
+                      <div className="text-xs mt-1">
+                        {announcement.audio_cache_url ? (
+                          <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                            ✓ Áudio em cache
+                            {announcement.audio_generated_at && (
+                              <span className="text-muted-foreground">
+                                ({format(new Date(announcement.audio_generated_at), 'dd/MM HH:mm', { locale: ptBR })})
+                              </span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-amber-600 dark:text-amber-400">⚠ Áudio não gerado</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      {/* Generate/Regenerate audio button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => generateAudioCache(announcement.id, announcement.text_content)}
+                        disabled={generating === announcement.id}
+                        title={announcement.audio_cache_url ? 'Regerar áudio' : 'Gerar áudio'}
+                      >
+                        {generating === announcement.id ? (
+                          <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
+                        ) : (
+                          <RefreshCw className={`w-4 h-4 ${announcement.audio_cache_url ? 'text-green-600' : 'text-amber-600'}`} />
+                        )}
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"

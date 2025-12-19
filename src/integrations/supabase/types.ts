@@ -199,6 +199,8 @@ export type Database = {
       }
       scheduled_announcements: {
         Row: {
+          audio_cache_url: string | null
+          audio_generated_at: string | null
           created_at: string
           days_of_week: number[]
           end_time: string
@@ -216,6 +218,8 @@ export type Database = {
           valid_until: string
         }
         Insert: {
+          audio_cache_url?: string | null
+          audio_generated_at?: string | null
           created_at?: string
           days_of_week?: number[]
           end_time?: string
@@ -233,6 +237,8 @@ export type Database = {
           valid_until?: string
         }
         Update: {
+          audio_cache_url?: string | null
+          audio_generated_at?: string | null
           created_at?: string
           days_of_week?: number[]
           end_time?: string
