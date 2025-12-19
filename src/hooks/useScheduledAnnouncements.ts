@@ -15,6 +15,8 @@ interface ScheduledAnnouncement {
   valid_from: string;
   valid_until: string;
   last_played_at: string | null;
+  audio_cache_url: string | null;
+  audio_generated_at: string | null;
 }
 
 interface UseScheduledAnnouncementsProps {
@@ -22,7 +24,7 @@ interface UseScheduledAnnouncementsProps {
   audioUnlocked: boolean;
   isSpeaking: boolean;
   voice: string;
-  onPlayAnnouncement: (text: string, repeatCount: number) => Promise<void>;
+  onPlayAnnouncement: (announcement: ScheduledAnnouncement, repeatCount: number) => Promise<void>;
 }
 
 export function useScheduledAnnouncements({
@@ -122,12 +124,13 @@ export function useScheduledAnnouncements({
     for (const announcement of announcements) {
       if (isWithinSchedule(announcement) && shouldPlayNow(announcement)) {
         console.log('📢 Playing scheduled announcement:', announcement.title);
+        console.log('📢 Using cached audio:', !!announcement.audio_cache_url);
         
         // Mark as played immediately to prevent duplicate plays
         lastCheckRef.current[announcement.id] = Date.now();
         
         try {
-          await onPlayAnnouncement(announcement.text_content, announcement.repeat_count);
+          await onPlayAnnouncement(announcement, announcement.repeat_count);
           await updateLastPlayed(announcement.id);
         } catch (err) {
           console.error('Error playing scheduled announcement:', err);

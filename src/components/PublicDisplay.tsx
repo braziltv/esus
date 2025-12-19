@@ -1065,9 +1065,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   );
 
   // Play scheduled announcement with configurable repeat count
+  // Uses cached audio URL if available, otherwise falls back to TTS generation
   const playScheduledAnnouncement = useCallback(
-    async (text: string, repeatCount: number) => {
-      console.log('📢 Playing scheduled announcement:', { text, repeatCount });
+    async (announcement: { audio_cache_url: string | null; text_content: string; title: string }, repeatCount: number) => {
+      console.log('📢 Playing scheduled announcement:', { 
+        title: announcement.title, 
+        hasCachedAudio: !!announcement.audio_cache_url,
+        repeatCount 
+      });
 
       // Prevent overlap
       if (isSpeakingRef.current) {
@@ -1084,9 +1089,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           // Play notification sound first
           await playNotificationSound();
 
-          // Use Google Cloud TTS with configured voice
-          await speakWithGoogleTTS(text);
-          console.log(`✅ Scheduled TTS iteration ${i + 1} completed`);
+          // Use cached audio if available, otherwise generate via TTS
+          if (announcement.audio_cache_url) {
+            console.log('📢 Using cached audio:', announcement.audio_cache_url);
+            const audio = new Audio(announcement.audio_cache_url);
+            audio.volume = parseFloat(localStorage.getItem('volume-tts') || '1');
+            
+            await new Promise<void>((resolve, reject) => {
+              audio.onended = () => resolve();
+              audio.onerror = (e) => reject(e);
+              audio.play().catch(reject);
+            });
+          } else {
+            console.log('📢 No cached audio, using TTS');
+            await speakWithGoogleTTS(announcement.text_content);
+          }
+          
+          console.log(`✅ Scheduled announcement iteration ${i + 1} completed`);
 
           // Small pause between repetitions (only if not the last iteration)
           if (i < repeatCount - 1) {
