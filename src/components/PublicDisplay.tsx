@@ -1459,310 +1459,409 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className={`h-[100dvh] w-[100dvw] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-[1vw] relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
+      className={`h-[100dvh] w-[100dvw] bg-[#0a0e1a] p-[1vw] relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
+      {/* Modern animated background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Gradient mesh background */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(59,130,246,0.15)_0%,_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(16,185,129,0.15)_0%,_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(139,92,246,0.08)_0%,_transparent_40%)]" />
+        
+        {/* Floating orbs */}
+        <div className="absolute top-[10%] left-[5%] w-[25vw] h-[25vw] bg-gradient-to-br from-cyan-500/20 to-blue-600/10 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '4s' }} />
+        <div className="absolute bottom-[15%] right-[10%] w-[30vw] h-[30vw] bg-gradient-to-br from-emerald-500/15 to-teal-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '5s' }} />
+        <div className="absolute top-[40%] right-[30%] w-[15vw] h-[15vw] bg-gradient-to-br from-violet-500/10 to-purple-600/5 rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '6s' }} />
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ 
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '50px 50px'
+        }} />
+      </div>
+
       {/* Flash overlay during announcement */}
       {announcingType && (
         <div className="absolute inset-0 z-50 pointer-events-none animate-flash">
           <div className={`absolute inset-0 ${
             announcingType === 'triage' 
-              ? 'bg-blue-500/30' 
-              : 'bg-emerald-500/30'
+              ? 'bg-gradient-to-r from-cyan-500/40 via-blue-500/30 to-cyan-500/40' 
+              : 'bg-gradient-to-r from-emerald-500/40 via-green-500/30 to-emerald-500/40'
           }`} />
         </div>
       )}
 
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[2vh] left-[2vw] w-[15vw] h-[15vw] bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-[2vh] right-[2vw] w-[12vw] h-[12vw] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-      </div>
-
-      {/* Header - Unified gradient bar */}
-      <div className="relative z-10 mb-[0.5vh] shrink-0">
-        <div className="bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-indigo-900/95 backdrop-blur-xl rounded-2xl px-[1.5vw] py-[0.8vh] shadow-2xl border border-white/20 relative overflow-hidden">
-          {/* Decorative glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-2xl" />
-          <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+      {/* Modern Header */}
+      <div className="relative z-10 mb-[1vh] shrink-0">
+        <div className="relative bg-gradient-to-r from-slate-900/90 via-slate-800/95 to-slate-900/90 backdrop-blur-2xl rounded-2xl border border-white/10 overflow-hidden">
+          {/* Animated top border glow */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDuration: '2s' }} />
           
-          <div className="flex items-center gap-[1.5vw] relative z-10">
+          <div className="px-[2vw] py-[1.2vh] flex items-center justify-between">
             {/* Left: Logo + Title */}
-            <div className="flex items-center gap-[0.8vw] shrink-0">
-              <div className="w-[3.5vw] h-[3.5vw] min-w-[40px] min-h-[40px] rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
-                <HealthCrossIcon size={32} className="w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px]" />
+            <div className="flex items-center gap-[1vw]">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl blur-lg opacity-50" />
+                <div className="relative w-[4vw] h-[4vw] min-w-[48px] min-h-[48px] rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-xl">
+                  <HealthCrossIcon size={32} className="w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px] text-white" />
+                </div>
               </div>
-              <div className="min-w-0">
-                <h1 className="font-bold text-white leading-tight whitespace-nowrap" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)' }}>
-                  Painel de Chamadas
+              <div>
+                <h1 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-white tracking-tight" style={{ fontSize: 'clamp(1.2rem, 2vw, 2.2rem)' }}>
+                  PAINEL DE CHAMADAS
                 </h1>
-                <p className="text-amber-300 leading-tight font-medium" style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.95rem)' }}>
-                  {unitName || 'Unidade de Saúde'}
-                </p>
+                <div className="flex items-center gap-[0.5vw]">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <p className="text-cyan-300 font-medium tracking-wide" style={{ fontSize: 'clamp(0.6rem, 1vw, 1.1rem)' }}>
+                    {unitName || 'Unidade de Saúde'}
+                  </p>
+                </div>
               </div>
             </div>
             
-            {/* Separator */}
-            <div className="w-px h-[4vh] bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-            
             {/* Right: Weather + Clock */}
-            <div className="flex-1 flex items-center justify-end overflow-visible min-w-0">
+            <div className="flex items-center">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Landscape optimized with viewport units */}
-      <div className="relative z-10 flex-1 grid grid-cols-12 gap-[0.8vw] min-h-0 pb-[5vh]">
-        {/* Current Calls - Side by side */}
-        <div className="col-span-9 grid grid-cols-2 gap-[0.8vw]">
-          {/* Triage Call */}
-          <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+      {/* Main Content */}
+      <div className="relative z-10 flex-1 grid grid-cols-12 gap-[1vw] min-h-0 pb-[6vh]">
+        {/* Call Cards - 9 columns */}
+        <div className="col-span-9 grid grid-cols-2 gap-[1vw]">
+          {/* Triage Call Card */}
+          <div className={`relative group rounded-2xl overflow-hidden transition-all duration-500 ${
             announcingType === 'triage' 
-              ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
-              : 'border border-slate-700'
+              ? 'ring-4 ring-cyan-400 shadow-[0_0_60px_rgba(6,182,212,0.5)]' 
+              : ''
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-[1vw] py-[0.8vh] shrink-0">
-              <p className="text-white font-bold flex items-center gap-[0.5vw]" style={{ fontSize: 'clamp(1rem, 1.8vw, 2rem)' }}>
-                <Activity className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
-                <span>TRIAGEM</span>
+            {/* Card Background with glassmorphism */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-slate-800/80 backdrop-blur-xl" />
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-500/10" />
+            
+            {/* Animated border glow on active */}
+            {announcingType === 'triage' && (
+              <div className="absolute inset-0 rounded-2xl border-2 border-cyan-400 animate-pulse" />
+            )}
+            
+            {/* Header Strip */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-blue-500 to-cyan-600" />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/50 via-blue-400/30 to-cyan-400/50 animate-pulse" style={{ animationDuration: '3s' }} />
+              <div className="relative px-[1.5vw] py-[1vh] flex items-center justify-between">
+                <div className="flex items-center gap-[0.8vw]">
+                  <div className="w-[3vw] h-[3vw] min-w-[36px] min-h-[36px] rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                    <Activity className="w-[1.8vw] h-[1.8vw] min-w-[22px] min-h-[22px] text-white" />
+                  </div>
+                  <span className="font-black text-white tracking-widest" style={{ fontSize: 'clamp(1.1rem, 2vw, 2.2rem)' }}>
+                    TRIAGEM
+                  </span>
+                </div>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-red-400 animate-bounce ml-auto shrink-0" />
+                  <div className="flex items-center gap-2">
+                    <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-white animate-bounce" />
+                    <VolumeX className="w-[1.5vw] h-[1.5vw] min-w-[18px] min-h-[18px] text-white/70 animate-pulse hidden" />
+                  </div>
                 )}
-              </p>
+              </div>
             </div>
-            <div className="p-[1vw] flex items-center justify-center flex-1 min-h-0">
+            
+            {/* Content */}
+            <div className="relative p-[1.5vw] flex items-center justify-center min-h-[25vh]">
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words animate-text-reveal ${
                     announcingType === 'triage' 
-                      ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
+                      ? 'text-cyan-300 drop-shadow-[0_0_40px_rgba(6,182,212,0.8)]' 
                       : 'text-white'
-                  }`} style={{ fontSize: 'clamp(2rem, 5vw, 6rem)', wordBreak: 'break-word' }} key={currentTriageCall.name}>
+                  }`} style={{ fontSize: 'clamp(2.5rem, 5.5vw, 7rem)', wordBreak: 'break-word', textShadow: announcingType === 'triage' ? '0 0 60px rgba(6,182,212,0.6)' : 'none' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-blue-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
-                    {currentTriageCall.destination || 'Triagem'}
-                  </p>
+                  <div className="mt-[1vh] flex items-center justify-center gap-[0.5vw]">
+                    <div className="px-[1vw] py-[0.3vh] rounded-full bg-cyan-500/20 border border-cyan-400/30">
+                      <p className="text-cyan-300 font-semibold" style={{ fontSize: 'clamp(0.9rem, 1.4vw, 1.6rem)' }}>
+                        {currentTriageCall.destination || 'Triagem'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
-                  Aguardando próxima chamada...
-                </p>
+                <div className="text-center space-y-[1vh]">
+                  <div className="w-[5vw] h-[5vw] min-w-[60px] min-h-[60px] mx-auto rounded-full bg-slate-700/50 flex items-center justify-center">
+                    <Activity className="w-[3vw] h-[3vw] min-w-[32px] min-h-[32px] text-slate-500" />
+                  </div>
+                  <p className="text-slate-500" style={{ fontSize: 'clamp(0.9rem, 1.3vw, 1.4rem)' }}>
+                    Aguardando chamada...
+                  </p>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Doctor Call */}
-          <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+          {/* Doctor Call Card */}
+          <div className={`relative group rounded-2xl overflow-hidden transition-all duration-500 ${
             announcingType === 'doctor' 
-              ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
-              : 'border border-slate-700'
+              ? 'ring-4 ring-emerald-400 shadow-[0_0_60px_rgba(16,185,129,0.5)]' 
+              : ''
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-[1vw] py-[0.8vh] shrink-0">
-              <p className="text-white font-bold flex items-center gap-[0.5vw]" style={{ fontSize: 'clamp(1rem, 1.8vw, 2rem)' }}>
-                <Stethoscope className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
-                <span>CONSULTÓRIO</span>
+            {/* Card Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-slate-800/80 backdrop-blur-xl" />
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-green-500/10" />
+            
+            {/* Animated border on active */}
+            {announcingType === 'doctor' && (
+              <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400 animate-pulse" />
+            )}
+            
+            {/* Header Strip */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600" />
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/50 via-green-400/30 to-emerald-400/50 animate-pulse" style={{ animationDuration: '3s' }} />
+              <div className="relative px-[1.5vw] py-[1vh] flex items-center justify-between">
+                <div className="flex items-center gap-[0.8vw]">
+                  <div className="w-[3vw] h-[3vw] min-w-[36px] min-h-[36px] rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                    <Stethoscope className="w-[1.8vw] h-[1.8vw] min-w-[22px] min-h-[22px] text-white" />
+                  </div>
+                  <span className="font-black text-white tracking-widest" style={{ fontSize: 'clamp(1.1rem, 2vw, 2.2rem)' }}>
+                    CONSULTÓRIO
+                  </span>
+                </div>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-red-400 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-white animate-bounce" />
                 )}
-              </p>
+              </div>
             </div>
-            <div className="p-[1vw] flex items-center justify-center flex-1 min-h-0">
+            
+            {/* Content */}
+            <div className="relative p-[1.5vw] flex items-center justify-center min-h-[25vh]">
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words animate-text-reveal ${
                     announcingType === 'doctor' 
-                      ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
+                      ? 'text-emerald-300 drop-shadow-[0_0_40px_rgba(16,185,129,0.8)]' 
                       : 'text-white'
-                  }`} style={{ fontSize: 'clamp(2rem, 5vw, 6rem)', wordBreak: 'break-word' }} key={currentDoctorCall.name}>
+                  }`} style={{ fontSize: 'clamp(2.5rem, 5.5vw, 7rem)', wordBreak: 'break-word', textShadow: announcingType === 'doctor' ? '0 0 60px rgba(16,185,129,0.6)' : 'none' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-emerald-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
-                    {currentDoctorCall.destination || 'Consultório'}
-                  </p>
+                  <div className="mt-[1vh] flex items-center justify-center gap-[0.5vw]">
+                    <div className="px-[1vw] py-[0.3vh] rounded-full bg-emerald-500/20 border border-emerald-400/30">
+                      <p className="text-emerald-300 font-semibold" style={{ fontSize: 'clamp(0.9rem, 1.4vw, 1.6rem)' }}>
+                        {currentDoctorCall.destination || 'Consultório'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
-                  Aguardando próxima chamada...
-                </p>
+                <div className="text-center space-y-[1vh]">
+                  <div className="w-[5vw] h-[5vw] min-w-[60px] min-h-[60px] mx-auto rounded-full bg-slate-700/50 flex items-center justify-center">
+                    <Stethoscope className="w-[3vw] h-[3vw] min-w-[32px] min-h-[32px] text-slate-500" />
+                  </div>
+                  <p className="text-slate-500" style={{ fontSize: 'clamp(0.9rem, 1.3vw, 1.4rem)' }}>
+                    Aguardando chamada...
+                  </p>
+                </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Right Column: History Panel */}
-        <div className="col-span-3 bg-slate-800/50 rounded-[1vw] border border-slate-700 p-[0.8vw] backdrop-blur-sm flex flex-col min-h-0">
-          <h3 className="font-bold text-white mb-[0.5vh] flex items-center gap-[0.4vw] shrink-0" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
-            <Clock className="w-[1.2vw] h-[1.2vw] min-w-[16px] min-h-[16px] text-primary shrink-0" />
-            <span>Últimas Chamadas</span>
-          </h3>
-          <div className="space-y-[0.5vh] flex-1 overflow-y-auto">
-            {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-[1vh]" style={{ fontSize: 'clamp(0.7rem, 0.9vw, 1rem)' }}>
-                Nenhuma chamada ainda
-              </p>
-            ) : (
-              historyItems.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`p-[0.6vw] rounded-lg ${
-                    index === 0 
-                      ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20 animate-call-entrance' 
-                      : 'bg-slate-700/50'
-                  } transition-all`}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="flex items-center gap-[0.4vw]">
-                    <div className={`w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] rounded-full flex items-center justify-center shrink-0 ${
-                      item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
-                    }`}>
-                      {item.type === 'triage' ? (
-                        <Activity className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] text-white" />
-                      ) : (
-                        <Stethoscope className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] text-white" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white truncate" style={{ fontSize: 'clamp(0.7rem, 1vw, 1rem)' }}>
-                        {item.name}
-                      </p>
-                      <p className="text-slate-400" style={{ fontSize: 'clamp(0.6rem, 0.8vw, 0.8rem)' }}>
-                        {item.type === 'triage' ? 'Triagem' : 'Médico'}
-                      </p>
-                    </div>
-                    <span className="text-slate-400 font-mono shrink-0" style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.9rem)' }}>
-                      {formatBrazilTime(item.time, 'HH:mm')}
-                    </span>
-                  </div>
+        {/* History Panel - 3 columns */}
+        <div className="col-span-3 relative rounded-2xl overflow-hidden">
+          {/* Background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-800/60 via-slate-900/80 to-slate-800/60 backdrop-blur-xl" />
+          <div className="absolute inset-0 border border-white/10 rounded-2xl" />
+          
+          <div className="relative h-full flex flex-col p-[1vw]">
+            {/* Header */}
+            <div className="flex items-center gap-[0.5vw] mb-[1vh] pb-[0.8vh] border-b border-white/10">
+              <div className="w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px] rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                <Clock className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] text-white" />
+              </div>
+              <h3 className="font-bold text-white tracking-wide" style={{ fontSize: 'clamp(0.9rem, 1.3vw, 1.4rem)' }}>
+                Últimas Chamadas
+              </h3>
+            </div>
+            
+            {/* List */}
+            <div className="flex-1 overflow-y-auto space-y-[0.6vh] scrollbar-hide">
+              {historyItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-2">
+                  <Clock className="w-8 h-8 opacity-50" />
+                  <p style={{ fontSize: 'clamp(0.8rem, 1vw, 1.1rem)' }}>Nenhuma chamada ainda</p>
                 </div>
-              ))
-            )}
+              ) : (
+                historyItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className={`relative p-[0.8vw] rounded-xl transition-all duration-300 ${
+                      index === 0 
+                        ? 'bg-gradient-to-r from-violet-500/20 via-purple-500/15 to-violet-500/20 border border-violet-400/30 animate-call-entrance' 
+                        : 'bg-white/5 hover:bg-white/10 border border-transparent'
+                    }`}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {index === 0 && (
+                      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-400 to-transparent" />
+                    )}
+                    <div className="flex items-center gap-[0.6vw]">
+                      <div className={`w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px] rounded-lg flex items-center justify-center shrink-0 ${
+                        item.type === 'triage' 
+                          ? 'bg-gradient-to-br from-cyan-500 to-blue-600' 
+                          : 'bg-gradient-to-br from-emerald-500 to-green-600'
+                      }`}>
+                        {item.type === 'triage' ? (
+                          <Activity className="w-[1.2vw] h-[1.2vw] min-w-[14px] min-h-[14px] text-white" />
+                        ) : (
+                          <Stethoscope className="w-[1.2vw] h-[1.2vw] min-w-[14px] min-h-[14px] text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-white truncate" style={{ fontSize: 'clamp(0.75rem, 1.1vw, 1.1rem)' }}>
+                          {item.name}
+                        </p>
+                        <p className="text-slate-400" style={{ fontSize: 'clamp(0.6rem, 0.85vw, 0.9rem)' }}>
+                          {item.type === 'triage' ? 'Triagem' : 'Médico'}
+                        </p>
+                      </div>
+                      <div className="px-[0.5vw] py-[0.2vh] rounded-md bg-slate-700/50">
+                        <span className="text-slate-300 font-mono" style={{ fontSize: 'clamp(0.65rem, 0.9vw, 1rem)' }}>
+                          {formatBrazilTime(item.time, 'HH:mm')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* News Ticker - Fixed at bottom like TV news breaking news style */}
+      {/* Modern News Ticker */}
       {newsItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0">
-          <div className="flex items-stretch h-[5vh] min-h-[40px]">
-            {/* Scrolling News Section - Dark background full width */}
-            <div className="flex-1 bg-slate-900 overflow-hidden flex items-center relative">
-              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
-              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
-              <div className="animate-marquee whitespace-nowrap inline-flex py-[0.3vh]">
-                {(() => {
-                  const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                  const itemsWithCredits: typeof newsItems = [];
-                  newsItems.forEach((item, index) => {
-                    itemsWithCredits.push(item);
-                    if ((index + 1) % 3 === 0) {
-                      itemsWithCredits.push(creditItem);
-                    }
-                  });
-                  
-                  return itemsWithCredits.map((item, index) => (
-                    <span key={index} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
-                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'G1' ? 'bg-red-500' : 
-                        item.source === 'O Globo' ? 'bg-blue-600' :
-                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
-                        item.source === 'UOL' ? 'bg-orange-500' :
-                        item.source === 'Folha' ? 'bg-blue-500' :
-                        item.source === 'Estadão' ? 'bg-slate-600' :
-                        item.source === 'CNN' ? 'bg-red-600' :
-                        item.source === 'Band' ? 'bg-green-600' :
-                        item.source === 'Terra' ? 'bg-emerald-500' :
-                        item.source === 'IG' ? 'bg-pink-500' :
-                        item.source === 'Correio' ? 'bg-sky-600' :
-                        item.source === 'Metrópoles' ? 'bg-purple-600' :
-                        item.source === 'Gazeta' ? 'bg-teal-600' :
-                        item.source === 'Poder360' ? 'bg-indigo-600' :
-                        item.source === 'Nexo' ? 'bg-rose-600' :
-                        item.source === 'Ag. Brasil' ? 'bg-cyan-600' :
-                        item.source === 'InfoMoney' ? 'bg-lime-600' :
-                        item.source === 'Exame' ? 'bg-amber-600' :
-                        item.source === 'Época' ? 'bg-fuchsia-600' :
-                        item.source === 'Valor' ? 'bg-violet-600' :
-                        item.source === 'O Tempo' ? 'bg-orange-600' :
-                        item.source === 'Hoje em Dia' ? 'bg-blue-700' :
-                        item.source === 'EM' ? 'bg-red-700' :
-                        item.source === 'Super' ? 'bg-yellow-600' :
-                        item.source === 'Tecmundo' ? 'bg-purple-500' :
-                        item.source === 'Olhar Digital' ? 'bg-green-500' :
-                        item.source === 'Canaltech' ? 'bg-blue-400' :
-                        item.source === 'GE' ? 'bg-green-700' :
-                        item.source === 'Lance' ? 'bg-red-500' :
-                        item.source === 'ESPN' ? 'bg-red-800' :
-                        'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
-                        {item.source === 'Créditos' ? '⭐' : item.source}
-                      </span>
-                      <span className="text-white">
-                        {item.title}
-                      </span>
-                      <span className="text-slate-500 mx-[0.4vw]">•</span>
+        <div className="fixed bottom-0 left-0 right-0 z-40">
+          {/* Top glow line */}
+          <div className="h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+          
+          <div className="relative bg-gradient-to-r from-slate-900/98 via-[#0a0e1a]/98 to-slate-900/98 backdrop-blur-xl overflow-hidden h-[5.5vh] min-h-[44px]">
+            {/* Animated background effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-purple-500/5 to-emerald-500/5" />
+            
+            {/* Edge fades */}
+            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#0a0e1a] to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#0a0e1a] to-transparent z-10" />
+            
+            <div className="animate-marquee whitespace-nowrap inline-flex items-center h-full">
+              {(() => {
+                const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
+                const itemsWithCredits: typeof newsItems = [];
+                newsItems.forEach((item, index) => {
+                  itemsWithCredits.push(item);
+                  if ((index + 1) % 3 === 0) {
+                    itemsWithCredits.push(creditItem);
+                  }
+                });
+                
+                return itemsWithCredits.map((item, index) => (
+                  <span key={index} className="mx-[1.5vw] inline-flex items-center gap-[0.6vw] text-white/90 font-medium" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.6rem)' }}>
+                    <span className={`px-[0.6vw] py-[0.3vh] rounded-lg font-bold ${
+                      item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900' :
+                      item.source === 'G1' ? 'bg-red-500 text-white' : 
+                      item.source === 'O Globo' ? 'bg-blue-600 text-white' :
+                      item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
+                      item.source === 'UOL' ? 'bg-orange-500 text-white' :
+                      item.source === 'Folha' ? 'bg-blue-500 text-white' :
+                      item.source === 'Estadão' ? 'bg-slate-600 text-white' :
+                      item.source === 'CNN' ? 'bg-red-600 text-white' :
+                      item.source === 'Band' ? 'bg-green-600 text-white' :
+                      item.source === 'Terra' ? 'bg-emerald-500 text-white' :
+                      item.source === 'IG' ? 'bg-pink-500 text-white' :
+                      item.source === 'Correio' ? 'bg-sky-600 text-white' :
+                      item.source === 'Metrópoles' ? 'bg-purple-600 text-white' :
+                      item.source === 'Gazeta' ? 'bg-teal-600 text-white' :
+                      item.source === 'Poder360' ? 'bg-indigo-600 text-white' :
+                      item.source === 'Nexo' ? 'bg-rose-600 text-white' :
+                      item.source === 'Ag. Brasil' ? 'bg-cyan-600 text-white' :
+                      item.source === 'InfoMoney' ? 'bg-lime-600 text-white' :
+                      item.source === 'Exame' ? 'bg-amber-600 text-white' :
+                      item.source === 'Época' ? 'bg-fuchsia-600 text-white' :
+                      item.source === 'Valor' ? 'bg-violet-600 text-white' :
+                      item.source === 'O Tempo' ? 'bg-orange-600 text-white' :
+                      item.source === 'Hoje em Dia' ? 'bg-blue-700 text-white' :
+                      item.source === 'EM' ? 'bg-red-700 text-white' :
+                      item.source === 'Super' ? 'bg-yellow-600 text-white' :
+                      item.source === 'Tecmundo' ? 'bg-purple-500 text-white' :
+                      item.source === 'Olhar Digital' ? 'bg-green-500 text-white' :
+                      item.source === 'Canaltech' ? 'bg-blue-400 text-white' :
+                      item.source === 'GE' ? 'bg-green-700 text-white' :
+                      item.source === 'Lance' ? 'bg-red-500 text-white' :
+                      item.source === 'ESPN' ? 'bg-red-800 text-white' :
+                      'bg-gray-500 text-white'
+                    }`} style={{ fontSize: 'clamp(0.7rem, 1vw, 1.1rem)' }}>
+                      {item.source === 'Créditos' ? '⭐' : item.source}
                     </span>
-                  ));
-                })()}
-                {(() => {
-                  const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                  const itemsWithCredits: typeof newsItems = [];
-                  newsItems.forEach((item, index) => {
-                    itemsWithCredits.push(item);
-                    if ((index + 1) % 3 === 0) {
-                      itemsWithCredits.push(creditItem);
-                    }
-                  });
-                  
-                  return itemsWithCredits.map((item, index) => (
-                    <span key={`dup-${index}`} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
-                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'G1' ? 'bg-red-500' : 
-                        item.source === 'O Globo' ? 'bg-blue-600' :
-                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
-                        item.source === 'UOL' ? 'bg-orange-500' :
-                        item.source === 'Folha' ? 'bg-blue-500' :
-                        item.source === 'Estadão' ? 'bg-slate-600' :
-                        item.source === 'CNN' ? 'bg-red-600' :
-                        item.source === 'Band' ? 'bg-green-600' :
-                        item.source === 'Terra' ? 'bg-emerald-500' :
-                        item.source === 'IG' ? 'bg-pink-500' :
-                        item.source === 'Correio' ? 'bg-sky-600' :
-                        item.source === 'Metrópoles' ? 'bg-purple-600' :
-                        item.source === 'Gazeta' ? 'bg-teal-600' :
-                        item.source === 'Poder360' ? 'bg-indigo-600' :
-                        item.source === 'Nexo' ? 'bg-rose-600' :
-                        item.source === 'Ag. Brasil' ? 'bg-cyan-600' :
-                        item.source === 'InfoMoney' ? 'bg-lime-600' :
-                        item.source === 'Exame' ? 'bg-amber-600' :
-                        item.source === 'Época' ? 'bg-fuchsia-600' :
-                        item.source === 'Valor' ? 'bg-violet-600' :
-                        item.source === 'O Tempo' ? 'bg-orange-600' :
-                        item.source === 'Hoje em Dia' ? 'bg-blue-700' :
-                        item.source === 'EM' ? 'bg-red-700' :
-                        item.source === 'Super' ? 'bg-yellow-600' :
-                        item.source === 'Tecmundo' ? 'bg-purple-500' :
-                        item.source === 'Olhar Digital' ? 'bg-green-500' :
-                        item.source === 'Canaltech' ? 'bg-blue-400' :
-                        item.source === 'GE' ? 'bg-green-700' :
-                        item.source === 'Lance' ? 'bg-red-500' :
-                        item.source === 'ESPN' ? 'bg-red-800' :
-                        'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
-                        {item.source === 'Créditos' ? '⭐' : item.source}
-                      </span>
-                      <span className="text-white">
-                        {item.title}
-                      </span>
-                      <span className="text-slate-500 mx-[0.4vw]">•</span>
+                    <span>{item.title}</span>
+                    <span className="text-slate-600 mx-[0.5vw]">•</span>
+                  </span>
+                ));
+              })()}
+              {(() => {
+                const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
+                const itemsWithCredits: typeof newsItems = [];
+                newsItems.forEach((item, index) => {
+                  itemsWithCredits.push(item);
+                  if ((index + 1) % 3 === 0) {
+                    itemsWithCredits.push(creditItem);
+                  }
+                });
+                
+                return itemsWithCredits.map((item, index) => (
+                  <span key={`dup-${index}`} className="mx-[1.5vw] inline-flex items-center gap-[0.6vw] text-white/90 font-medium" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.6rem)' }}>
+                    <span className={`px-[0.6vw] py-[0.3vh] rounded-lg font-bold ${
+                      item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900' :
+                      item.source === 'G1' ? 'bg-red-500 text-white' : 
+                      item.source === 'O Globo' ? 'bg-blue-600 text-white' :
+                      item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
+                      item.source === 'UOL' ? 'bg-orange-500 text-white' :
+                      item.source === 'Folha' ? 'bg-blue-500 text-white' :
+                      item.source === 'Estadão' ? 'bg-slate-600 text-white' :
+                      item.source === 'CNN' ? 'bg-red-600 text-white' :
+                      item.source === 'Band' ? 'bg-green-600 text-white' :
+                      item.source === 'Terra' ? 'bg-emerald-500 text-white' :
+                      item.source === 'IG' ? 'bg-pink-500 text-white' :
+                      item.source === 'Correio' ? 'bg-sky-600 text-white' :
+                      item.source === 'Metrópoles' ? 'bg-purple-600 text-white' :
+                      item.source === 'Gazeta' ? 'bg-teal-600 text-white' :
+                      item.source === 'Poder360' ? 'bg-indigo-600 text-white' :
+                      item.source === 'Nexo' ? 'bg-rose-600 text-white' :
+                      item.source === 'Ag. Brasil' ? 'bg-cyan-600 text-white' :
+                      item.source === 'InfoMoney' ? 'bg-lime-600 text-white' :
+                      item.source === 'Exame' ? 'bg-amber-600 text-white' :
+                      item.source === 'Época' ? 'bg-fuchsia-600 text-white' :
+                      item.source === 'Valor' ? 'bg-violet-600 text-white' :
+                      item.source === 'O Tempo' ? 'bg-orange-600 text-white' :
+                      item.source === 'Hoje em Dia' ? 'bg-blue-700 text-white' :
+                      item.source === 'EM' ? 'bg-red-700 text-white' :
+                      item.source === 'Super' ? 'bg-yellow-600 text-white' :
+                      item.source === 'Tecmundo' ? 'bg-purple-500 text-white' :
+                      item.source === 'Olhar Digital' ? 'bg-green-500 text-white' :
+                      item.source === 'Canaltech' ? 'bg-blue-400 text-white' :
+                      item.source === 'GE' ? 'bg-green-700 text-white' :
+                      item.source === 'Lance' ? 'bg-red-500 text-white' :
+                      item.source === 'ESPN' ? 'bg-red-800 text-white' :
+                      'bg-gray-500 text-white'
+                    }`} style={{ fontSize: 'clamp(0.7rem, 1vw, 1.1rem)' }}>
+                      {item.source === 'Créditos' ? '⭐' : item.source}
                     </span>
-                  ));
-                })()}
-              </div>
+                    <span>{item.title}</span>
+                    <span className="text-slate-600 mx-[0.5vw]">•</span>
+                  </span>
+                ));
+              })()}
             </div>
           </div>
         </div>
@@ -1770,21 +1869,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* Exit Confirmation Modal */}
       {showExitConfirm && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-800 border-4 border-red-500 rounded-3xl p-8 lg:p-12 xl:p-16 max-w-2xl w-full shadow-2xl shadow-red-500/20 animate-scale-in">
-            <div className="text-center space-y-6 lg:space-y-8">
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 border border-red-500/50 rounded-3xl p-8 lg:p-12 max-w-2xl w-full shadow-[0_0_100px_rgba(239,68,68,0.3)] animate-scale-in">
+            {/* Glow effect */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-red-500/10 to-transparent" />
+            
+            <div className="relative text-center space-y-6 lg:space-y-8">
               {/* Warning Icon */}
-              <div className="w-24 h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 mx-auto rounded-full bg-red-500/20 border-4 border-red-500 flex items-center justify-center">
-                <LogOut className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 text-red-500" />
+              <div className="relative mx-auto w-24 h-24 lg:w-32 lg:h-32">
+                <div className="absolute inset-0 bg-red-500/30 rounded-full blur-xl animate-pulse" />
+                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-red-500 to-red-700 border-4 border-red-400/50 flex items-center justify-center">
+                  <LogOut className="w-12 h-12 lg:w-16 lg:h-16 text-white" />
+                </div>
               </div>
               
               {/* Title */}
-              <h2 className="text-3xl lg:text-4xl xl:text-5xl font-black text-white">
+              <h2 className="text-3xl lg:text-4xl font-black text-white">
                 SAIR DO MODO TV?
               </h2>
               
               {/* Description */}
-              <p className="text-lg lg:text-xl xl:text-2xl text-slate-300">
+              <p className="text-lg lg:text-xl text-slate-300">
                 Você será redirecionado para a tela de login.
               </p>
               
@@ -1792,26 +1897,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 pt-4">
                 <button
                   onClick={() => setShowExitConfirm(false)}
-                  className="flex-1 py-4 lg:py-6 px-8 text-xl lg:text-2xl xl:text-3xl font-bold text-white bg-slate-700 hover:bg-slate-600 border-2 border-slate-500 rounded-2xl transition-all duration-200 hover:scale-105"
+                  className="flex-1 py-4 lg:py-5 px-8 text-lg lg:text-xl font-bold text-white bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-xl transition-all duration-200 hover:scale-105"
                 >
                   CANCELAR
                 </button>
                 <button
                   onClick={() => {
-                    // Exit fullscreen
                     if (document.fullscreenElement) {
                       document.exitFullscreen();
                     } else if ((document as any).webkitFullscreenElement) {
                       (document as any).webkitExitFullscreen();
                     }
-                    // Clear audio unlock to show unlock screen next time
                     localStorage.removeItem('audioUnlocked');
-                    // Redirect to login
                     window.location.href = '/';
                   }}
-                  className="flex-1 py-4 lg:py-6 px-8 text-xl lg:text-2xl xl:text-3xl font-bold text-white bg-red-600 hover:bg-red-500 border-2 border-red-400 rounded-2xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-3"
+                  className="flex-1 py-4 lg:py-5 px-8 text-lg lg:text-xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 border border-red-400/50 rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-3"
                 >
-                  <LogOut className="w-6 h-6 lg:w-8 lg:h-8" />
+                  <LogOut className="w-6 h-6" />
                   SAIR
                 </button>
               </div>
@@ -1820,21 +1922,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Hidden Exit Button - Only visible on hover */}
-      <div className="fixed bottom-4 right-4 z-50 group">
+      {/* Hidden Exit Button */}
+      <div className="fixed bottom-[7vh] right-4 z-50 group">
         <button
           onClick={() => setShowExitConfirm(true)}
-          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
+          className="w-14 h-14 lg:w-16 lg:h-16 rounded-full bg-transparent group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
           title="Sair do modo TV"
         >
           <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <LogOut className="w-6 h-6 lg:w-8 lg:h-8 text-red-400" />
+            <LogOut className="w-5 h-5 lg:w-6 lg:h-6 text-red-400" />
             <span className="text-[8px] lg:text-[10px] text-red-400 font-medium">SAIR</span>
           </div>
         </button>
       </div>
-
-      {/* Audio Test Button - Discrete */}
     </div>
   );
 }
