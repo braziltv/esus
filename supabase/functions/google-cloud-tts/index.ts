@@ -102,35 +102,37 @@ async function getAccessToken(credentials: any): Promise<string> {
 }
 
 // Vozes disponíveis no Google Cloud TTS para pt-BR
-// Journey = vozes mais naturais e conversacionais (parecem humanas)
+// Neural2 = MELHOR para pronúncia de nomes brasileiros
+// Journey = vozes mais naturais e conversacionais
 // Studio = qualidade de estúdio profissional
-// Neural2 = alta qualidade neural
+// Wavenet = alta qualidade
+// Standard = econômico
 const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
-  // Vozes Journey (MAIS NATURAIS - parecem humanas)
+  // Vozes Neural2 (MELHOR PRONÚNCIA DE NOMES)
+  'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
+  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
+  'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
+  // Vozes Journey (naturais e conversacionais)
   'pt-BR-Journey-F': { languageCode: 'pt-BR', name: 'pt-BR-Journey-F', ssmlGender: 'FEMALE' },
   'pt-BR-Journey-D': { languageCode: 'pt-BR', name: 'pt-BR-Journey-D', ssmlGender: 'MALE' },
   'pt-BR-Journey-O': { languageCode: 'pt-BR', name: 'pt-BR-Journey-O', ssmlGender: 'FEMALE' },
   // Vozes Studio (qualidade profissional)
   'pt-BR-Studio-B': { languageCode: 'pt-BR', name: 'pt-BR-Studio-B', ssmlGender: 'MALE' },
   'pt-BR-Studio-C': { languageCode: 'pt-BR', name: 'pt-BR-Studio-C', ssmlGender: 'FEMALE' },
-  // Vozes Neural2 (alta qualidade)
-  'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
-  'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
   // Vozes Wavenet
   'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
   'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
   'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
-  // Vozes Standard
+  // Vozes Standard (econômico)
   'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
   'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
   'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
 };
 
-// Vozes padrão por gênero - Journey são as mais naturais
+// Vozes padrão por gênero - Neural2 para melhor pronúncia de nomes
 const DEFAULT_VOICES = {
-  female: 'pt-BR-Journey-F',
-  male: 'pt-BR-Journey-D'
+  female: 'pt-BR-Neural2-A',
+  male: 'pt-BR-Neural2-B'
 };
 
 serve(async (req) => {
