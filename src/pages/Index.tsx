@@ -10,6 +10,7 @@ import { ServicePanel } from '@/components/ServicePanel';
 import { PublicDisplay } from '@/components/PublicDisplay';
 import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
+import { AdminPasswordProtection } from '@/components/AdminPasswordProtection';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Heart, Bandage, Scan, BedDouble } from 'lucide-react';
@@ -500,7 +501,9 @@ const Index = () => {
         {/* Administrativo */}
         <TabsContent value="administrativo" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
           <main className="container-responsive py-4 sm:py-6 lg:py-8">
-            <StatisticsPanel patients={patients} history={history} />
+            <AdminPasswordProtection title="Área Administrativa">
+              <StatisticsPanel patients={patients} history={history} />
+            </AdminPasswordProtection>
           </main>
         </TabsContent>
       </Tabs>
