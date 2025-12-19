@@ -22,7 +22,7 @@ export function useTTSPreCache() {
   // Pré-cachear uma frase de destino via Google Cloud TTS
   const preCacheDestinationPhrase = useCallback(async (phrase: string): Promise<boolean> => {
     try {
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Journey-F';
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
