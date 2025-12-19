@@ -9,11 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import { setManualThemeOverride } from './AutoNightMode';
-import { useUnitSettings } from '@/hooks/useUnitSettings';
 
 interface SettingsDialogProps {
   trigger?: React.ReactNode;
-  unitName?: string;
 }
 
 interface VolumeSettings {
@@ -77,7 +75,7 @@ const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
 const GOOGLE_VOICE_FEMALE_KEY = 'googleVoiceFemale';
 const GOOGLE_VOICE_MALE_KEY = 'googleVoiceMale';
 
-export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
+export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
   const [isTesting, setIsTesting] = useState(false);
@@ -85,22 +83,9 @@ export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   
-  // Sync voice settings via database
-  const { voice: syncedVoice, updateVoice } = useUnitSettings(unitName || null);
-  const [localVoice, setLocalVoice] = useState<string | null>(null);
-  
-  // Use synced voice from database, fallback to local state
-  const currentVoice = localVoice || syncedVoice;
-  
-  // Sync local state with database
-  useEffect(() => {
-    if (syncedVoice) {
-      setLocalVoice(syncedVoice);
-    }
-  }, [syncedVoice]);
-  
   const [volumes, setVolumes] = useState<VolumeSettings>(DEFAULT_VOLUMES);
   const [autoNightMode, setAutoNightMode] = useState(() => localStorage.getItem(AUTO_NIGHT_KEY) !== 'false');
+  
   // Google Cloud TTS voice settings
   const [googleVoiceFemale, setGoogleVoiceFemale] = useState(() => 
     localStorage.getItem(GOOGLE_VOICE_FEMALE_KEY) || 'pt-BR-Neural2-A'
@@ -523,25 +508,10 @@ export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
                   Usada nas chamadas de pacientes na TV
                 </p>
                 <Select 
-                  value={currentVoice} 
-                  onValueChange={async (value) => {
-                    // Update local state immediately for responsive UI
-                    setLocalVoice(value);
-                    // Also save to localStorage for backward compatibility
+                  value={localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Chirp3-HD-Achernar'} 
+                  onValueChange={(value) => {
                     localStorage.setItem(PATIENT_CALL_VOICE_KEY, value);
-                    // Dispatch events for same-tab sync (fallback)
-                    window.dispatchEvent(new CustomEvent('voiceSettingChanged', { detail: { voice: value } }));
-                    window.dispatchEvent(new StorageEvent('storage', {
-                      key: PATIENT_CALL_VOICE_KEY,
-                      newValue: value,
-                    }));
-                    // Sync to database for cross-device sync (TV screen)
-                    const synced = await updateVoice(value);
-                    if (synced) {
-                      toast.success('Voz sincronizada com a TV!');
-                    } else {
-                      toast.success('Voz atualizada localmente.');
-                    }
+                    toast.success('Voz de chamada atualizada');
                   }}
                 >
                   <SelectTrigger className="bg-background">

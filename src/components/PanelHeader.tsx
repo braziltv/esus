@@ -97,7 +97,6 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
 
               {/* Settings */}
               <SettingsDialog 
-                unitName={unitName}
                 trigger={
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <Settings className="w-4 h-4" />
@@ -186,7 +185,6 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
 
             {/* Settings */}
             <SettingsDialog 
-              unitName={unitName}
               trigger={
                 <Button variant="ghost" size="sm" className="gap-2">
                   <Settings className="w-4 h-4" />
