@@ -112,7 +112,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(countdownInterval);
   }, []);
 
-  // Re-check localStorage periodically for unit name
+  // Re-check localStorage periodically for unit name (reduced frequency)
   useEffect(() => {
     const checkUnitName = () => {
       const current = localStorage.getItem('selectedUnitName') || '';
@@ -120,7 +120,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         setUnitName(current);
       }
     };
-    const interval = setInterval(checkUnitName, 1000);
+    // Check every 5 seconds instead of 1 second to reduce CPU load
+    const interval = setInterval(checkUnitName, 5000);
     return () => clearInterval(interval);
   }, [unitName]);
 
@@ -198,11 +199,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
     let activityInterval: ReturnType<typeof setInterval> | null = null;
-    let reloadTimeout: ReturnType<typeof setTimeout> | null = null;
     let reloadCheckInterval: ReturnType<typeof setInterval> | null = null;
+    let memoryCleanupInterval: ReturnType<typeof setInterval> | null = null;
     const AUTO_RELOAD_INTERVAL = 30 * 60 * 1000; // 30 minutes auto reload
-    const ACTIVITY_INTERVAL = 15 * 1000; // Simulate activity every 15 seconds (more frequent)
-    const RELOAD_CHECK_INTERVAL = 10 * 1000; // Check every 10 seconds if we should reload
+    const ACTIVITY_INTERVAL = 30 * 1000; // Simulate activity every 30 seconds (reduced from 15s)
+    const RELOAD_CHECK_INTERVAL = 30 * 1000; // Check every 30 seconds if we should reload (reduced from 10s)
+    const MEMORY_CLEANUP_INTERVAL = 5 * 60 * 1000; // Memory cleanup every 5 minutes
     let pendingReload = false;
     let reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
 
@@ -215,21 +217,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           
           wakeLock.addEventListener('release', () => {
             console.log('🔓 Wake Lock liberado - tentando reativar...');
-            // Try to re-acquire wake lock immediately
-            requestWakeLock();
+            // Try to re-acquire wake lock after a delay (avoid tight loop)
+            setTimeout(requestWakeLock, 3000);
           });
         }
       } catch (err) {
         console.log('Wake Lock não disponível:', err);
-        // Retry after 5 seconds
-        setTimeout(requestWakeLock, 5000);
+        // Retry after 10 seconds (increased from 5s)
+        setTimeout(requestWakeLock, 10000);
       }
     };
 
-    // Simulate user activity to prevent standby on older TVs - more aggressive
+    // Simulate user activity to prevent standby on older TVs - simplified
     const simulateActivity = () => {
-      // Multiple techniques to prevent standby
-      
       // 1. Dispatch synthetic mouse move event
       const event = new MouseEvent('mousemove', {
         bubbles: false,
@@ -239,41 +239,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       });
       document.body.dispatchEvent(event);
 
-      // 2. Dispatch a synthetic scroll event
-      const scrollEvent = new WheelEvent('wheel', {
-        bubbles: false,
-        cancelable: true,
-        deltaY: 0,
-      });
-      document.body.dispatchEvent(scrollEvent);
-
-      // 3. Force a tiny DOM change (forces browser to stay active)
+      // 2. Force a tiny DOM change (forces browser to stay active)
       const antiStandbyEl = document.getElementById('anti-standby-pixel');
       if (antiStandbyEl) {
         antiStandbyEl.style.opacity = antiStandbyEl.style.opacity === '0.01' ? '0.02' : '0.01';
       }
 
-      // 4. Keep video elements playing if any
-      const videos = document.querySelectorAll('video');
-      videos.forEach(video => {
-        if (video.paused && video.readyState >= 2) {
-          video.play().catch(() => {});
-        }
-      });
-
-      // 5. Resume audio context if suspended
+      // 3. Resume audio context if suspended
       if (audioContextRef.current?.state === 'suspended') {
         audioContextRef.current.resume().catch(() => {});
       }
+    };
 
-      // 6. Resume speech synthesis
-      try {
-        window.speechSynthesis?.resume?.();
-      } catch {
-        // ignore
+    // Memory cleanup - clear old processed calls
+    const cleanupMemory = () => {
+      const maxProcessedCalls = 100;
+      if (processedCallsRef.current.size > maxProcessedCalls) {
+        const arr = Array.from(processedCallsRef.current);
+        processedCallsRef.current = new Set(arr.slice(-50)); // Keep only last 50
+        console.log('🧹 Memory cleanup: cleared old processed calls');
       }
-
-      console.log('📺 Atividade simulada para evitar standby');
     };
 
     // Check if we should reload now
@@ -310,7 +295,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       if (document.visibilityState === 'visible') {
         console.log('👁️ Página visível novamente - reativando proteções');
         requestWakeLock();
-        simulateActivity();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -319,24 +303,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const handleFocus = () => {
       console.log('🎯 Página recebeu foco - reativando proteções');
       requestWakeLock();
-      simulateActivity();
     };
     window.addEventListener('focus', handleFocus);
 
     // Start wake lock
     requestWakeLock();
 
-    // Start activity simulation interval (every 15 seconds)
+    // Start activity simulation interval (every 30 seconds - reduced frequency)
     activityInterval = setInterval(simulateActivity, ACTIVITY_INTERVAL);
 
-    // Start reload check interval (every 10 seconds)
+    // Start reload check interval (every 30 seconds - reduced frequency)
     reloadCheckInterval = setInterval(checkReload, RELOAD_CHECK_INTERVAL);
+
+    // Start memory cleanup interval
+    memoryCleanupInterval = setInterval(cleanupMemory, MEMORY_CLEANUP_INTERVAL);
 
     // Schedule first reload
     scheduleNextReload();
-
-    // Initial activity simulation
-    simulateActivity();
 
     // Create anti-standby pixel element
     if (!document.getElementById('anti-standby-pixel')) {
@@ -353,11 +336,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       if (activityInterval) {
         clearInterval(activityInterval);
       }
-      if (reloadTimeout) {
-        clearTimeout(reloadTimeout);
-      }
       if (reloadCheckInterval) {
         clearInterval(reloadCheckInterval);
+      }
+      if (memoryCleanupInterval) {
+        clearInterval(memoryCleanupInterval);
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
@@ -1442,10 +1425,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // kick once
     void poll();
 
+    // Poll every 5 seconds (increased from 2s to reduce load on TV browsers)
     const interval = window.setInterval(() => {
       if (isSpeakingRef.current) return;
       void poll();
-    }, 2000);
+    }, 5000);
 
     return () => {
       disposed = true;
