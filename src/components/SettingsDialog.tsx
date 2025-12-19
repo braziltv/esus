@@ -22,26 +22,48 @@ interface VolumeSettings {
 }
 
 // Vozes Google Cloud TTS disponíveis para pt-BR
-const GOOGLE_VOICES = {
+// Organizadas por qualidade: Chirp 3 HD > Journey > Studio > Neural2 > WaveNet > Standard
+export const GOOGLE_VOICES = {
   female: [
-    { id: 'pt-BR-Journey-F', name: 'Journey-F (Mais Natural)', quality: 'ultra' },
-    { id: 'pt-BR-Journey-O', name: 'Journey-O', quality: 'ultra' },
-    { id: 'pt-BR-Studio-C', name: 'Studio-C (Profissional)', quality: 'premium' },
-    { id: 'pt-BR-Neural2-A', name: 'Neural2-A', quality: 'premium' },
-    { id: 'pt-BR-Neural2-C', name: 'Neural2-C', quality: 'premium' },
-    { id: 'pt-BR-Wavenet-A', name: 'Wavenet-A', quality: 'high' },
-    { id: 'pt-BR-Wavenet-C', name: 'Wavenet-C', quality: 'high' },
-    { id: 'pt-BR-Standard-A', name: 'Standard-A', quality: 'standard' },
-    { id: 'pt-BR-Standard-C', name: 'Standard-C', quality: 'standard' },
+    // Chirp 3 HD - Ultra realistas (última geração)
+    { id: 'pt-BR-Chirp3-HD-Acacia', name: 'Chirp 3 HD - Acacia', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Lemon', name: 'Chirp 3 HD - Lemon', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Kore', name: 'Chirp 3 HD - Kore', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    // Journey - Mais naturais
+    { id: 'pt-BR-Journey-F', name: 'Journey-F (Muito Natural)', quality: 'ultra', category: 'Journey' },
+    { id: 'pt-BR-Journey-O', name: 'Journey-O', quality: 'ultra', category: 'Journey' },
+    // Studio - Profissional
+    { id: 'pt-BR-Studio-C', name: 'Studio-C (Profissional)', quality: 'premium', category: 'Studio' },
+    // Neural2
+    { id: 'pt-BR-Neural2-A', name: 'Neural2-A', quality: 'premium', category: 'Neural2' },
+    { id: 'pt-BR-Neural2-C', name: 'Neural2-C', quality: 'premium', category: 'Neural2' },
+    // WaveNet
+    { id: 'pt-BR-Wavenet-A', name: 'WaveNet-A', quality: 'high', category: 'WaveNet' },
+    { id: 'pt-BR-Wavenet-C', name: 'WaveNet-C', quality: 'high', category: 'WaveNet' },
+    // Standard
+    { id: 'pt-BR-Standard-A', name: 'Standard-A', quality: 'standard', category: 'Standard' },
+    { id: 'pt-BR-Standard-C', name: 'Standard-C', quality: 'standard', category: 'Standard' },
   ],
   male: [
-    { id: 'pt-BR-Journey-D', name: 'Journey-D (Mais Natural)', quality: 'ultra' },
-    { id: 'pt-BR-Studio-B', name: 'Studio-B (Profissional)', quality: 'premium' },
-    { id: 'pt-BR-Neural2-B', name: 'Neural2-B', quality: 'premium' },
-    { id: 'pt-BR-Wavenet-B', name: 'Wavenet-B', quality: 'high' },
-    { id: 'pt-BR-Standard-B', name: 'Standard-B', quality: 'standard' },
+    // Chirp 3 HD - Ultra realistas (última geração)
+    { id: 'pt-BR-Chirp3-HD-Fennel', name: 'Chirp 3 HD - Fennel', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Orus', name: 'Chirp 3 HD - Orus', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Puck', name: 'Chirp 3 HD - Puck', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    // Journey - Mais naturais
+    { id: 'pt-BR-Journey-D', name: 'Journey-D (Muito Natural)', quality: 'ultra', category: 'Journey' },
+    // Studio - Profissional
+    { id: 'pt-BR-Studio-B', name: 'Studio-B (Profissional)', quality: 'premium', category: 'Studio' },
+    // Neural2
+    { id: 'pt-BR-Neural2-B', name: 'Neural2-B', quality: 'premium', category: 'Neural2' },
+    // WaveNet
+    { id: 'pt-BR-Wavenet-B', name: 'WaveNet-B', quality: 'high', category: 'WaveNet' },
+    // Standard
+    { id: 'pt-BR-Standard-B', name: 'Standard-B', quality: 'standard', category: 'Standard' },
   ]
 };
+
+// Chave para voz de chamada de pacientes (separada da voz de horas)
+export const PATIENT_CALL_VOICE_KEY = 'patientCallVoice';
 
 const DEFAULT_VOLUMES: VolumeSettings = {
   notification: 1,

@@ -102,10 +102,20 @@ async function getAccessToken(credentials: any): Promise<string> {
 }
 
 // Vozes disponíveis no Google Cloud TTS para pt-BR
+// Chirp 3 HD = vozes de última geração com qualidade ultra-realista
 // Journey = vozes mais naturais e conversacionais (parecem humanas)
 // Studio = qualidade de estúdio profissional
 // Neural2 = alta qualidade neural
+// WaveNet = vozes com boa qualidade
+// Standard = vozes básicas
 const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
+  // Vozes Chirp 3 HD (ULTRA REALISTAS - última geração)
+  'pt-BR-Chirp3-HD-Acacia': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Acacia', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Fennel': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Fennel', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Lemon': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Lemon', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Orus': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Orus', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Puck', ssmlGender: 'MALE' },
   // Vozes Journey (MAIS NATURAIS - parecem humanas)
   'pt-BR-Journey-F': { languageCode: 'pt-BR', name: 'pt-BR-Journey-F', ssmlGender: 'FEMALE' },
   'pt-BR-Journey-D': { languageCode: 'pt-BR', name: 'pt-BR-Journey-D', ssmlGender: 'MALE' },
