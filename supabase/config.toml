@@ -23,3 +23,9 @@ verify_jwt = false
 
 [functions.google-cloud-tts]
 verify_jwt = false
+
+[functions.telegram-alert]
+verify_jwt = false
+
+[functions.send-daily-statistics]
+verify_jwt = false
