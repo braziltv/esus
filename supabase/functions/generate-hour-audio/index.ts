@@ -1,13 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-// Alice - voz feminina popular em português brasileiro
-const VOICE_ID = 'Xb7hH8MSUJpSbSDYk0k2';
 
 // Texto para horas (0-23) - estilo brasileiro conversacional
 function getHourText(hour: number): string {
@@ -71,69 +69,152 @@ function getMinuteText(minute: number): string {
   return minutesText[minute] || `e ${minute}`;
 }
 
-// Gera áudio tentando múltiplas chaves API
-async function generateAudioWithFallback(text: string): Promise<ArrayBuffer> {
-  const apiKeys = [
-    Deno.env.get('ELEVENLABS_API_KEY'),
-    Deno.env.get('ELEVENLABS_API_KEY_HOURS'),
-  ].filter(Boolean) as string[];
+// Cria JWT para autenticação Google Cloud
+async function createJWT(credentials: any): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: credentials.client_email,
+    scope: 'https://www.googleapis.com/auth/cloud-platform',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600,
+  };
 
-  if (apiKeys.length === 0) {
-    throw new Error('No ElevenLabs API key configured');
+  const enc = new TextEncoder();
+  const headerB64 = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const payloadB64 = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const signInput = `${headerB64}.${payloadB64}`;
+
+  // Parse PEM private key
+  const pemContents = credentials.private_key
+    .replace(/-----BEGIN PRIVATE KEY-----/, '')
+    .replace(/-----END PRIVATE KEY-----/, '')
+    .replace(/\s/g, '');
+  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryKey,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, enc.encode(signInput));
+  const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+
+  return `${signInput}.${sigB64}`;
+}
+
+// Obtém access token do Google Cloud
+async function getAccessToken(credentials: any): Promise<string> {
+  const jwt = await createJWT(credentials);
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+  });
+
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text();
+    throw new Error(`Failed to get access token: ${errorText}`);
   }
 
-  let lastError: Error | null = null;
+  const tokenData = await tokenResponse.json();
+  return tokenData.access_token;
+}
 
-  for (const apiKey of apiKeys) {
-    try {
-      console.log(`Generating audio for: "${text}"`);
-      
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-        {
-          method: 'POST',
-          headers: {
-            'xi-api-key': apiKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text,
-            model_id: 'eleven_multilingual_v2',
-            output_format: 'mp3_44100_128',
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-              style: 0.4,
-              use_speaker_boost: true,
-              speed: 0.95,
-            },
-          }),
-        }
-      );
+// Gera áudio usando Google Cloud TTS
+async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
+  const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
+  if (!credentialsJson) {
+    throw new Error('GOOGLE_CLOUD_CREDENTIALS not configured');
+  }
 
-      if (response.ok) {
-        return await response.arrayBuffer();
-      }
+  const credentials = JSON.parse(credentialsJson);
+  const accessToken = await getAccessToken(credentials);
 
-      const errorText = await response.text();
-      console.error(`ElevenLabs API error: ${response.status} - ${errorText}`);
-      lastError = new Error(`ElevenLabs API error: ${response.status}`);
-      
-      // Se for 401, tentar próxima chave
-      if (response.status === 401) {
-        console.log('API key unauthorized, trying next key...');
-        continue;
-      }
-      
-      // Para outros erros, lançar imediatamente
-      throw lastError;
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      console.error(`Error with API key: ${lastError.message}`);
+  console.log(`[Google TTS] Generating audio for: "${text}"`);
+
+  const response = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      input: { text },
+      voice: {
+        languageCode: 'pt-BR',
+        name: 'pt-BR-Neural2-A', // Voz feminina neural de alta qualidade
+        ssmlGender: 'FEMALE',
+      },
+      audioConfig: {
+        audioEncoding: 'MP3',
+        speakingRate: 0.95,
+        pitch: 0,
+        volumeGainDb: 0,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Google TTS API error: ${response.status} - ${errorText}`);
+    throw new Error(`Google TTS API error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  
+  // Google retorna o áudio em base64
+  const audioContent = data.audioContent;
+  const binaryString = atob(audioContent);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  
+  console.log(`[Google TTS] Generated ${bytes.length} bytes for: "${text}"`);
+  return bytes.buffer;
+}
+
+// Função para deletar todos os arquivos de cache de tempo
+async function deleteTimeCache(supabase: any): Promise<{ deleted: number; errors: string[] }> {
+  const results = { deleted: 0, errors: [] as string[] };
+  
+  // Listar todos os arquivos na pasta time
+  const { data: files, error: listError } = await supabase.storage
+    .from('tts-cache')
+    .list('time');
+  
+  if (listError) {
+    results.errors.push(`List error: ${listError.message}`);
+    return results;
+  }
+
+  if (!files || files.length === 0) {
+    console.log('No files to delete in time folder');
+    return results;
+  }
+
+  // Deletar cada arquivo
+  for (const file of files) {
+    const filePath = `time/${file.name}`;
+    const { error: deleteError } = await supabase.storage
+      .from('tts-cache')
+      .remove([filePath]);
+    
+    if (deleteError) {
+      results.errors.push(`Delete ${filePath}: ${deleteError.message}`);
+    } else {
+      results.deleted++;
+      console.log(`Deleted: ${filePath}`);
     }
   }
 
-  throw lastError || new Error('All API keys failed');
+  return results;
 }
 
 serve(async (req) => {
@@ -147,6 +228,99 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Deletar cache antigo e regenerar tudo
+    if (action === 'delete-and-regenerate') {
+      console.log('Starting delete-and-regenerate process...');
+      
+      // Primeiro deletar tudo
+      const deleteResults = await deleteTimeCache(supabase);
+      console.log(`Deleted ${deleteResults.deleted} files`);
+      
+      // Agora regenerar tudo com Google TTS
+      const genResults = { hours: 0, minutes: 0, minutos_word: false, failed: 0, errors: [] as string[] };
+      
+      // Gerar horas (0-23)
+      for (let h = 0; h < 24; h++) {
+        const cacheKey = `h_${h.toString().padStart(2, '0')}.mp3`;
+        try {
+          const text = getHourText(h);
+          const audioBuffer = await generateAudioWithGoogle(text);
+          
+          const { error: uploadError } = await supabase.storage
+            .from('tts-cache')
+            .upload(`time/${cacheKey}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
+
+          if (uploadError) {
+            genResults.failed++;
+            genResults.errors.push(`${cacheKey}: ${uploadError.message}`);
+          } else {
+            console.log(`Generated hour ${h}: "${text}"`);
+            genResults.hours++;
+          }
+          await new Promise(resolve => setTimeout(resolve, 200)); // Menor delay para Google
+        } catch (error) {
+          genResults.failed++;
+          genResults.errors.push(`h_${h}: ${error}`);
+        }
+      }
+
+      // Gerar minutos (1-59)
+      for (let m = 1; m < 60; m++) {
+        const cacheKey = `m_${m.toString().padStart(2, '0')}.mp3`;
+        try {
+          const text = getMinuteText(m);
+          const audioBuffer = await generateAudioWithGoogle(text);
+          
+          const { error: uploadError } = await supabase.storage
+            .from('tts-cache')
+            .upload(`time/${cacheKey}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
+
+          if (uploadError) {
+            genResults.failed++;
+            genResults.errors.push(`${cacheKey}: ${uploadError.message}`);
+          } else {
+            console.log(`Generated minute ${m}: "${text}"`);
+            genResults.minutes++;
+          }
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          genResults.failed++;
+          genResults.errors.push(`m_${m}: ${error}`);
+        }
+      }
+
+      // Gerar palavra "minutos"
+      try {
+        const audioBuffer = await generateAudioWithGoogle('minutos');
+        await supabase.storage
+          .from('tts-cache')
+          .upload('time/minutos.mp3', audioBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: true,
+          });
+        console.log('Generated minutos word');
+        genResults.minutos_word = true;
+      } catch (error) {
+        genResults.failed++;
+        genResults.errors.push(`minutos: ${error}`);
+      }
+
+      return new Response(JSON.stringify({
+        action: 'delete-and-regenerate',
+        deleted: deleteResults,
+        generated: genResults,
+        total: genResults.hours + genResults.minutes + (genResults.minutos_word ? 1 : 0),
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Gerar todos os áudios de horas (24 arquivos)
     if (action === 'generate-hours') {
@@ -169,7 +343,7 @@ serve(async (req) => {
 
         try {
           const text = getHourText(h);
-          const audioBuffer = await generateAudioWithFallback(text);
+          const audioBuffer = await generateAudioWithGoogle(text);
           
           const { error: uploadError } = await supabase.storage
             .from('tts-cache')
@@ -185,7 +359,7 @@ serve(async (req) => {
             console.log(`Generated hour ${h}: "${text}"`);
             results.success++;
           }
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 200));
         } catch (error) {
           results.failed++;
           results.errors.push(`h_${h}: ${error}`);
@@ -218,7 +392,7 @@ serve(async (req) => {
 
         try {
           const text = getMinuteText(m);
-          const audioBuffer = await generateAudioWithFallback(text);
+          const audioBuffer = await generateAudioWithGoogle(text);
           
           const { error: uploadError } = await supabase.storage
             .from('tts-cache')
@@ -234,7 +408,7 @@ serve(async (req) => {
             console.log(`Generated minute ${m}: "${text}"`);
             results.success++;
           }
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 200));
         } catch (error) {
           results.failed++;
           results.errors.push(`m_${m}: ${error}`);
@@ -263,7 +437,7 @@ serve(async (req) => {
       }
 
       try {
-        const audioBuffer = await generateAudioWithFallback('minutos');
+        const audioBuffer = await generateAudioWithGoogle('minutos');
         
         const { error: uploadError } = await supabase.storage
           .from('tts-cache')
@@ -312,7 +486,7 @@ serve(async (req) => {
 
         try {
           const text = getHourText(h);
-          const audioBuffer = await generateAudioWithFallback(text);
+          const audioBuffer = await generateAudioWithGoogle(text);
           
           await supabase.storage
             .from('tts-cache')
@@ -323,7 +497,7 @@ serve(async (req) => {
 
           console.log(`Generated hour ${h}: "${text}"`);
           results.hours++;
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 200));
         } catch (error) {
           results.failed++;
           results.errors.push(`h_${h}: ${error}`);
@@ -347,7 +521,7 @@ serve(async (req) => {
 
         try {
           const text = getMinuteText(m);
-          const audioBuffer = await generateAudioWithFallback(text);
+          const audioBuffer = await generateAudioWithGoogle(text);
           
           await supabase.storage
             .from('tts-cache')
@@ -358,7 +532,7 @@ serve(async (req) => {
 
           console.log(`Generated minute ${m}: "${text}"`);
           results.minutes++;
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 200));
         } catch (error) {
           results.failed++;
           results.errors.push(`m_${m}: ${error}`);
@@ -376,7 +550,7 @@ serve(async (req) => {
           results.skipped++;
         } else {
           try {
-            const audioBuffer = await generateAudioWithFallback('minutos');
+            const audioBuffer = await generateAudioWithGoogle('minutos');
             await supabase.storage
               .from('tts-cache')
               .upload(`time/${minutosKey}`, audioBuffer, {
@@ -392,7 +566,7 @@ serve(async (req) => {
         }
       } else {
         try {
-          const audioBuffer = await generateAudioWithFallback('minutos');
+          const audioBuffer = await generateAudioWithGoogle('minutos');
           await supabase.storage
             .from('tts-cache')
             .upload(`time/${minutosKey}`, audioBuffer, {
@@ -452,14 +626,14 @@ serve(async (req) => {
       try {
         const hourPath = `time/h_${hour.toString().padStart(2, '0')}.mp3`;
         const hourUrl = await ensureSignedUrl(hourPath, () => 
-          generateAudioWithFallback(getHourText(hour))
+          generateAudioWithGoogle(getHourText(hour))
         );
 
         let minuteUrl: string | null = null;
         if (minute > 0) {
           const minutePath = `time/m_${minute.toString().padStart(2, '0')}.mp3`;
           minuteUrl = await ensureSignedUrl(minutePath, () => 
-            generateAudioWithFallback(getMinuteText(minute))
+            generateAudioWithGoogle(getMinuteText(minute))
           );
         }
 
