@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { Volume2, VolumeX, LogOut, Settings, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
+import { AdminPasswordDialog } from './AdminPasswordDialog';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { HealthCrossIcon } from './HealthCrossIcon';
 import { useTheme } from 'next-themes';
 import { setManualThemeOverride } from './AutoNightMode';
 import { ConnectionIndicator } from './ConnectionIndicator';
+
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
@@ -16,13 +19,32 @@ interface PanelHeaderProps {
 export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName }: PanelHeaderProps) {
   const { currentTime } = useBrazilTime();
   const { theme, setTheme } = useTheme();
+  const [showSettingsPasswordDialog, setShowSettingsPasswordDialog] = useState(false);
+  const [isSettingsAuthenticated, setIsSettingsAuthenticated] = useState(false);
+  const [openSettings, setOpenSettings] = useState(false);
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     setManualThemeOverride(true);
   };
+
+  const handleSettingsClick = () => {
+    if (isSettingsAuthenticated) {
+      setOpenSettings(true);
+    } else {
+      setShowSettingsPasswordDialog(true);
+    }
+  };
+
+  const handleSettingsAuthSuccess = () => {
+    setIsSettingsAuthenticated(true);
+    setShowSettingsPasswordDialog(false);
+    setOpenSettings(true);
+  };
+
   return (
+    <>
     <header className="bg-card shadow-health border-b border-border">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Mobile Layout - Two Rows */}
@@ -96,13 +118,14 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
               </Button>
 
               {/* Settings */}
-              <SettingsDialog 
-                trigger={
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                }
-              />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={handleSettingsClick}
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
 
               {/* Status indicator */}
               <ConnectionIndicator />
@@ -184,14 +207,15 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
             </Button>
 
             {/* Settings */}
-            <SettingsDialog 
-              trigger={
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <Settings className="w-4 h-4" />
-                  <span className="hidden lg:inline">Config</span>
-                </Button>
-              }
-            />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2"
+              onClick={handleSettingsClick}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden lg:inline">Config</span>
+            </Button>
 
             {/* Status indicator */}
             <ConnectionIndicator />
@@ -210,5 +234,22 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
         </div>
       </div>
     </header>
+    
+    {/* Settings Dialog */}
+    <SettingsDialog 
+      trigger={null}
+      open={openSettings}
+      onOpenChange={setOpenSettings}
+    />
+    
+    {/* Settings Password Dialog */}
+    <AdminPasswordDialog
+      isOpen={showSettingsPasswordDialog}
+      onClose={() => setShowSettingsPasswordDialog(false)}
+      onSuccess={handleSettingsAuthSuccess}
+      title="Acesso às Configurações"
+      description="As configurações do sistema requerem autenticação administrativa."
+    />
+    </>
   );
 }
