@@ -46,12 +46,12 @@ const Index = () => {
     // TV mode can only view display
     if (isTvMode) return;
     
-    // TESTE: Segurança desabilitada temporariamente
-    // if (value === "administrativo" && !isAdminAuthenticated) {
-    //   setPendingAdminTab(value);
-    //   setShowPasswordDialog(true);
-    //   return;
-    // }
+    // Check if trying to access admin tab without authentication
+    if (value === "administrativo" && !isAdminAuthenticated) {
+      setPendingAdminTab(value);
+      setShowPasswordDialog(true);
+      return;
+    }
     
     setActiveTab(value);
     
