@@ -11,7 +11,9 @@ import { toast } from 'sonner';
 import { setManualThemeOverride } from './AutoNightMode';
 
 interface SettingsDialogProps {
-  trigger?: React.ReactNode;
+  trigger?: React.ReactNode | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface VolumeSettings {
@@ -49,7 +51,7 @@ const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
 const GOOGLE_VOICE_FEMALE_KEY = 'googleVoiceFemale';
 const GOOGLE_VOICE_MALE_KEY = 'googleVoiceMale';
 
-export function SettingsDialog({ trigger }: SettingsDialogProps) {
+export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
   const [isTesting, setIsTesting] = useState(false);
@@ -329,14 +331,22 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const ptVoices = availableVoices.filter(v => v.lang.includes('pt'));
 
   return (
-    <Dialog onOpenChange={(open) => { if (open) loadVoices(); }}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-            <Settings className="w-5 h-5" />
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog 
+      open={open} 
+      onOpenChange={(isOpen) => { 
+        if (isOpen) loadVoices(); 
+        onOpenChange?.(isOpen);
+      }}
+    >
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Settings className="w-5 h-5" />
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

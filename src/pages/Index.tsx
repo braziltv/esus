@@ -11,6 +11,7 @@ import { PublicDisplay } from '@/components/PublicDisplay';
 import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
+import { AdminPasswordDialog, useAdminAuth } from '@/components/AdminPasswordDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Heart, Bandage, Scan, BedDouble } from 'lucide-react';
 import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
@@ -20,7 +21,11 @@ const Index = () => {
   const [unitName, setUnitName] = useState("");
   const [activeTab, setActiveTab] = useState("cadastro");
   const [isTvMode, setIsTvMode] = useState(false);
+  const [pendingAdminTab, setPendingAdminTab] = useState<string | null>(null);
   const mainContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Admin authentication
+  const { isAdminAuthenticated, showPasswordDialog, setShowPasswordDialog, handleAuthSuccess, resetAuth } = useAdminAuth();
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -41,6 +46,13 @@ const Index = () => {
     // TV mode can only view display
     if (isTvMode) return;
     
+    // Check if trying to access admin tab without authentication
+    if (value === "administrativo" && !isAdminAuthenticated) {
+      setPendingAdminTab(value);
+      setShowPasswordDialog(true);
+      return;
+    }
+    
     setActiveTab(value);
     
     if (value === "display") {
@@ -54,6 +66,16 @@ const Index = () => {
         document.exitFullscreen().catch(console.error);
       }
     }
+  };
+  
+  // Handle admin auth success
+  const onAdminAuthSuccess = () => {
+    handleAuthSuccess(() => {
+      if (pendingAdminTab) {
+        setActiveTab(pendingAdminTab);
+        setPendingAdminTab(null);
+      }
+    });
   };
 
   // Listen for fullscreen exit (ESC key) and switch tab (only for non-TV mode)
@@ -166,7 +188,8 @@ const Index = () => {
     setIsLoggedIn(false);
     setUnitName("");
     setIsTvMode(false);
-  }, []);
+    resetAuth(); // Reset admin authentication on logout
+  }, [resetAuth]);
 
   // Auto logout at 07:04 and 19:04 (except TV mode)
   useAutoLogout({ isTvMode, onLogout: handleLogout });
@@ -504,6 +527,18 @@ const Index = () => {
           </main>
         </TabsContent>
       </Tabs>
+      
+      {/* Admin Password Dialog */}
+      <AdminPasswordDialog
+        isOpen={showPasswordDialog}
+        onClose={() => {
+          setShowPasswordDialog(false);
+          setPendingAdminTab(null);
+        }}
+        onSuccess={onAdminAuthSuccess}
+        title="Acesso ao Painel Administrativo"
+        description="O painel administrativo contém configurações e estatísticas sensíveis. Digite a senha para continuar."
+      />
     </div>
   );
 };
