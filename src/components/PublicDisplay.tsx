@@ -59,7 +59,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
-  const [newsCountdown, setNewsCountdown] = useState(3 * 60); // 3 minutes in seconds
+  const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const [commercialPhrases, setCommercialPhrases] = useState<CommercialPhrase[]>([]);
   const [scheduledAnnouncements, setScheduledAnnouncements] = useState<ScheduledAnnouncement[]>([]);
   const lastAnnouncementPlayedRef = useRef<Record<string, number>>({});
@@ -127,13 +127,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
     };
 
+    // Update news in background every 5 minutes via edge function
+    const updateNewsInBackground = async () => {
+      try {
+        console.log('🔄 Updating news cache in background...');
+        await supabase.functions.invoke('update-cache');
+        console.log('✅ News cache updated, reloading...');
+        await loadNewsFromDB();
+      } catch (error) {
+        console.error('Error updating news in background:', error);
+      }
+    };
+
     loadNewsFromDB();
-    setNewsCountdown(3 * 60);
-    // Reload from DB every 3 minutes to get fresh shuffled data
+    setNewsCountdown(5 * 60);
+    
+    // Update news every 5 minutes in background
     const interval = setInterval(() => {
-      loadNewsFromDB();
-      setNewsCountdown(3 * 60);
-    }, 3 * 60 * 1000);
+      updateNewsInBackground();
+      setNewsCountdown(5 * 60);
+    }, 5 * 60 * 1000);
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -261,7 +275,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Countdown timer for next news update
   useEffect(() => {
     const countdownInterval = setInterval(() => {
-      setNewsCountdown(prev => (prev > 0 ? prev - 1 : 3 * 60));
+      setNewsCountdown(prev => (prev > 0 ? prev - 1 : 5 * 60));
     }, 1000);
     return () => clearInterval(countdownInterval);
   }, []);
@@ -2085,8 +2099,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   newsItems.forEach((item, index) => {
                     itemsWithExtras.push(item);
                     
-                    // Insert commercial phrase every 2 news items (if available)
-                    if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
+                    // Insert commercial phrase every 3 news items (if available)
+                    if ((index + 1) % 3 === 0 && commercialIndex < commercialItems.length) {
                       itemsWithExtras.push(commercialItems[commercialIndex]);
                       commercialIndex++;
                     }
