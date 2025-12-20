@@ -199,8 +199,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   useEffect(() => {
     const loadScheduledAnnouncements = async () => {
       try {
-        const today = new Date().toISOString().split('T')[0];
-
+        const today = formatBrazilTime(new Date(), 'yyyy-MM-dd');
         let query = supabase
           .from('scheduled_announcements')
           .select('*')
@@ -1097,20 +1096,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Play scheduled voice announcements (from Marketing panel)
   useEffect(() => {
-    if (!currentTime || !audioUnlocked || !isSynced || scheduledAnnouncements.length === 0) return;
+    if (!currentTime || !audioUnlocked || scheduledAnnouncements.length === 0) return;
 
     // Never overlap with patient calls
     if (announcingType || isSpeakingRef.current) {
       return;
     }
 
-    const now = new Date();
+    // Use Brazil-synced time from useBrazilTime
+    const now = currentTime;
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     const currentTimeStr = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:00`;
     const dayOfWeek = now.getDay();
-    const nowMs = Date.now();
-
+    const nowMs = now.getTime();
     // Check each scheduled announcement
     for (const announcement of scheduledAnnouncements) {
       // Check if within time window
@@ -1176,7 +1175,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         break;
       }
     }
-  }, [currentTime, audioUnlocked, isSynced, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS]);
+  }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS]);
 
   const getDestinationPhrase = useCallback((destination: string): string => {
     // Mapeamento de destinos para frases corretas
