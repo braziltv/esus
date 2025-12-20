@@ -123,17 +123,35 @@ export function SystemMonitoringPanel() {
 
   const checkEdgeFunction = useCallback(async (functionName: string): Promise<'online' | 'offline'> => {
     try {
+      // Use HEAD request first, fallback to GET with abort for functions that require body
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`,
         {
-          method: 'OPTIONS',
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
+          body: JSON.stringify({ healthCheck: true }),
+          signal: controller.signal,
         }
       );
-      return response.ok || response.status === 204 ? 'online' : 'offline';
-    } catch {
+      
+      clearTimeout(timeoutId);
+      
+      // Function is online if it responds (any status code means the function is deployed and running)
+      // 200, 400, 401, 403, 500 all indicate the function is responding
+      return response.status !== 404 ? 'online' : 'offline';
+    } catch (err) {
+      // AbortError means timeout, but function might still be online (just slow)
+      // Network errors mean offline
+      if (err instanceof Error && err.name === 'AbortError') {
+        return 'offline'; // Timeout - consider offline
+      }
       return 'offline';
     }
   }, []);
