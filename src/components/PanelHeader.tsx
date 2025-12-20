@@ -30,8 +30,11 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
   };
 
   const handleSettingsClick = () => {
-    // TESTE: Segurança desabilitada temporariamente
-    setOpenSettings(true);
+    if (isSettingsAuthenticated) {
+      setOpenSettings(true);
+    } else {
+      setShowSettingsPasswordDialog(true);
+    }
   };
 
   const handleSettingsAuthSuccess = () => {
