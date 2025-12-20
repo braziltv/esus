@@ -159,6 +159,19 @@ export function useUserSession() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         updateActivity();
+      } else if (document.visibilityState === 'hidden') {
+        // Mark session as inactive when page is hidden
+        const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
+        if (sessionId) {
+          // Use regular fetch for session update (sendBeacon doesn't work with Supabase headers)
+          supabase
+            .from('user_sessions')
+            .update({ 
+              last_activity_at: new Date().toISOString(),
+            })
+            .eq('id', sessionId)
+            .then(() => {});
+        }
       }
     };
 
@@ -166,12 +179,15 @@ export function useUserSession() {
       // Mark session as inactive on page close
       const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
       if (sessionId) {
-        // Use sendBeacon for reliable delivery on page unload
-        const data = JSON.stringify({ is_active: false, logout_at: new Date().toISOString() });
-        navigator.sendBeacon(
-          `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_sessions?id=eq.${sessionId}`,
-          data
-        );
+        // Use synchronous approach for beforeunload
+        supabase
+          .from('user_sessions')
+          .update({ 
+            is_active: false, 
+            logout_at: new Date().toISOString() 
+          })
+          .eq('id', sessionId)
+          .then(() => {});
       }
     };
 
