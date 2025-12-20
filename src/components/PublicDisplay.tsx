@@ -23,6 +23,29 @@ interface TTSError {
   timestamp: Date;
 }
 
+interface ScheduledAnnouncement {
+  id: string;
+  title: string;
+  text_content: string;
+  start_time: string;
+  end_time: string;
+  days_of_week: number[];
+  interval_minutes: number;
+  repeat_count: number;
+  is_active: boolean;
+  last_played_at: string | null;
+}
+
+interface CommercialPhrase {
+  id: string;
+  phrase_content: string;
+  start_time: string;
+  end_time: string;
+  days_of_week: number[];
+  is_active: boolean;
+  display_order: number;
+}
+
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
   const { playHourAudio } = useHourAudio();
@@ -36,6 +59,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(3 * 60); // 3 minutes in seconds
+  const [commercialPhrases, setCommercialPhrases] = useState<CommercialPhrase[]>([]);
+  const [scheduledAnnouncements, setScheduledAnnouncements] = useState<ScheduledAnnouncement[]>([]);
+  const lastAnnouncementPlayedRef = useRef<Record<string, number>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -44,11 +70,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const lastTimeAnnouncementRef = useRef<number>(0); // timestamp da última chamada de hora
-  const scheduledAnnouncementsRef = useRef<number[]>([]); // minutos agendados para anunciar
-  const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
-  const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
-  const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
+  const lastTimeAnnouncementRef = useRef<number>(0);
+  const scheduledAnnouncementsRef = useRef<number[]>([]);
+  const currentScheduleHourRef = useRef<number>(-1);
+  const isSpeakingRef = useRef<boolean>(false);
+  const lastSpeakCallRef = useRef<number>(0);
   const [ttsError, setTtsError] = useState<TTSError | null>(null);
 
   const readVolume = (key: string, fallback = 1) => {

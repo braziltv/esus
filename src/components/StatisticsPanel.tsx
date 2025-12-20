@@ -68,6 +68,7 @@ import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
+import { MarketingPanel } from './MarketingPanel';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -2633,6 +2634,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Marketing Panel */}
+      <MarketingPanel />
 
       {/* Dialog para Ver Todos os Nomes */}
       <Dialog open={showNamesDialog} onOpenChange={setShowNamesDialog}>
