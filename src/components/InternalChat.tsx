@@ -118,9 +118,9 @@ export function InternalChat({ station }: InternalChatProps) {
 
     loadMessages();
 
-    // Subscribe to real-time updates
+    // Subscribe to real-time updates - INSERT and DELETE
     const channel = supabase
-      .channel('chat-messages')
+      .channel(`chat-messages-${unitName.replace(/\s+/g, '-')}`)
       .on(
         'postgres_changes',
         {
@@ -131,7 +131,11 @@ export function InternalChat({ station }: InternalChatProps) {
         },
         (payload) => {
           const newMsg = payload.new as ChatMessage;
-          setMessages((prev) => [...prev, newMsg]);
+          setMessages((prev) => {
+            // Avoid duplicate messages
+            if (prev.some(m => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
           
           // Check if message is for this station
           const isForMe = newMsg.recipient === 'todos' || newMsg.recipient === station;
@@ -150,6 +154,24 @@ export function InternalChat({ station }: InternalChatProps) {
             // Auto-open the chat
             setIsOpen(true);
             setUnreadCount(0);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'chat_messages',
+        },
+        (payload) => {
+          const deletedMsg = payload.old as { id: string; unit_name?: string };
+          // If the deleted message belongs to our unit, remove from local state
+          if (deletedMsg.unit_name === unitName) {
+            setMessages((prev) => prev.filter(m => m.id !== deletedMsg.id));
+          } else if (!deletedMsg.unit_name) {
+            // If unit_name not in payload, try to remove anyway
+            setMessages((prev) => prev.filter(m => m.id !== deletedMsg.id));
           }
         }
       )
