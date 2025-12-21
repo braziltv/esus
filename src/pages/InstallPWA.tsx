@@ -149,8 +149,8 @@ const InstallPWA = () => {
     
     if (installMode === 'normal') {
       return {
-        icon: <img src="/pwa-full-512x512.png" alt="Xama-Pan Full" className="h-20 w-20 rounded-xl shadow-lg" />,
-        title: 'Xama-Pan Full',
+        icon: <img src="/pwa-full-512x512.png" alt="Xama-Pan Operador" className="h-20 w-20 rounded-xl shadow-lg" />,
+        title: 'Xama-Pan Operador',
         description: 'Acesso completo ao sistema com todas as funcionalidades',
         features: [
           'Login com usuário e senha',
@@ -213,7 +213,7 @@ const InstallPWA = () => {
               </div>
             </button>
 
-            {/* Xama-Pan Full Option */}
+            {/* Xama-Pan Operador Option */}
             <button
               onClick={() => setInstallMode('normal')}
               className="w-full p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
@@ -221,11 +221,11 @@ const InstallPWA = () => {
               <div className="flex items-start gap-4">
                 <img 
                   src="/pwa-full-192x192.png" 
-                  alt="Xama-Pan Full" 
+                  alt="Xama-Pan Operador" 
                   className="h-14 w-14 rounded-xl shadow-md group-hover:scale-105 transition-transform"
                 />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-1">Xama-Pan Full</h3>
+                  <h3 className="font-semibold text-lg mb-1">Xama-Pan Operador</h3>
                   <p className="text-sm text-muted-foreground mb-2">
                     Para operação do sistema
                   </p>
