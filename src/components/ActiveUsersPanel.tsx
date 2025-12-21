@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Users,
   Globe,
@@ -32,6 +33,7 @@ import {
   CalendarDays,
   Eye,
   MousePointerClick,
+  Filter,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, formatDistanceToNow, differenceInMinutes, differenceInHours, startOfDay, isToday, isYesterday } from 'date-fns';
@@ -86,6 +88,19 @@ export function ActiveUsersPanel() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
+  const [selectedUnit, setSelectedUnit] = useState<string>('all');
+
+  // Get unique unit names from sessions
+  const unitNames = useMemo(() => {
+    const names = new Set(sessions.map(s => s.unit_name));
+    return Array.from(names).sort();
+  }, [sessions]);
+
+  // Filter sessions by selected unit
+  const filteredSessions = useMemo(() => {
+    if (selectedUnit === 'all') return sessions;
+    return sessions.filter(s => s.unit_name === selectedUnit);
+  }, [sessions, selectedUnit]);
 
   const loadSessions = useCallback(async () => {
     try {
@@ -231,50 +246,50 @@ export function ActiveUsersPanel() {
     return { browser, browserVersion, os, osVersion, device, isMobile, isTablet };
   }, []);
 
-  // Calculate statistics
+  // Calculate statistics based on filtered sessions
   const stats = useMemo(() => {
-    const activeSessions = sessions.filter(s => s.is_active);
-    const inactiveSessions = sessions.filter(s => !s.is_active);
-    const todaySessions = sessions.filter(s => isToday(new Date(s.login_at)));
-    const yesterdaySessions = sessions.filter(s => isYesterday(new Date(s.login_at)));
+    const activeSessions = filteredSessions.filter(s => s.is_active);
+    const inactiveSessions = filteredSessions.filter(s => !s.is_active);
+    const todaySessions = filteredSessions.filter(s => isToday(new Date(s.login_at)));
+    const yesterdaySessions = filteredSessions.filter(s => isYesterday(new Date(s.login_at)));
     
-    const totalVoiceCalls = sessions.reduce((sum, s) => sum + (s.voice_calls_count || 0), 0);
-    const totalTtsCalls = sessions.reduce((sum, s) => sum + (s.tts_calls_count || 0), 0);
-    const totalRegistrations = sessions.reduce((sum, s) => sum + (s.registrations_count || 0), 0);
-    const totalMessages = sessions.reduce((sum, s) => sum + (s.messages_sent || 0), 0);
+    const totalVoiceCalls = filteredSessions.reduce((sum, s) => sum + (s.voice_calls_count || 0), 0);
+    const totalTtsCalls = filteredSessions.reduce((sum, s) => sum + (s.tts_calls_count || 0), 0);
+    const totalRegistrations = filteredSessions.reduce((sum, s) => sum + (s.registrations_count || 0), 0);
+    const totalMessages = filteredSessions.reduce((sum, s) => sum + (s.messages_sent || 0), 0);
 
     // Calculate average session duration
-    const completedSessions = sessions.filter(s => s.logout_at);
+    const completedSessions = filteredSessions.filter(s => s.logout_at);
     const totalDuration = completedSessions.reduce((sum, s) => {
       return sum + differenceInMinutes(new Date(s.logout_at!), new Date(s.login_at));
     }, 0);
     const avgDuration = completedSessions.length > 0 ? Math.round(totalDuration / completedSessions.length) : 0;
 
     // Unique IPs
-    const uniqueIPs = new Set(sessions.map(s => s.ip_address).filter(Boolean)).size;
+    const uniqueIPs = new Set(filteredSessions.map(s => s.ip_address).filter(Boolean)).size;
 
     // Device breakdown
-    const deviceBreakdown = sessions.reduce((acc, s) => {
+    const deviceBreakdown = filteredSessions.reduce((acc, s) => {
       const info = parseUserAgent(s.user_agent);
       acc[info.device] = (acc[info.device] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     // Browser breakdown
-    const browserBreakdown = sessions.reduce((acc, s) => {
+    const browserBreakdown = filteredSessions.reduce((acc, s) => {
       const info = parseUserAgent(s.user_agent);
       acc[info.browser] = (acc[info.browser] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     // OS breakdown
-    const osBreakdown = sessions.reduce((acc, s) => {
+    const osBreakdown = filteredSessions.reduce((acc, s) => {
       const info = parseUserAgent(s.user_agent);
       acc[info.os] = (acc[info.os] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    // Stats by unit
+    // Stats by unit (use all sessions for unit breakdown, not filtered)
     const unitStats: UnitStats[] = [];
     const unitMap = new Map<string, { sessions: UserSession[] }>();
     
@@ -303,14 +318,14 @@ export function ActiveUsersPanel() {
     });
 
     // Station breakdown
-    const stationBreakdown = sessions.reduce((acc, s) => {
+    const stationBreakdown = filteredSessions.reduce((acc, s) => {
       acc[s.station] = (acc[s.station] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     // TV mode vs regular
-    const tvModeSessions = sessions.filter(s => s.is_tv_mode).length;
-    const regularSessions = sessions.length - tvModeSessions;
+    const tvModeSessions = filteredSessions.filter(s => s.is_tv_mode).length;
+    const regularSessions = filteredSessions.length - tvModeSessions;
 
     return {
       activeSessions,
@@ -331,7 +346,7 @@ export function ActiveUsersPanel() {
       tvModeSessions,
       regularSessions,
     };
-  }, [sessions, parseUserAgent]);
+  }, [sessions, filteredSessions, parseUserAgent]);
 
   const getStationLabel = (station: string) => {
     const labels: Record<string, string> = {
@@ -398,7 +413,7 @@ export function ActiveUsersPanel() {
     <TooltipProvider>
       <div className="space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-primary" />
             <h3 className="text-lg font-semibold">Monitoramento de Sessões</h3>
@@ -406,7 +421,23 @@ export function ActiveUsersPanel() {
               {stats.activeSessions.length} online
             </Badge>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Unit Filter */}
+            <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+              <SelectTrigger className="w-[200px]">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Filtrar por unidade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as unidades</SelectItem>
+                {unitNames.map(unit => (
+                  <SelectItem key={unit} value={unit}>
+                    {unit}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
             <Button variant="outline" size="sm" onClick={cleanupInactiveSessions}>
               <Trash2 className="w-4 h-4 mr-1" />
               Limpar
