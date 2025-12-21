@@ -545,10 +545,11 @@ export function useCallPanel() {
         }
       });
 
-    // Periodic refresh every 2 seconds for real-time sync across modules
+    // Periodic refresh every 3 seconds for real-time sync across modules
+    // Using 3s instead of 2s to reduce server load while maintaining responsiveness
     const refreshInterval = setInterval(() => {
       refreshPatientsFromDB();
-    }, 2000);
+    }, 3000);
 
     return () => {
       console.log('🔌 Cleaning up patient sync subscription');
