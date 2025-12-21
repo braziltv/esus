@@ -2,18 +2,19 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tv, Download, X, Check } from 'lucide-react';
+import { Tv, Download, X, Check, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const DISMISS_KEY = 'pwa-install-dismissed';
 const DISMISS_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
-const HEALTH_UNITS = [
-  { id: "pa-pedro-jose", name: "PA Pedro José de Menezes" },
-  { id: "psf-aguinalda", name: "PSF Aguinalda Angélica" },
-  { id: "ubs-maria-alves", name: "UBS Maria Alves de Mendonça" },
-];
+interface Unit {
+  id: string;
+  name: string;
+  display_name: string;
+}
 
 export const AndroidTVInstallPrompt = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ export const AndroidTVInstallPrompt = () => {
   const [isSmartTV, setIsSmartTV] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
   const [showUnitSelector, setShowUnitSelector] = useState(false);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [isLoadingUnits, setIsLoadingUnits] = useState(false);
 
   useEffect(() => {
     // Detect Smart TVs - expanded detection
@@ -101,6 +104,35 @@ export const AndroidTVInstallPrompt = () => {
     }
   }, []);
 
+  // Fetch units from database when showing unit selector
+  useEffect(() => {
+    if (showUnitSelector && units.length === 0) {
+      const fetchUnits = async () => {
+        setIsLoadingUnits(true);
+        try {
+          const { data, error } = await supabase
+            .from('units')
+            .select('id, name, display_name')
+            .eq('is_active', true)
+            .order('display_name');
+          
+          if (error) throw error;
+          setUnits(data || []);
+        } catch (error) {
+          console.error('Error fetching units:', error);
+          toast({
+            title: "Erro ao carregar unidades",
+            description: "Não foi possível carregar as unidades. Tente novamente.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoadingUnits(false);
+        }
+      };
+      fetchUnits();
+    }
+  }, [showUnitSelector, units.length, toast]);
+
   const handleDismiss = () => {
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
     setShowPrompt(false);
@@ -120,17 +152,17 @@ export const AndroidTVInstallPrompt = () => {
       return;
     }
 
-    const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
+    const unit = units.find(u => u.name === selectedUnit);
     
     // Set up TV mode without requiring login
     localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("selectedUnitId", selectedUnit);
-    localStorage.setItem("selectedUnitName", unit?.name || "");
+    localStorage.setItem("selectedUnitId", unit?.id || selectedUnit);
+    localStorage.setItem("selectedUnitName", unit?.display_name || "");
     localStorage.setItem("isTvMode", "true");
     
     toast({
       title: "Modo TV ativado!",
-      description: `Painel configurado para ${unit?.name}`,
+      description: `Painel configurado para ${unit?.display_name}`,
     });
 
     // Navigate to install page with TV mode
@@ -160,18 +192,24 @@ export const AndroidTVInstallPrompt = () => {
                 </div>
               </div>
 
-              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger className="h-12 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground">
-                  <SelectValue placeholder="Selecione a unidade" />
-                </SelectTrigger>
-                <SelectContent className="bg-background">
-                  {HEALTH_UNITS.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id} className="py-3">
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isLoadingUnits ? (
+                <div className="flex items-center justify-center h-12 bg-primary-foreground/10 rounded-md">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary-foreground" />
+                </div>
+              ) : (
+                <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                  <SelectTrigger className="h-12 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground">
+                    <SelectValue placeholder="Selecione a unidade" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background">
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.name} className="py-3">
+                        {unit.display_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
               <div className="flex gap-2">
                 <Button
