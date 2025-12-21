@@ -350,37 +350,4 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       {renderDateTimeStack()}
     </div>
   );
-        {weather.forecast?.slice(0, 2).map((day, index) => {
-          const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-          const today = currentTime;
-          const targetDate = new Date(today);
-          targetDate.setDate(targetDate.getDate() + index);
-          const dayName = index === 0 ? 'HOJE' : dayNames[targetDate.getDay()];
-          
-          return (
-            <div 
-              key={index} 
-              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-lg lg:rounded-xl 3xl:rounded-2xl px-1.5 sm:px-2 lg:px-3 xl:px-4 3xl:px-6 4k:px-8 py-1 lg:py-1.5 3xl:py-3 4k:py-4 flex flex-col items-center backdrop-blur-sm border border-white/20`}
-            >
-              <span className="font-bold text-white text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
-                {dayName}
-              </span>
-              <div className="my-0.5 lg:my-1 3xl:my-2">
-                {getWeatherIcon(day.icon || 'cloud', 'lg')}
-              </div>
-              <div className="flex items-center gap-0.5 lg:gap-1 3xl:gap-2">
-                <span className="text-cyan-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
-                  {day.minTemp}°
-                </span>
-                <span className="text-white/50 font-bold text-[7px] lg:text-[9px] 3xl:text-xs 4k:text-sm">/</span>
-                <span className="text-orange-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
-                  {day.maxTemp}°
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 }
