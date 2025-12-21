@@ -29,6 +29,3 @@ verify_jwt = false
 
 [functions.send-daily-statistics]
 verify_jwt = false
-
-[functions.ip-geolocation]
-verify_jwt = false
