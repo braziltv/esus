@@ -196,7 +196,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   const renderDateTimeStack = () => {
     return (
-      <div className="flex flex-col items-center gap-1 sm:gap-1.5 3xl:gap-2 shrink-0 min-w-[140px] sm:min-w-[160px] lg:min-w-[190px] xl:min-w-[220px] 3xl:min-w-[280px] 4k:min-w-[320px]">
+      <div className="flex flex-col items-center gap-1 sm:gap-1.5 3xl:gap-2 shrink-0 w-[120px] sm:w-[140px] lg:w-[170px] xl:w-[200px] 3xl:w-[250px] 4k:w-[280px]">
         {renderDateSection()}
         {renderClockSection()}
       </div>

@@ -1936,8 +1936,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             {/* Separator */}
             <div className="hidden sm:block w-px h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
             
-            {/* Right: Weather + Clock - Always visible, no hidden horizontal scroll */}
-            <div className="flex-1 min-w-0 flex items-center justify-end overflow-hidden">
+            {/* Right: Weather + Clock */}
+            <div className="flex-1 min-w-0 flex items-center justify-end overflow-visible">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
