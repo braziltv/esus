@@ -1910,31 +1910,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="absolute bottom-[2%] right-[2%] w-[15vw] h-[15vw] max-w-[150px] max-h-[150px] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
-      {/* Header - Responsive gradient bar */}
-      <div className="relative z-10 mb-1 sm:mb-2 shrink-0">
-        <div className="bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-indigo-900/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 shadow-2xl border border-white/20 relative overflow-hidden">
+      {/* Header - Responsive gradient bar for all TV resolutions */}
+      <div className="relative z-10 mb-1 sm:mb-2 3xl:mb-4 4k:mb-6 shrink-0">
+        <div className="bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-indigo-900/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 3xl:px-8 3xl:py-4 4k:px-12 4k:py-6 shadow-2xl border border-white/20 relative overflow-hidden">
           {/* Decorative glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl" />
           <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
           
-          <div className="flex items-center relative z-10 w-full gap-2 sm:gap-3 lg:gap-4">
+          <div className="flex items-center relative z-10 w-full gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
             {/* Left: Logo + Title - Fixed width to prevent overlap */}
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 shrink-0">
-              <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 xl:w-14 xl:h-14 rounded-md sm:rounded-lg lg:rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
-                <HealthCrossIcon size={32} className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 xl:w-9 xl:h-9" />
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-5 shrink-0">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 xl:w-14 xl:h-14 3xl:w-20 3xl:h-20 4k:w-28 4k:h-28 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
+                <HealthCrossIcon size={32} className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 xl:w-9 xl:h-9 3xl:w-14 3xl:h-14 4k:w-20 4k:h-20" />
               </div>
               <div className="hidden sm:block shrink-0">
-                <h1 className="font-bold text-white leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl">
+                <h1 className="font-bold text-white leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl">
                   Painel de Chamadas
                 </h1>
-                <p className="text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm whitespace-nowrap">
+                <p className="text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap">
                   {unitName || 'Unidade de Saúde'}
                 </p>
               </div>
             </div>
             
             {/* Separator */}
-            <div className="hidden sm:block w-px h-6 lg:h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+            <div className="hidden sm:block w-px h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
             
             {/* Right: Weather + Clock - Takes remaining space with proper overflow handling */}
             <div className="flex-1 flex items-center justify-end overflow-x-auto scrollbar-hide">
@@ -1944,41 +1944,41 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       </div>
 
-      {/* Main Content - Responsive grid layout */}
-      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 lg:gap-4 min-h-0 pb-12 sm:pb-14 lg:pb-16">
+      {/* Main Content - Responsive grid layout for all TV sizes */}
+      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8 min-h-0 pb-12 sm:pb-14 lg:pb-16 3xl:pb-20 4k:pb-24">
         {/* Current Calls - Stacked on mobile, side by side on larger screens */}
-        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
           {/* Triage Call */}
           <div className={`tv-glass tv-card flex flex-col transition-all duration-300 ${
             announcingType === 'triage' 
               ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
               : 'border border-slate-700/50'
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 shrink-0">
-              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base lg:text-lg xl:text-xl">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" />
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0">
+              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0" />
                 <span>TRIAGEM</span>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-red-400 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-red-400 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px]">
+            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px] 3xl:min-h-[200px] 4k:min-h-[280px]">
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'triage' 
                       ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
                       : 'text-white'
                   }`} style={{ wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-blue-400 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg">
+                  <p className="text-blue-400 mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl">
                     {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center text-xs sm:text-sm lg:text-base">
+                <p className="text-slate-500 text-center text-xs sm:text-sm lg:text-base 3xl:text-lg 4k:text-xl">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -1991,31 +1991,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
               : 'border border-slate-700/50'
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 shrink-0">
-              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base lg:text-lg xl:text-xl">
-                <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" />
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0">
+              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
+                <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0" />
                 <span>CONSULTÓRIO</span>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-red-400 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-red-400 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px]">
+            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px] 3xl:min-h-[200px] 4k:min-h-[280px]">
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'doctor' 
                       ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
                       : 'text-white'
                   }`} style={{ wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-emerald-400 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg">
+                  <p className="text-emerald-400 mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl">
                     {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center text-xs sm:text-sm lg:text-base">
+                <p className="text-slate-500 text-center text-xs sm:text-sm lg:text-base 3xl:text-lg 4k:text-xl">
                   Aguardando próxima chamada...
                 </p>
               )}
