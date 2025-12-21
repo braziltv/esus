@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -32,9 +31,10 @@ import {
   CalendarDays,
   Eye,
   MousePointerClick,
+  Navigation,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { format, formatDistanceToNow, differenceInMinutes, differenceInHours, startOfDay, isToday, isYesterday } from 'date-fns';
+import { format, formatDistanceToNow, differenceInMinutes, differenceInHours, isToday, isYesterday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -72,6 +72,18 @@ interface DeviceInfo {
   isTablet: boolean;
 }
 
+interface GeoLocation {
+  city: string;
+  regionName: string;
+  country: string;
+  countryCode: string;
+  isp: string;
+  org: string;
+  lat: number;
+  lon: number;
+  timezone: string;
+}
+
 interface UnitStats {
   unitName: string;
   activeSessions: number;
@@ -86,6 +98,8 @@ export function ActiveUsersPanel() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
+  const [geoLocations, setGeoLocations] = useState<Record<string, GeoLocation | null>>({});
+  const [loadingGeo, setLoadingGeo] = useState(false);
 
   const loadSessions = useCallback(async () => {
     try {
@@ -130,6 +144,28 @@ export function ActiveUsersPanel() {
     }
   }, [loadSessions]);
 
+  // Load geolocations for IPs
+  const loadGeoLocations = useCallback(async (ips: string[]) => {
+    const uniqueIps = [...new Set(ips.filter(ip => ip && ip !== 'N/A' && !geoLocations[ip]))];
+    if (uniqueIps.length === 0) return;
+
+    setLoadingGeo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ip-geolocation', {
+        body: { ips: uniqueIps }
+      });
+
+      if (error) throw error;
+      if (data?.locations) {
+        setGeoLocations(prev => ({ ...prev, ...data.locations }));
+      }
+    } catch (error) {
+      console.error('Error loading geolocations:', error);
+    } finally {
+      setLoadingGeo(false);
+    }
+  }, [geoLocations]);
+
   useEffect(() => {
     loadSessions();
     
@@ -149,6 +185,14 @@ export function ActiveUsersPanel() {
       clearInterval(interval);
     };
   }, [loadSessions]);
+
+  // Load geolocations when sessions change
+  useEffect(() => {
+    if (sessions.length > 0) {
+      const ips = sessions.map(s => s.ip_address).filter(Boolean) as string[];
+      loadGeoLocations(ips);
+    }
+  }, [sessions, loadGeoLocations]);
 
   // Parse User Agent for detailed device info
   const parseUserAgent = useCallback((userAgent: string | null): DeviceInfo => {
@@ -533,6 +577,7 @@ export function ActiveUsersPanel() {
                     <div className="space-y-3">
                       {stats.activeSessions.map((session) => {
                         const deviceInfo = parseUserAgent(session.user_agent);
+                        const geoInfo = session.ip_address ? geoLocations[session.ip_address] : null;
                         return (
                           <div
                             key={session.id}
@@ -554,6 +599,39 @@ export function ActiveUsersPanel() {
                                     {getStationLabel(session.station)}
                                   </Badge>
                                 </div>
+
+                                {/* Location Info */}
+                                {geoInfo && (
+                                  <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-md bg-blue-500/10 border border-blue-500/20">
+                                    <Navigation className="w-4 h-4 text-blue-500" />
+                                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                      {geoInfo.city}, {geoInfo.regionName}
+                                    </span>
+                                    <Badge variant="outline" className="text-xs">
+                                      {geoInfo.countryCode}
+                                    </Badge>
+                                    {geoInfo.isp && (
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                                            • {geoInfo.isp}
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Provedor: {geoInfo.isp}</p>
+                                          {geoInfo.org && <p>Organização: {geoInfo.org}</p>}
+                                          <p>Timezone: {geoInfo.timezone}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                  </div>
+                                )}
+                                {!geoInfo && session.ip_address && loadingGeo && (
+                                  <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    <span>Localizando...</span>
+                                  </div>
+                                )}
 
                                 {/* Device & Browser Info */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-2">
@@ -581,10 +659,25 @@ export function ActiveUsersPanel() {
                                     </TooltipContent>
                                   </Tooltip>
 
-                                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                                    <Globe className="w-3 h-3" />
-                                    <span className="font-mono text-xs">{session.ip_address || 'N/A'}</span>
-                                  </div>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                                        <Globe className="w-3 h-3" />
+                                        <span className="font-mono text-xs">{session.ip_address || 'N/A'}</span>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {geoInfo ? (
+                                        <div>
+                                          <p className="font-medium">{geoInfo.city}, {geoInfo.regionName}</p>
+                                          <p>{geoInfo.country}</p>
+                                          <p className="text-xs text-muted-foreground mt-1">Lat: {geoInfo.lat}, Lon: {geoInfo.lon}</p>
+                                        </div>
+                                      ) : (
+                                        <p>IP: {session.ip_address}</p>
+                                      )}
+                                    </TooltipContent>
+                                  </Tooltip>
 
                                   <div className="flex items-center gap-1.5 text-muted-foreground">
                                     <Clock className="w-3 h-3" />
@@ -686,6 +779,7 @@ export function ActiveUsersPanel() {
                     <div className="space-y-2">
                       {stats.inactiveSessions.map((session) => {
                         const deviceInfo = parseUserAgent(session.user_agent);
+                        const geoInfo = session.ip_address ? geoLocations[session.ip_address] : null;
                         return (
                           <div
                             key={session.id}
@@ -705,6 +799,21 @@ export function ActiveUsersPanel() {
                                   <Badge variant="secondary" className="text-xs">
                                     {getStationLabel(session.station)}
                                   </Badge>
+                                  {geoInfo && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-1 text-xs text-blue-500">
+                                          <MapPin className="w-3 h-3" />
+                                          <span>{geoInfo.city}, {geoInfo.regionName}</span>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{geoInfo.city}, {geoInfo.regionName}</p>
+                                        <p>{geoInfo.country}</p>
+                                        {geoInfo.isp && <p className="text-xs">ISP: {geoInfo.isp}</p>}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted-foreground">
                                   <span>{deviceInfo.browser} • {deviceInfo.os}</span>
