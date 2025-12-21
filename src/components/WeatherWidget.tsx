@@ -196,7 +196,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   const renderDateTimeStack = () => {
     return (
-      <div className="flex flex-col items-center gap-1 sm:gap-1.5 3xl:gap-2 shrink-0 min-w-[120px] sm:min-w-[140px] lg:min-w-[180px] xl:min-w-[210px] 3xl:min-w-[260px] 4k:min-w-[320px]">
+      <div className="flex flex-col items-center gap-1 sm:gap-1.5 3xl:gap-2 shrink-0 min-w-[140px] sm:min-w-[160px] lg:min-w-[190px] xl:min-w-[220px] 3xl:min-w-[280px] 4k:min-w-[320px]">
         {renderDateSection()}
         {renderClockSection()}
       </div>
@@ -233,30 +233,24 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-6 4k:gap-8 flex-nowrap justify-end shrink-0">
-      {/* Date + Time (stacked) */}
-      {renderDateTimeStack()}
-
-      {/* Separator */}
-      <div className="w-px h-5 sm:h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-
+    <div className="w-full min-w-0 flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-6 4k:gap-8 flex-nowrap justify-end">
       {/* City & Weather Icon */}
-      <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 3xl:gap-3 shrink-0">
-        <div className="flex flex-col items-center justify-center">
+      <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 3xl:gap-3 min-w-0">
+        <div className="flex flex-col items-center justify-center min-w-0">
           <span className="font-bold text-white/70 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base">
             Previsão
           </span>
-          <div className="flex items-center gap-0.5 text-amber-300">
+          <div className="flex items-center gap-0.5 text-amber-300 min-w-0">
             <MapPin className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3.5 lg:h-3.5 3xl:w-5 3xl:h-5 4k:w-6 4k:h-6 animate-bounce shrink-0" />
-            <span 
-              className="font-bold truncate max-w-[50px] sm:max-w-[70px] lg:max-w-[100px] 3xl:max-w-[150px] text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg" 
+            <span
+              className="font-bold truncate max-w-[50px] sm:max-w-[70px] lg:max-w-[100px] 3xl:max-w-[150px] text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg"
               title={`${displayCity}-MG`}
             >
               {displayCity}-MG
             </span>
           </div>
         </div>
-        
+
         {/* Weather Icon with glow */}
         <div className="relative shrink-0">
           <div className="absolute inset-0 bg-yellow-400/30 blur-xl rounded-full" />
@@ -265,9 +259,9 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           </div>
         </div>
       </div>
-      
+
       {/* Current Temperature */}
-      <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-lg lg:rounded-xl 3xl:rounded-2xl px-1.5 sm:px-2 lg:px-3 3xl:px-5 4k:px-6 py-0.5 sm:py-1 3xl:py-2 backdrop-blur-sm border border-white/10 shrink-0">
+      <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-lg lg:rounded-xl 3xl:rounded-2xl px-1.5 sm:px-2 lg:px-3 3xl:px-5 4k:px-6 py-0.5 sm:py-1 3xl:py-2 backdrop-blur-sm border border-white/10">
         <span className="font-bold text-emerald-300 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base">
           Agora
         </span>
@@ -285,10 +279,12 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           </span>
         )}
       </div>
-      
+
       {/* Max/Min Temperature Display */}
-      <div className="flex flex-col items-center shrink-0">
-        <span className={`font-bold uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}>
+      <div className="flex flex-col items-center">
+        <span
+          className={`font-bold uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}
+        >
           {showMaxTemp ? 'Máxima' : 'Mínima'}
         </span>
         <div className="flex items-baseline">
@@ -300,9 +296,9 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           </span>
         </div>
       </div>
-      
+
       {/* Humidity */}
-      <div className="hidden xs:flex sm:flex flex-col items-center bg-white/10 rounded-lg 3xl:rounded-xl px-1 sm:px-1.5 lg:px-2 xl:px-3 3xl:px-4 4k:px-5 py-0.5 lg:py-1 3xl:py-2 backdrop-blur-sm shrink-0">
+      <div className="hidden xs:flex sm:flex flex-col items-center bg-white/10 rounded-lg 3xl:rounded-xl px-1 sm:px-1.5 lg:px-2 xl:px-3 3xl:px-4 4k:px-5 py-0.5 lg:py-1 3xl:py-2 backdrop-blur-sm">
         <Droplets className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 3xl:w-7 3xl:h-7 4k:w-8 4k:h-8 text-cyan-400 shrink-0" />
         <span className="font-bold text-white tabular-nums text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl">
           {weather.current.humidity}%
@@ -311,12 +307,49 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           Umidade
         </span>
       </div>
-      
+
       {/* Separator */}
       <div className="hidden md:block w-px h-6 lg:h-8 xl:h-10 3xl:h-14 4k:h-20 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-      
+
       {/* Forecast Cards */}
-      <div className="hidden md:flex gap-1 lg:gap-2 xl:gap-3 3xl:gap-4 4k:gap-6 shrink-0">
+      <div className="hidden md:flex gap-1 lg:gap-2 xl:gap-3 3xl:gap-4 4k:gap-6">
+        {weather.forecast?.slice(0, 2).map((day, index) => {
+          const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+          const today = currentTime;
+          const targetDate = new Date(today);
+          targetDate.setDate(targetDate.getDate() + index);
+          const dayName = index === 0 ? 'HOJE' : dayNames[targetDate.getDay()];
+
+          return (
+            <div
+              key={index}
+              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-lg lg:rounded-xl 3xl:rounded-2xl px-1.5 sm:px-2 lg:px-3 xl:px-4 3xl:px-6 4k:px-8 py-1 lg:py-1.5 3xl:py-3 4k:py-4 flex flex-col items-center backdrop-blur-sm border border-white/20`}
+            >
+              <span className="font-bold text-white text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+                {dayName}
+              </span>
+              <div className="my-0.5 lg:my-1 3xl:my-2">{getWeatherIcon(day.icon || 'cloud', 'lg')}</div>
+              <div className="flex items-center gap-0.5 lg:gap-1 3xl:gap-2">
+                <span className="text-cyan-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+                  {day.minTemp}°
+                </span>
+                <span className="text-white/50 font-bold text-[7px] lg:text-[9px] 3xl:text-xs 4k:text-sm">/</span>
+                <span className="text-orange-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+                  {day.maxTemp}°
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-5 sm:h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+
+      {/* Date + Time (stacked) - keep visible even if space is tight */}
+      {renderDateTimeStack()}
+    </div>
+  );
         {weather.forecast?.slice(0, 2).map((day, index) => {
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
           const today = currentTime;
