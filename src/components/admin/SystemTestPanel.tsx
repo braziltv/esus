@@ -1111,14 +1111,15 @@ export function SystemTestPanel() {
             body: JSON.stringify({ test: true, message: 'Teste de conectividade' })
           });
           const elapsed = Date.now() - start;
+          // Read response body only once
+          const responseText = await response.text();
           // Even if it returns error due to config issues, the function is reachable
           if (response.status === 500 || response.status === 400) {
-            const errorText = await response.text();
-            if (errorText.includes('TELEGRAM') || errorText.includes('chat_id') || errorText.includes('token')) {
+            if (responseText.includes('TELEGRAM') || responseText.includes('chat_id') || responseText.includes('token')) {
               return { success: true, message: `Função OK (config pendente) - ${elapsed}ms` };
             }
           }
-          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: await response.text() };
+          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: responseText };
           return { success: true, message: `OK em ${elapsed}ms` };
         } catch (err) {
           return { success: false, message: 'Falha', error: err instanceof Error ? err.message : 'Erro' };
