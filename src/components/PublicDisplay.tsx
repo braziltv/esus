@@ -1945,9 +1945,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       </div>
 
       {/* Main Content - Responsive grid layout for all TV sizes */}
-      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8 min-h-0 pb-12 sm:pb-14 lg:pb-16 3xl:pb-20 4k:pb-24">
+      <div className="relative z-10 flex-1 grid grid-cols-12 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8 min-h-0 pb-12 sm:pb-14 lg:pb-16 3xl:pb-20 4k:pb-24">
         {/* Current Calls - Stacked on mobile, side by side on larger screens */}
-        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
+        <div className="col-span-9 grid grid-cols-1 landscape:grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
           {/* Triage Call */}
           <div className={`tv-glass tv-card flex flex-col transition-all duration-300 ${
             announcingType === 'triage' 
@@ -2024,7 +2024,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* Right Column: History Panel - Hidden on very small screens, shown on sm+ */}
-        <div className="flex lg:col-span-3 tv-glass tv-card border border-slate-700/50 p-2 sm:p-3 lg:p-4 flex-col min-h-0 max-h-[180px] sm:max-h-none landscape:max-h-none">
+        <div className="col-span-3 flex tv-glass tv-card border border-slate-700/50 p-2 sm:p-3 lg:p-4 flex-col min-h-0">
           <h3 className="font-bold text-white mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm lg:text-base">
             <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-primary shrink-0" />
             <span>Últimas Chamadas</span>
