@@ -2467,7 +2467,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                        {item.source === 'Créditos' ? '⭐' : item.source}
+                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 inline animate-bounce" /> Informativo</> : item.source}
                       </span>
                       <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
                         {item.title}
@@ -2547,7 +2547,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                        {item.source === 'Créditos' ? '⭐' : item.source}
+                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 inline animate-bounce" /> Informativo</> : item.source}
                       </span>
                       <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
                         {item.title}
