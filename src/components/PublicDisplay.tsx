@@ -78,6 +78,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const isSpeakingRef = useRef<boolean>(false);
   const lastSpeakCallRef = useRef<number>(0);
   const [ttsError, setTtsError] = useState<TTSError | null>(null);
+  const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
 
   const readVolume = (key: string, fallback = 1) => {
     const raw = localStorage.getItem(key);
@@ -293,8 +294,35 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           table: 'scheduled_announcements',
           filter: `unit_name=eq.${unitName}`
         },
-        (payload) => {
+        async (payload) => {
           console.log('📢 Realtime update received for scheduled announcement:', payload);
+          
+          const newRecord = payload.new as any;
+          
+          // Se last_played_at foi setado para null, significa que é uma requisição de reprodução imediata
+          if (newRecord && newRecord.last_played_at === null && newRecord.is_active) {
+            console.log('🚀 Immediate playback triggered via realtime!', newRecord.title);
+            
+            // Criar objeto do anúncio para reprodução imediata
+            const immediateAnnouncement: ScheduledAnnouncement = {
+              id: newRecord.id,
+              title: newRecord.title,
+              text_content: newRecord.text_content,
+              start_time: newRecord.start_time,
+              end_time: newRecord.end_time,
+              days_of_week: newRecord.days_of_week,
+              interval_minutes: newRecord.interval_minutes,
+              repeat_count: newRecord.repeat_count,
+              is_active: newRecord.is_active,
+              last_played_at: null,
+              audio_cache_url: newRecord.audio_cache_url,
+              updated_at: newRecord.updated_at,
+            };
+            
+            // Setar para reprodução imediata
+            setPendingImmediateAnnouncement(immediateAnnouncement);
+          }
+          
           // Recarregar anúncios quando houver atualização
           loadScheduledAnnouncements();
         }
@@ -1355,6 +1383,66 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       break;
     }
   }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS, playCachedAudio]);
+
+  // Process immediate announcement triggered via realtime
+  useEffect(() => {
+    if (!pendingImmediateAnnouncement || !audioUnlocked) return;
+    
+    // Prevent overlap
+    if (announcingType || isSpeakingRef.current) {
+      console.log('⏸️ Cannot play immediate announcement - already speaking');
+      return;
+    }
+
+    const announcement = pendingImmediateAnnouncement;
+    console.log(`🚀 Processing immediate announcement: "${announcement.title}"`);
+    
+    // Clear the pending announcement immediately to prevent re-triggering
+    setPendingImmediateAnnouncement(null);
+    
+    // Update last_played_at in database
+    const now = new Date();
+    supabase
+      .from('scheduled_announcements')
+      .update({ last_played_at: now.toISOString() })
+      .eq('id', announcement.id)
+      .then(({ error }) => {
+        if (error) console.error('Error updating last_played_at:', error);
+      });
+
+    // Play immediately
+    const playImmediateAnnouncement = async () => {
+      isSpeakingRef.current = true;
+      setAnnouncingType('triage');
+
+      try {
+        for (let i = 0; i < announcement.repeat_count; i++) {
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
+          
+          await playNotificationSound();
+          
+          if (announcement.audio_cache_url) {
+            console.log(`📢 Playing cached audio for "${announcement.title}"`);
+            await playCachedAudio(announcement.audio_cache_url);
+          } else {
+            console.log(`📢 Generating TTS for "${announcement.title}" (no cache)`);
+            await speakWithGoogleTTS(announcement.text_content);
+          }
+          
+          console.log(`📢 Immediate announcement "${announcement.title}" iteration ${i + 1}/${announcement.repeat_count} completed`);
+        }
+      } catch (error) {
+        console.error('Error playing immediate announcement:', error);
+      } finally {
+        isSpeakingRef.current = false;
+        setAnnouncingType(null);
+      }
+    };
+
+    playImmediateAnnouncement();
+  }, [pendingImmediateAnnouncement, audioUnlocked, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS]);
 
   const playCommercialPhraseNow = useCallback(async () => {
     try {
