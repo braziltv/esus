@@ -501,7 +501,8 @@
 
 .animate-marquee {
   display: inline-flex;
-  animation: marquee 1482s linear infinite; /* 30% mais lento (1140 * 1.3) */
+  /* 30% mais lento (velocidade = 70% do original) => duração = 1140 / 0.7 ≈ 1629s */
+  animation: marquee 1629s linear infinite;
 }
 
 @keyframes flash {
