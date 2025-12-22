@@ -211,66 +211,99 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, [unitName]);
 
   // Load scheduled voice announcements from database
-  useEffect(() => {
-    const loadScheduledAnnouncements = async () => {
-      try {
-        const today = formatBrazilTime(new Date(), 'yyyy-MM-dd');
-        let query = supabase
-          .from('scheduled_announcements')
-          .select('*')
-          .eq('is_active', true)
-          .lte('valid_from', today)
-          .gte('valid_until', today);
+  const loadScheduledAnnouncements = useCallback(async () => {
+    try {
+      const today = formatBrazilTime(new Date(), 'yyyy-MM-dd');
+      let query = supabase
+        .from('scheduled_announcements')
+        .select('*')
+        .eq('is_active', true)
+        .lte('valid_from', today)
+        .gte('valid_until', today);
 
-        // Filter by unit if set
-        if (unitName) {
-          query = query.eq('unit_name', unitName);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-          console.error('Error loading scheduled announcements:', error);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          console.log('📢 Scheduled voice announcements loaded:', data.length);
-          
-          // Sync lastAnnouncementPlayedRef with database last_played_at
-          data.forEach(a => {
-            if (a.last_played_at) {
-              const lastPlayedMs = new Date(a.last_played_at).getTime();
-              lastAnnouncementPlayedRef.current[a.id] = lastPlayedMs;
-            }
-          });
-          
-          setScheduledAnnouncements(data.map(a => ({
-            id: a.id,
-            title: a.title,
-            text_content: a.text_content,
-            start_time: a.start_time,
-            end_time: a.end_time,
-            days_of_week: a.days_of_week,
-            interval_minutes: a.interval_minutes,
-            repeat_count: a.repeat_count,
-            is_active: a.is_active,
-            last_played_at: a.last_played_at,
-            audio_cache_url: a.audio_cache_url,
-          })));
-        } else {
-          setScheduledAnnouncements([]);
-        }
-      } catch (error) {
-        console.error('Error loading scheduled announcements:', error);
+      // Filter by unit if set
+      if (unitName) {
+        query = query.eq('unit_name', unitName);
       }
-    };
 
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error loading scheduled announcements:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        console.log('📢 Scheduled voice announcements loaded:', data.length);
+        
+        // Sync lastAnnouncementPlayedRef with database last_played_at
+        data.forEach(a => {
+          if (a.last_played_at) {
+            const lastPlayedMs = new Date(a.last_played_at).getTime();
+            lastAnnouncementPlayedRef.current[a.id] = lastPlayedMs;
+          } else {
+            // Se last_played_at é null, limpar do cache para forçar reprodução
+            delete lastAnnouncementPlayedRef.current[a.id];
+          }
+        });
+        
+        setScheduledAnnouncements(data.map(a => ({
+          id: a.id,
+          title: a.title,
+          text_content: a.text_content,
+          start_time: a.start_time,
+          end_time: a.end_time,
+          days_of_week: a.days_of_week,
+          interval_minutes: a.interval_minutes,
+          repeat_count: a.repeat_count,
+          is_active: a.is_active,
+          last_played_at: a.last_played_at,
+          audio_cache_url: a.audio_cache_url,
+        })));
+      } else {
+        setScheduledAnnouncements([]);
+      }
+    } catch (error) {
+      console.error('Error loading scheduled announcements:', error);
+    }
+  }, [unitName]);
+
+  useEffect(() => {
     loadScheduledAnnouncements();
     // Reload every 5 minutes
     const interval = setInterval(loadScheduledAnnouncements, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [unitName]);
+  }, [loadScheduledAnnouncements]);
+
+  // Realtime subscription for scheduled announcements (for instant TV playback)
+  useEffect(() => {
+    if (!unitName) return;
+
+    console.log('📡 Setting up realtime subscription for scheduled announcements');
+    
+    const channel = supabase
+      .channel('scheduled-announcements-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'scheduled_announcements',
+          filter: `unit_name=eq.${unitName}`
+        },
+        (payload) => {
+          console.log('📢 Realtime update received for scheduled announcement:', payload);
+          // Recarregar anúncios quando houver atualização
+          loadScheduledAnnouncements();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('📡 Removing realtime subscription for scheduled announcements');
+      supabase.removeChannel(channel);
+    };
+  }, [unitName, loadScheduledAnnouncements]);
 
   // Countdown timer for next news update
   useEffect(() => {
