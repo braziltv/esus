@@ -202,7 +202,7 @@ interface ContentItem {
 }
 
 // ==================== CONSTANTES ====================
-const ROTATION_INTERVAL = 3 * 60 * 1000; // 3 minutes
+const ROTATION_INTERVAL = 1 * 60 * 1000; // 1 minute - alternates between tip and quote
 
 function getRandomIndex(max: number, excludeIndex?: number): number {
   let index = Math.floor(Math.random() * max);
@@ -215,7 +215,8 @@ function getRandomIndex(max: number, excludeIndex?: number): number {
 }
 
 export function RotatingTipsCard() {
-  const [currentContent, setCurrentContent] = useState<ContentItem>({ type: 'quote', index: 0 });
+  // Start with a random tip
+  const [currentContent, setCurrentContent] = useState<ContentItem>({ type: 'tip', index: getRandomIndex(USAGE_TIPS.length) });
   const [animationKey, setAnimationKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [showBadge, setShowBadge] = useState(false);
@@ -306,28 +307,22 @@ export function RotatingTipsCard() {
       rotationCountRef.current += 1;
       
       setCurrentContent(prev => {
-        // Every ~3 rotations (10 min / 3 min = ~3.33), show support card
-        // Show support after every 3 regular rotations
-        if (rotationCountRef.current % 4 === 0) {
+        // Every 10 rotations (10 min), show support card
+        if (rotationCountRef.current % 10 === 0) {
           return { type: 'support', index: 0 };
         }
         
-        // Alternate between quote and tip
-        if (prev.type === 'quote') {
-          return {
-            type: 'tip',
-            index: getRandomIndex(USAGE_TIPS.length)
-          };
-        } else if (prev.type === 'tip') {
+        // Alternate: tip (1 min) -> quote (1 min) -> tip -> quote...
+        if (prev.type === 'tip') {
           return {
             type: 'quote',
             index: getRandomIndex(QUOTES.length)
           };
         } else {
-          // After support, go back to quote
+          // After quote or support, show tip
           return {
-            type: 'quote',
-            index: getRandomIndex(QUOTES.length)
+            type: 'tip',
+            index: getRandomIndex(USAGE_TIPS.length)
           };
         }
       });
