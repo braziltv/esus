@@ -8,7 +8,7 @@ import { HealthCrossIcon } from './HealthCrossIcon';
 import { useTheme } from 'next-themes';
 import { setManualThemeOverride } from './AutoNightMode';
 import { ConnectionIndicator } from './ConnectionIndicator';
-
+import { HeaderStatsWidget } from './HeaderStatsWidget';
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
@@ -152,6 +152,9 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
               </p>
             </div>
           </div>
+
+          {/* Stats Widget */}
+          <HeaderStatsWidget unitName={unitName} />
 
           {/* Time and Controls */}
           <div className="flex items-center gap-2 lg:gap-4">
