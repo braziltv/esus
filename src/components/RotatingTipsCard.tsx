@@ -189,7 +189,7 @@ const SUPPORT_INFO = {
   title: "Suporte do Sistema",
   message: "Caso identifique algum erro ou tenha dúvidas, críticas ou sugestões, entre em contato:",
   email: "kalebelg@gmail.com",
-  phone: "(37) 99844-4433",
+  phone: "(37) 9 9844-4433",
   bgColor: "from-slate-600 via-slate-700 to-zinc-800",
   emoji: "🛠️"
 };
