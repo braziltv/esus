@@ -358,8 +358,8 @@ export const QuickHelpPanel = forwardRef<QuickHelpPanelRef, QuickHelpPanelProps>
                     <span>Clique no ícone de som para ativar/desativar notificações sonoras</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span>•</span>
-                    <span>Use o chat interno para comunicação entre setores</span>
+                    <span>💬</span>
+                    <span>Use o chat interno <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">💬 Chat</span> para comunicação entre setores</span>
                   </li>
                 </ul>
               </div>
