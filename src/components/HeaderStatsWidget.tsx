@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, Clock, TrendingUp, Activity } from 'lucide-react';
+import { Users, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -7,7 +7,6 @@ interface Stats {
   waitingCount: number;
   todayCalls: number;
   avgWaitTime: number;
-  activeSessions: number;
 }
 
 interface HeaderStatsWidgetProps {
@@ -18,8 +17,7 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
   const [stats, setStats] = useState<Stats>({
     waitingCount: 0,
     todayCalls: 0,
-    avgWaitTime: 0,
-    activeSessions: 0
+    avgWaitTime: 0
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,13 +39,6 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
         .eq('unit_name', unitName)
         .gte('created_at', today.toISOString());
 
-      // Get active sessions count
-      const { count: activeSessions } = await supabase
-        .from('user_sessions')
-        .select('*', { count: 'exact', head: true })
-        .eq('unit_name', unitName)
-        .eq('is_active', true);
-
       // Calculate average wait time (simplified - based on waiting patients)
       const { data: waitingPatients } = await supabase
         .from('patient_calls')
@@ -68,8 +59,7 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
       setStats({
         waitingCount: waitingCount || 0,
         todayCalls: todayCalls || 0,
-        avgWaitTime,
-        activeSessions: activeSessions || 0
+        avgWaitTime
       });
     } catch (error) {
       console.error('Error fetching header stats:', error);
@@ -127,13 +117,6 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
       label: 'Tempo Médio',
       color: stats.avgWaitTime > 30 ? 'text-destructive' : stats.avgWaitTime > 15 ? 'text-amber-500' : 'text-green-500',
       bgColor: stats.avgWaitTime > 30 ? 'bg-destructive/10' : stats.avgWaitTime > 15 ? 'bg-amber-500/10' : 'bg-green-500/10'
-    },
-    {
-      icon: Activity,
-      value: stats.activeSessions,
-      label: 'Sessões Ativas',
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10'
     }
   ];
 
