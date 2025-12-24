@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Heart, Bandage, Scan, BedDouble, Settings2 } from 'lucide-react';
 import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
 import { SystemConfigPanel } from '@/components/admin/SystemConfigPanel';
+import { QuickHelpPanel } from '@/components/QuickHelpPanel';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -353,8 +354,9 @@ const Index = () => {
               </TabsTrigger>
               
               {/* Áudio Avulso Button - sempre visível na nav */}
-              <div className="flex items-center ml-1 sm:ml-2">
+              <div className="flex items-center gap-1 ml-1 sm:ml-2">
                 <CustomAnnouncementButton className="h-8 sm:h-9" />
+                <QuickHelpPanel variant="icon" />
               </div>
             </TabsList>
           </div>
