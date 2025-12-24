@@ -157,23 +157,22 @@ export const QuickHelpPanel = forwardRef<QuickHelpPanelRef, QuickHelpPanelProps>
   ({ variant = 'icon', className = '' }, ref) => {
     const [open, setOpen] = useState(false);
     const [countdown, setCountdown] = useState<number | null>(null);
-    const [autoCloseEnabled, setAutoCloseEnabled] = useState(false);
+    const [countdownFinished, setCountdownFinished] = useState(false);
 
-    // Expose method to open with auto-close
+    // Expose method to open with countdown (no auto-close)
     useImperativeHandle(ref, () => ({
       openWithAutoClose: (seconds = 10) => {
         setOpen(true);
         setCountdown(seconds);
-        setAutoCloseEnabled(true);
+        setCountdownFinished(false);
       }
     }));
 
-    // Handle countdown and auto-close
+    // Handle countdown (no auto-close, just shows timer)
     useEffect(() => {
-      if (!autoCloseEnabled || countdown === null || countdown <= 0) {
+      if (countdown === null || countdown <= 0) {
         if (countdown === 0) {
-          setOpen(false);
-          setAutoCloseEnabled(false);
+          setCountdownFinished(true);
           setCountdown(null);
         }
         return;
@@ -189,15 +188,22 @@ export const QuickHelpPanel = forwardRef<QuickHelpPanelRef, QuickHelpPanelProps>
       }, 1000);
 
       return () => clearInterval(timer);
-    }, [countdown, autoCloseEnabled]);
+    }, [countdown]);
 
-    // Reset auto-close when manually closed
+    // Reset state when manually closed
     const handleOpenChange = (newOpen: boolean) => {
       setOpen(newOpen);
       if (!newOpen) {
-        setAutoCloseEnabled(false);
         setCountdown(null);
+        setCountdownFinished(false);
       }
+    };
+
+    // Close handler
+    const handleClose = () => {
+      setOpen(false);
+      setCountdown(null);
+      setCountdownFinished(false);
     };
 
     return (
@@ -226,15 +232,23 @@ export const QuickHelpPanel = forwardRef<QuickHelpPanelRef, QuickHelpPanelProps>
                 <HelpCircle className="h-6 w-6 text-primary" />
                 Guia Rápido
               </SheetTitle>
-              {/* Countdown Timer */}
-              {autoCloseEnabled && countdown !== null && countdown > 0 && (
+              {/* Countdown Timer or Close Button */}
+              {countdown !== null && countdown > 0 ? (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
                   <Timer className="w-4 h-4 text-primary animate-pulse" />
                   <span className="text-sm font-medium text-primary tabular-nums">
                     {countdown}s
                   </span>
                 </div>
-              )}
+              ) : countdownFinished ? (
+                <Button 
+                  onClick={handleClose}
+                  size="sm"
+                  className="animate-pulse"
+                >
+                  Fechar Guia
+                </Button>
+              ) : null}
             </div>
             <SheetDescription>
               Dicas e orientações para usar o sistema
