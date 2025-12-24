@@ -458,7 +458,7 @@ export function RotatingTipsCard() {
           <span className={`transition-transform duration-700 ease-out ${showBadge ? 'rotate-[360deg]' : 'rotate-0'}`}>
             {currentData.badgeIcon}
           </span>
-          <span className="text-white text-[10px] font-semibold tracking-wide">{currentData.badge}</span>
+          <span className="text-white text-xs font-semibold tracking-wide">{currentData.badge}</span>
         </div>
 
         {/* Main Content */}
@@ -481,7 +481,7 @@ export function RotatingTipsCard() {
           >
             {currentData.mainIcon}
           </span>
-          <p className="text-white font-bold text-sm sm:text-base leading-snug drop-shadow-md transition-all duration-500">
+          <p className="text-white font-bold text-base sm:text-lg leading-snug drop-shadow-md transition-all duration-500">
             {currentData.mainText}
           </p>
         </div>
@@ -490,7 +490,7 @@ export function RotatingTipsCard() {
         {currentData.type !== 'support' && (
           <p 
             className={`
-              text-white/90 text-xs font-medium mb-2 pl-5
+              text-white/90 text-sm font-medium mb-2 pl-5
               transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
               ${showSubContent 
                 ? 'opacity-100 translate-x-0 blur-0' 
@@ -524,10 +524,10 @@ export function RotatingTipsCard() {
               {currentData.detailIcon}
             </div>
             <div className="transition-all duration-400">
-              <p className={`${currentData.type === 'quote' ? 'text-yellow-300' : 'text-blue-200'} text-[10px] font-semibold uppercase tracking-wider`}>
+              <p className={`${currentData.type === 'quote' ? 'text-yellow-300' : 'text-blue-200'} text-xs font-semibold uppercase tracking-wider`}>
                 {currentData.detailTitle}
               </p>
-              <p className="text-white text-xs leading-tight">
+              <p className="text-white text-sm leading-tight">
                 {currentData.detailText}
               </p>
             </div>
