@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.send-daily-statistics]
 verify_jwt = false
+
+[functions.database-stats]
+verify_jwt = false
