@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
+import { usePreventSleep } from '@/hooks/usePreventSleep';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -51,6 +52,10 @@ interface CommercialPhrase {
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
   const { playHourAudio } = useHourAudio();
+  
+  // Previne modo de espera da TV Android
+  usePreventSleep(true);
+  
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
