@@ -76,6 +76,9 @@ const feeds = [
   // Saúde
   { url: 'https://saude.ig.com.br/rss.xml', source: 'iG Saúde' },
   { url: 'https://www.uol.com.br/vivabem/rss.xml', source: 'VivaBem' },
+  // Notícias gerais e internacionais
+  { url: 'https://www.noticiasaominuto.com.br/rss/brasil', source: 'Notícias ao Minuto' },
+  { url: 'https://news.un.org/feed/subscribe/pt/news/region/americas/feed/rss.xml', source: 'ONU News' },
 ];
 
 // Decodificar entidades HTML
