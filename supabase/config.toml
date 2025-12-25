@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.database-stats]
 verify_jwt = false
+
+[functions.tv-reload-command]
+verify_jwt = false
