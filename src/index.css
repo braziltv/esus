@@ -635,17 +635,49 @@
   }
 }
 
-/* Hide Lovable badge completely */
+/* Hide Lovable badge completely - aggressive selectors */
 #lovable-badge,
-a[href*="lovable.dev"][target="_blank"],
+#__lovable-badge,
+[id*="lovable"],
+[class*="lovable"],
+[data-lovable],
 [data-lovable-badge],
+a[href*="lovable.dev"],
+a[href*="lovable.app"],
+a[href*="lovable"][target="_blank"],
 div[style*="position: fixed"][style*="z-index: 99999"],
-iframe[src*="lovable"] {
+div[style*="position: fixed"][style*="z-index: 9999"],
+div[style*="position: fixed"][style*="bottom: 0"],
+div[style*="position: fixed"][style*="right: 0"],
+div[style*="position: fixed"] > a[href*="lovable"],
+iframe[src*="lovable"],
+img[src*="lovable"],
+img[alt*="lovable" i],
+img[alt*="Lovable" i],
+button[aria-label*="lovable" i],
+div[aria-label*="lovable" i],
+*[title*="lovable" i],
+*[title*="Lovable"],
+body > div:last-child a[href*="lovable"],
+body > div[style*="fixed"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
   width: 0 !important;
   height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  transform: scale(0) !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(100%) !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
