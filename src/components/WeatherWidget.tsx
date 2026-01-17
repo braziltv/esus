@@ -25,115 +25,134 @@ interface WeatherWidgetProps {
   formatTime?: (date: Date, format: string) => string;
 }
 
-// 3D-style weather icon component
+// Modern transparent weather icon component with glass morphism
 function Weather3DIcon({ description, size = 'sm' }: { description: string; size?: 'sm' | 'lg' }) {
   const desc = description.toLowerCase();
   
   const sizeClasses = size === 'lg' 
-    ? 'w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 xl:w-12 xl:h-12 3xl:w-14 3xl:h-14 4k:w-16 4k:h-16' 
-    : 'w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-7 3xl:h-7';
-  
-  const iconContainerClass = size === 'lg'
-    ? 'relative group'
-    : 'relative';
+    ? 'w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 xl:w-14 xl:h-14 3xl:w-16 3xl:h-16 4k:w-20 4k:h-20' 
+    : 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 3xl:w-8 3xl:h-8';
 
-  // Determine icon type and colors
+  const iconSizeClasses = size === 'lg'
+    ? 'w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-9 xl:h-9 3xl:w-10 3xl:h-10 4k:w-14 4k:h-14'
+    : 'w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6';
+
+  // Determine icon type, colors and animation
   let IconComponent = CloudSun;
-  let primaryColor = 'from-yellow-300 via-yellow-400 to-orange-400';
-  let glowColor = 'rgba(251, 191, 36, 0.6)';
+  let iconColor = 'text-amber-300';
+  let glowColor = 'rgba(251, 191, 36, 0.5)';
+  let bgGradient = 'from-amber-500/10 via-orange-500/5 to-transparent';
+  let borderColor = 'border-amber-400/20';
   let animation = 'animate-pulse';
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) {
     IconComponent = Sun;
-    primaryColor = 'from-yellow-300 via-amber-400 to-orange-500';
-    glowColor = 'rgba(251, 191, 36, 0.8)';
-    animation = 'animate-[spin_12s_linear_infinite]';
+    iconColor = 'text-yellow-300';
+    glowColor = 'rgba(253, 224, 71, 0.6)';
+    bgGradient = 'from-yellow-500/15 via-amber-500/10 to-transparent';
+    borderColor = 'border-yellow-400/30';
+    animation = 'animate-[spin_20s_linear_infinite]';
   } else if (desc.includes('partly') || desc.includes('parcialmente')) {
     IconComponent = CloudSun;
-    primaryColor = 'from-yellow-200 via-amber-300 to-orange-400';
-    glowColor = 'rgba(251, 191, 36, 0.5)';
+    iconColor = 'text-amber-200';
+    glowColor = 'rgba(251, 191, 36, 0.4)';
+    bgGradient = 'from-amber-500/10 via-slate-500/5 to-transparent';
+    borderColor = 'border-amber-400/25';
     animation = 'animate-pulse';
   } else if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('pancada')) {
     IconComponent = CloudRain;
-    primaryColor = 'from-blue-300 via-blue-400 to-blue-600';
-    glowColor = 'rgba(59, 130, 246, 0.6)';
-    animation = 'animate-bounce';
+    iconColor = 'text-sky-300';
+    glowColor = 'rgba(56, 189, 248, 0.5)';
+    bgGradient = 'from-sky-500/15 via-blue-500/10 to-transparent';
+    borderColor = 'border-sky-400/30';
+    animation = 'animate-[bounce_1.5s_ease-in-out_infinite]';
   } else if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) {
     IconComponent = CloudLightning;
-    primaryColor = 'from-purple-300 via-purple-500 to-purple-700';
-    glowColor = 'rgba(168, 85, 247, 0.7)';
-    animation = 'animate-[pulse_0.5s_ease-in-out_infinite]';
+    iconColor = 'text-violet-300';
+    glowColor = 'rgba(196, 181, 253, 0.6)';
+    bgGradient = 'from-violet-500/15 via-purple-500/10 to-transparent';
+    borderColor = 'border-violet-400/30';
+    animation = 'animate-[pulse_0.8s_ease-in-out_infinite]';
   } else if (desc.includes('snow') || desc.includes('neve')) {
     IconComponent = CloudSnow;
-    primaryColor = 'from-slate-100 via-blue-100 to-cyan-200';
-    glowColor = 'rgba(255, 255, 255, 0.6)';
-    animation = 'animate-[bounce_2s_ease-in-out_infinite]';
+    iconColor = 'text-cyan-200';
+    glowColor = 'rgba(165, 243, 252, 0.5)';
+    bgGradient = 'from-cyan-500/15 via-slate-400/10 to-transparent';
+    borderColor = 'border-cyan-300/30';
+    animation = 'animate-[bounce_2.5s_ease-in-out_infinite]';
   } else if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) {
     IconComponent = Wind;
-    primaryColor = 'from-slate-300 via-slate-400 to-slate-500';
-    glowColor = 'rgba(148, 163, 184, 0.5)';
+    iconColor = 'text-slate-300';
+    glowColor = 'rgba(203, 213, 225, 0.4)';
+    bgGradient = 'from-slate-500/10 via-slate-400/5 to-transparent';
+    borderColor = 'border-slate-400/20';
     animation = 'animate-pulse';
   } else if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) {
     IconComponent = Cloud;
-    primaryColor = 'from-slate-200 via-slate-300 to-slate-400';
-    glowColor = 'rgba(148, 163, 184, 0.5)';
-    animation = 'animate-pulse';
+    iconColor = 'text-slate-300';
+    glowColor = 'rgba(203, 213, 225, 0.4)';
+    bgGradient = 'from-slate-400/10 via-slate-500/5 to-transparent';
+    borderColor = 'border-slate-400/20';
+    animation = 'animate-[pulse_3s_ease-in-out_infinite]';
   }
 
   if (size === 'lg') {
     return (
-      <div className={iconContainerClass}>
-        {/* Outer glow ring */}
+      <div className="relative group">
+        {/* Soft outer glow */}
         <div 
-          className="absolute -inset-2 rounded-full blur-xl opacity-60 animate-pulse"
+          className="absolute -inset-3 rounded-full blur-2xl opacity-40 animate-pulse"
           style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)` }}
         />
         
-        {/* 3D glass container */}
-        <div className="relative">
-          {/* Background gradient with depth */}
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 via-transparent to-black/20 backdrop-blur-md" />
+        {/* Glass container */}
+        <div 
+          className={`relative ${sizeClasses} rounded-2xl backdrop-blur-xl bg-gradient-to-br ${bgGradient} border ${borderColor} flex items-center justify-center overflow-hidden`}
+          style={{ 
+            boxShadow: `0 8px 32px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(0,0,0,0.1), 0 0 20px ${glowColor}`
+          }}
+        >
+          {/* Top highlight line */}
+          <div className="absolute top-0 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           
-          {/* Main 3D icon container */}
-          <div 
-            className={`relative ${sizeClasses} rounded-xl bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 border border-white/20 flex items-center justify-center overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.3)]`}
-            style={{ transform: 'perspective(200px) rotateX(5deg)' }}
-          >
-            {/* Inner highlight */}
-            <div className="absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-            
-            {/* Icon with gradient fill effect */}
-            <div className={`relative ${animation}`}>
-              <IconComponent 
-                className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-6 lg:h-6 xl:w-7 xl:h-7 3xl:w-10 3xl:h-10 4k:w-12 4k:h-12`}
-                style={{ 
-                  filter: `drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 4px 6px rgba(0,0,0,0.4))`,
-                  color: 'white'
-                }}
-              />
-              {/* Gradient overlay for 3D effect */}
-              <div className={`absolute inset-0 bg-gradient-to-b ${primaryColor} opacity-80 mix-blend-overlay rounded-full`} />
-            </div>
-            
-            {/* Bottom reflection */}
-            <div className="absolute bottom-0 left-[20%] right-[20%] h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          {/* Floating icon */}
+          <div className={animation}>
+            <IconComponent 
+              className={`${iconSizeClasses} ${iconColor}`}
+              strokeWidth={1.5}
+              style={{ 
+                filter: `drop-shadow(0 0 12px ${glowColor}) drop-shadow(0 2px 4px rgba(0,0,0,0.2))`
+              }}
+            />
           </div>
+          
+          {/* Bottom subtle reflection */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-white/5 to-transparent" />
         </div>
       </div>
     );
   }
 
-  // Small icon version
+  // Small icon version - minimal glass style
   return (
-    <div className={iconContainerClass}>
+    <div className="relative">
+      {/* Subtle glow */}
       <div 
-        className={`${sizeClasses} rounded-md bg-gradient-to-br from-slate-700/60 to-slate-900/60 border border-white/10 flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] ${animation}`}
+        className="absolute -inset-1 rounded-lg blur-md opacity-30"
+        style={{ background: glowColor }}
+      />
+      
+      <div 
+        className={`relative ${sizeClasses} rounded-lg backdrop-blur-md bg-gradient-to-br ${bgGradient} border ${borderColor} flex items-center justify-center`}
+        style={{ 
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 8px rgba(0,0,0,0.15)`
+        }}
       >
         <IconComponent 
-          className="w-3 h-3 sm:w-4 sm:h-4 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5"
+          className={`${iconSizeClasses} ${iconColor} ${animation}`}
+          strokeWidth={1.5}
           style={{ 
-            filter: `drop-shadow(0 0 4px ${glowColor})`,
-            color: 'white'
+            filter: `drop-shadow(0 0 6px ${glowColor})`
           }}
         />
       </div>
