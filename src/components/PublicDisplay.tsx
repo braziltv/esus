@@ -2327,7 +2327,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           
           {/* Central white core flash */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 rounded-full blur-3xl animate-pulse ${
+            <div className={`w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full blur-2xl sm:blur-3xl animate-pulse ${
               flashColor === 'blue' ? 'bg-blue-200' : 'bg-emerald-200'
             }`} style={{ animation: 'callFlashBlue 0.6s ease-out forwards' }} />
           </div>
@@ -2342,13 +2342,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           
           {/* Radar rings emanating from center */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`absolute w-[40vw] h-[40vw] rounded-full border-4 ${
+            <div className={`absolute w-[60vw] sm:w-[50vw] lg:w-[40vw] h-[60vw] sm:h-[50vw] lg:h-[40vw] rounded-full border-2 sm:border-3 lg:border-4 ${
               announcingType === 'triage' ? 'border-blue-400/50' : 'border-emerald-400/50'
             } animate-radar-ring`} />
-            <div className={`absolute w-[40vw] h-[40vw] rounded-full border-4 ${
+            <div className={`absolute w-[60vw] sm:w-[50vw] lg:w-[40vw] h-[60vw] sm:h-[50vw] lg:h-[40vw] rounded-full border-2 sm:border-3 lg:border-4 ${
               announcingType === 'triage' ? 'border-blue-400/40' : 'border-emerald-400/40'
             } animate-radar-ring-delayed`} />
-            <div className={`absolute w-[40vw] h-[40vw] rounded-full border-4 ${
+            <div className={`absolute w-[60vw] sm:w-[50vw] lg:w-[40vw] h-[60vw] sm:h-[50vw] lg:h-[40vw] rounded-full border-2 sm:border-3 lg:border-4 ${
               announcingType === 'triage' ? 'border-blue-400/30' : 'border-emerald-400/30'
             } animate-radar-ring-delayed-2`} />
           </div>
@@ -2356,17 +2356,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Central content - Name prominently displayed */}
           <div className="absolute inset-0 flex flex-col items-center justify-center px-8">
             {/* Status badge */}
-            <div className={`mb-6 px-8 py-3 rounded-full animate-status-badge ${
+            <div className={`mb-3 sm:mb-4 lg:mb-6 px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 rounded-full animate-status-badge ${
               announcingType === 'triage' 
-                ? 'bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.6)]' 
-                : 'bg-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.6)]'
+                ? 'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)] sm:shadow-[0_0_30px_rgba(59,130,246,0.6)]' 
+                : 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] sm:shadow-[0_0_30px_rgba(16,185,129,0.6)]'
             }`}>
-              <div className="flex items-center gap-3">
-                <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-megaphone-shake" />
-                <span className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-wider uppercase">
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                <Megaphone className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white animate-megaphone-shake" />
+                <span className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-black text-white tracking-wider uppercase">
                   🔔 CHAMANDO AGORA
                 </span>
-                <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-megaphone-shake" style={{ animationDelay: '0.25s' }} />
+                <Megaphone className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white animate-megaphone-shake" style={{ animationDelay: '0.25s' }} />
               </div>
             </div>
             
@@ -2384,10 +2384,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 }}
               />
               <h1 
-                className="tv-font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] leading-tight tracking-wide animate-name-mega-pulse text-yellow-300 relative z-10"
+                className="tv-font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl 3xl:text-[10rem] 4k:text-[12rem] leading-tight tracking-wide animate-name-mega-pulse text-yellow-300 relative z-10"
                 style={{ 
                   wordBreak: 'break-word',
-                  WebkitTextStroke: '2px rgba(255, 200, 0, 0.3)',
+                  WebkitTextStroke: '1px rgba(255, 200, 0, 0.3)',
                   letterSpacing: '0.02em'
                 }}
               >
@@ -2395,25 +2395,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </h1>
               {/* Reflection effect */}
               <div 
-                className="absolute -bottom-4 left-0 right-0 h-16 opacity-20 blur-sm scale-y-[-0.3] pointer-events-none overflow-hidden"
+                className="absolute -bottom-2 sm:-bottom-4 left-0 right-0 h-8 sm:h-12 lg:h-16 opacity-20 blur-sm scale-y-[-0.3] pointer-events-none overflow-hidden hidden sm:block"
                 style={{ 
                   maskImage: 'linear-gradient(to bottom, white, transparent)',
                   WebkitMaskImage: 'linear-gradient(to bottom, white, transparent)'
                 }}
               >
-                <span className="tv-font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] text-yellow-300">
+                <span className="tv-font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl 3xl:text-[10rem] 4k:text-[12rem] text-yellow-300">
                   {currentCallName}
                 </span>
               </div>
             </div>
             
             {/* Destination */}
-            <div className={`mt-6 px-6 py-2 rounded-xl ${
+            <div className={`mt-3 sm:mt-4 lg:mt-6 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl ${
               announcingType === 'triage' 
-                ? 'bg-blue-900/80 border-2 border-blue-400' 
-                : 'bg-emerald-900/80 border-2 border-emerald-400'
+                ? 'bg-blue-900/80 border sm:border-2 border-blue-400' 
+                : 'bg-emerald-900/80 border sm:border-2 border-emerald-400'
             }`}>
-              <p className={`tv-font-heading text-2xl sm:text-3xl lg:text-4xl font-bold ${
+              <p className={`tv-font-heading text-lg sm:text-2xl lg:text-3xl xl:text-4xl font-bold ${
                 announcingType === 'triage' ? 'text-blue-200' : 'text-emerald-200'
               }`}>
                 {announcingType === 'triage' ? '🏥' : '👨‍⚕️'} {currentCallDestination || (announcingType === 'triage' ? 'Triagem' : 'Consultório')}
@@ -2421,15 +2421,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             
             {/* Sound wave indicator */}
-            <div className="mt-8 flex items-center gap-2">
+            <div className="mt-4 sm:mt-6 lg:mt-8 flex items-center gap-1 sm:gap-1.5 lg:gap-2">
               {[...Array(7)].map((_, i) => (
                 <div
                   key={i}
-                  className={`w-3 sm:w-4 rounded-full ${
+                  className={`w-2 sm:w-3 lg:w-4 rounded-full ${
                     announcingType === 'triage' ? 'bg-blue-400' : 'bg-emerald-400'
                   }`}
                   style={{
-                    height: `${30 + Math.sin(Date.now() / 200 + i) * 25}px`,
+                    height: `${20 + Math.sin(Date.now() / 200 + i) * 15}px`,
                     animation: `soundWave 0.4s ease-in-out infinite alternate`,
                     animationDelay: `${i * 0.08}s`
                   }}
@@ -2531,9 +2531,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       </div>
 
       {/* Main Content - Responsive grid layout for all TV sizes */}
-      <div className="relative z-10 flex-1 grid grid-cols-12 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8 min-h-0 pb-12 sm:pb-14 lg:pb-16 3xl:pb-20 4k:pb-24">
-        {/* Current Calls - Stacked on mobile, side by side on larger screens */}
-        <div className="col-span-9 grid grid-cols-1 landscape:grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
+      <div className="relative z-10 flex-1 grid grid-cols-1 portrait:grid-cols-1 landscape:grid-cols-12 sm:grid-cols-12 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8 min-h-0 pb-12 sm:pb-14 lg:pb-16 3xl:pb-20 4k:pb-24 px-1 sm:px-0">
+        {/* Current Calls - Stacked on mobile portrait, side by side on landscape/larger screens */}
+        <div className="col-span-1 portrait:col-span-1 landscape:col-span-9 sm:col-span-9 grid grid-cols-1 landscape:grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
           {/* Triage Call - 3D Modern Card */}
           <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
             announcingType === 'triage' 
@@ -2654,46 +2654,46 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* Right Column: History Panel - 3D Glass effect */}
-        <div className="col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-2 sm:p-3 lg:p-4 flex-col min-h-0 border border-purple-500/20">
-          <h3 className="tv-font-heading font-bold text-white mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm lg:text-base drop-shadow-md">
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-cyan-400 shrink-0 animate-pulse" />
+        <div className="col-span-1 portrait:col-span-1 landscape:col-span-3 sm:col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-1.5 sm:p-2 lg:p-3 xl:p-4 flex-col min-h-0 border border-purple-500/20 portrait:max-h-[200px] landscape:max-h-none">
+          <h3 className="tv-font-heading font-bold text-white mb-1 sm:mb-2 flex items-center gap-1 sm:gap-1.5 lg:gap-2 shrink-0 text-[10px] sm:text-xs lg:text-sm xl:text-base drop-shadow-md">
+            <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-cyan-400 shrink-0 animate-pulse" />
             <span className="shimmer-text">Últimas Chamadas</span>
           </h3>
-          <div className="space-y-1 sm:space-y-1.5 lg:space-y-2 flex-1 overflow-y-auto scrollbar-thin">
+          <div className="space-y-0.5 sm:space-y-1 lg:space-y-1.5 xl:space-y-2 flex-1 overflow-y-auto scrollbar-thin">
             {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-2 sm:py-4 text-[10px] sm:text-xs lg:text-sm">
+              <p className="text-slate-500 text-center py-1 sm:py-2 lg:py-4 text-[8px] sm:text-[10px] lg:text-xs xl:text-sm">
                 Nenhuma chamada ainda
               </p>
             ) : (
               historyItems.slice(0, 8).map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-1.5 sm:p-2 lg:p-2.5 rounded-md sm:rounded-lg ${
+                  className={`p-1 sm:p-1.5 lg:p-2 xl:p-2.5 rounded sm:rounded-md lg:rounded-lg ${
                     index === 0 
                       ? 'bg-primary/20 border border-primary/40 ring-1 ring-primary/20 animate-call-entrance' 
                       : 'bg-slate-700/50'
                   } transition-all`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <div className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 rounded-full flex items-center justify-center shrink-0 ${
+                  <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2">
+                    <div className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 rounded-full flex items-center justify-center shrink-0 ${
                       item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
+                        <Activity className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-4 xl:h-4 text-white" />
                       ) : (
-                        <Stethoscope className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
+                        <Stethoscope className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-4 xl:h-4 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="tv-font-body font-semibold text-white truncate text-[10px] sm:text-xs lg:text-sm">
+                      <p className="tv-font-body font-semibold text-white truncate text-[8px] sm:text-[10px] lg:text-xs xl:text-sm">
                         {item.name}
                       </p>
-                      <p className="tv-font-body text-slate-400 text-[8px] sm:text-[10px] lg:text-xs">
+                      <p className="tv-font-body text-slate-400 text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-slate-400 font-mono shrink-0 text-[9px] sm:text-[10px] lg:text-xs">
+                    <span className="text-slate-400 font-mono shrink-0 text-[7px] sm:text-[9px] lg:text-[10px] xl:text-xs">
                       {formatBrazilTime(item.time, 'HH:mm')}
                     </span>
                   </div>
@@ -2707,12 +2707,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* News Ticker - Fixed at bottom like TV news breaking news style */}
       {newsItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0">
-          <div className="flex items-stretch h-10 sm:h-12 lg:h-14 animate-ticker-glow">
+          <div className="flex items-stretch h-8 sm:h-10 lg:h-12 xl:h-14 3xl:h-16 4k:h-20 animate-ticker-glow">
             {/* Scrolling News Section - 3D Glass effect */}
             <div className="flex-1 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl overflow-hidden flex items-center relative border-t border-white/10">
-              <div className="absolute left-0 top-0 bottom-0 w-4 sm:w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
-              <div className="absolute right-0 top-0 bottom-0 w-4 sm:w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
-              <div className="animate-marquee whitespace-nowrap inline-flex py-1">
+              <div className="absolute left-0 top-0 bottom-0 w-2 sm:w-4 lg:w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
+              <div className="absolute right-0 top-0 bottom-0 w-2 sm:w-4 lg:w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
+              <div className="animate-marquee whitespace-nowrap inline-flex py-0.5 sm:py-1">
                 {(() => {
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
                   // Convert commercial phrases to news format
@@ -2747,9 +2747,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     commercialIndex++;
                   }
                   
-                  return itemsWithExtras.map((item, index) => (
-                    <span key={index} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
+                    return itemsWithExtras.map((item, index) => (
+                      <span key={index} className="mx-1 sm:mx-2 lg:mx-4 inline-flex items-center gap-0.5 sm:gap-1 lg:gap-2 text-white font-medium tracking-wide text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                        <span className={`px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-0.5 lg:py-1 rounded text-[7px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm font-bold inline-block ${
                         item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
@@ -2783,14 +2783,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Lance' ? 'bg-red-500' :
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 inline animate-bounce" /> Informativo</> : item.source}
+                        } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
+                          {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
+                        </span>
+                        <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
+                          {item.title}
+                        </span>
+                        <span className="text-slate-500 mx-0.5 sm:mx-1 lg:mx-2">•</span>
                       </span>
-                      <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
-                        {item.title}
-                      </span>
-                      <span className="text-slate-500 mx-1 sm:mx-2">•</span>
-                    </span>
                   ));
                 })()}
                 {(() => {
@@ -2828,8 +2828,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }
                   
                   return itemsWithExtras.map((item, index) => (
-                    <span key={`dup-${index}`} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
+                    <span key={`dup-${index}`} className="mx-1 sm:mx-2 lg:mx-4 inline-flex items-center gap-0.5 sm:gap-1 lg:gap-2 text-white font-medium tracking-wide text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                      <span className={`px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-0.5 lg:py-1 rounded text-[7px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm font-bold inline-block ${
                         item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
@@ -2864,12 +2864,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 inline animate-bounce" /> Informativo</> : item.source}
+                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
                       </span>
                       <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
                         {item.title}
                       </span>
-                      <span className="text-slate-500 mx-1 sm:mx-2">•</span>
+                      <span className="text-slate-500 mx-0.5 sm:mx-1 lg:mx-2">•</span>
                     </span>
                   ));
                 })()}
@@ -2932,15 +2932,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* Hidden Exit Button - Only visible on hover */}
-      <div className="fixed bottom-12 sm:bottom-14 lg:bottom-16 right-2 sm:right-4 z-50 group">
+      <div className="fixed bottom-10 sm:bottom-12 lg:bottom-14 xl:bottom-16 3xl:bottom-20 4k:bottom-24 right-1 sm:right-2 lg:right-4 z-50 group">
         <button
           onClick={() => setShowExitConfirm(true)}
-          className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
+          className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border sm:border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
           title="Sair do modo TV"
         >
           <div className="flex flex-col items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <LogOut className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-red-400" />
-            <span className="text-[7px] sm:text-[8px] lg:text-[9px] text-red-400 font-medium">SAIR</span>
+            <LogOut className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-red-400" />
+            <span className="text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] text-red-400 font-medium">SAIR</span>
           </div>
         </button>
       </div>
