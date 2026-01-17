@@ -1124,3 +1124,78 @@
 .animate-megaphone-shake {
   animation: megaphoneShake 0.5s ease-in-out infinite;
 }
+
+/* ========== CALL FLASH EFFECT ========== */
+@keyframes callFlashBlue {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 1) 0%, rgba(147, 197, 253, 0.95) 20%, rgba(59, 130, 246, 0.8) 50%, rgba(30, 64, 175, 0.6) 80%, transparent 100%);
+  }
+  15% {
+    opacity: 0.9;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.9) 0%, rgba(147, 197, 253, 0.8) 30%, rgba(59, 130, 246, 0.5) 60%, transparent 100%);
+  }
+  30% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes callFlashGreen {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 1) 0%, rgba(167, 243, 208, 0.95) 20%, rgba(16, 185, 129, 0.8) 50%, rgba(6, 95, 70, 0.6) 80%, transparent 100%);
+  }
+  15% {
+    opacity: 0.9;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.9) 0%, rgba(167, 243, 208, 0.8) 30%, rgba(16, 185, 129, 0.5) 60%, transparent 100%);
+  }
+  30% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-call-flash-blue {
+  animation: callFlashBlue 0.8s ease-out forwards;
+}
+
+.animate-call-flash-green {
+  animation: callFlashGreen 0.8s ease-out forwards;
+}
+
+/* Light burst rays effect */
+@keyframes lightBurst {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-light-burst {
+  animation: lightBurst 1s ease-out forwards;
+}
