@@ -922,24 +922,61 @@
   animation: callingBackgroundShift 2s ease-in-out infinite;
 }
 
-/* Waiting state - calm blue pulsing */
-@keyframes waitingPulse {
+/* Waiting state - smooth color alternation through multiple palettes */
+@keyframes waitingPulseAlternate {
   0%, 100% {
+    /* Deep indigo/purple */
     background: linear-gradient(135deg, 
-      hsl(220, 60%, 8%) 0%, 
-      hsl(240, 50%, 12%) 50%,
-      hsl(220, 60%, 8%) 100%);
+      hsl(230, 60%, 8%) 0%, 
+      hsl(250, 50%, 12%) 50%,
+      hsl(270, 45%, 10%) 100%);
   }
-  50% {
+  14% {
+    /* Deep teal/cyan */
     background: linear-gradient(135deg, 
-      hsl(230, 65%, 10%) 0%, 
-      hsl(250, 55%, 14%) 50%,
-      hsl(230, 65%, 10%) 100%);
+      hsl(190, 55%, 7%) 0%, 
+      hsl(180, 50%, 11%) 50%,
+      hsl(170, 45%, 9%) 100%);
+  }
+  28% {
+    /* Deep blue/slate */
+    background: linear-gradient(135deg, 
+      hsl(215, 60%, 8%) 0%, 
+      hsl(220, 55%, 12%) 50%,
+      hsl(225, 50%, 10%) 100%);
+  }
+  42% {
+    /* Deep violet/magenta */
+    background: linear-gradient(135deg, 
+      hsl(280, 50%, 8%) 0%, 
+      hsl(290, 45%, 11%) 50%,
+      hsl(300, 40%, 9%) 100%);
+  }
+  57% {
+    /* Deep emerald/green */
+    background: linear-gradient(135deg, 
+      hsl(160, 45%, 7%) 0%, 
+      hsl(150, 50%, 10%) 50%,
+      hsl(140, 45%, 8%) 100%);
+  }
+  71% {
+    /* Deep sapphire/navy */
+    background: linear-gradient(135deg, 
+      hsl(225, 65%, 7%) 0%, 
+      hsl(235, 60%, 11%) 50%,
+      hsl(245, 55%, 9%) 100%);
+  }
+  85% {
+    /* Deep rose/burgundy */
+    background: linear-gradient(135deg, 
+      hsl(340, 45%, 8%) 0%, 
+      hsl(350, 40%, 11%) 50%,
+      hsl(355, 35%, 9%) 100%);
   }
 }
 
 .animate-waiting-background {
-  animation: waitingPulse 8s ease-in-out infinite;
+  animation: waitingPulseAlternate 60s ease-in-out infinite;
 }
 
 /* Calling overlay dramatic entrance */
