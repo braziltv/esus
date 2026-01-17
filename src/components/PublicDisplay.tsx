@@ -2264,60 +2264,109 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     );
   }
 
+  // Determine if we're in "calling" state
+  const isCallingState = !!announcingType;
+  const hasAnyActiveCall = currentTriageCall || currentDoctorCall;
+
   return (
     <div 
       ref={containerRef}
-      className={`h-dvh w-full animate-color-shift tv-safe-area relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
+      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''} ${
+        announcingType === 'triage' 
+          ? 'calling-bg-triage' 
+          : announcingType === 'doctor' 
+            ? 'calling-bg-doctor' 
+            : hasAnyActiveCall 
+              ? 'animate-color-shift' 
+              : 'animate-color-shift waiting-state-bg'
+      }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
-      {/* Flash overlay during announcement */}
+      {/* ========== FULLSCREEN CALLING OVERLAY ========== */}
       {announcingType && (
-        <div className="absolute inset-0 z-50 pointer-events-none animate-flash">
-          <div className={`absolute inset-0 ${
-            announcingType === 'triage' 
-              ? 'bg-blue-500/30' 
-              : 'bg-emerald-500/30'
-          }`} />
-        </div>
-      )}
+        <div className={`fullscreen-call-overlay ${
+          announcingType === 'triage' 
+            ? 'fullscreen-call-overlay-triage' 
+            : 'fullscreen-call-overlay-doctor'
+        }`}>
+          {/* Floating particles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className={`absolute w-32 h-32 rounded-full blur-3xl ${
+                  announcingType === 'triage' ? 'bg-blue-500/20' : 'bg-emerald-500/20'
+                }`}
+                style={{
+                  left: `${10 + i * 15}%`,
+                  top: `${20 + (i % 3) * 25}%`,
+                  animation: `floatOrb ${8 + i * 2}s ease-in-out infinite`,
+                  animationDelay: `${i * 0.5}s`
+                }}
+              />
+            ))}
+          </div>
 
-      {/* Voice Announcement Indicator */}
-      {announcingType && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[55] pointer-events-none">
-          <div className={`flex flex-col items-center gap-4 p-6 sm:p-8 rounded-2xl backdrop-blur-lg shadow-2xl ${
-            announcingType === 'triage'
-              ? 'bg-blue-900/90 border-2 border-blue-400 shadow-blue-500/50'
-              : 'bg-emerald-900/90 border-2 border-emerald-400 shadow-emerald-500/50'
-          }`}>
-            {/* Animated Sound Wave Icon */}
-            <div className="flex items-center gap-1">
+          {/* Central calling card */}
+          <div className="calling-card-central flex flex-col items-center gap-6 sm:gap-8 p-8 sm:p-12 relative z-10">
+            {/* State badge */}
+            <div className={`calling-state-badge ${
+              announcingType === 'triage' 
+                ? 'calling-state-badge-triage' 
+                : 'calling-state-badge-doctor'
+            }`}>
+              🔔 CHAMANDO AGORA
+            </div>
+
+            {/* Icon with ring pulse */}
+            <div className={`calling-icon-ring w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center ${
+              announcingType === 'triage' 
+                ? 'bg-blue-500/30 text-blue-300' 
+                : 'bg-emerald-500/30 text-emerald-300'
+            }`}>
+              {announcingType === 'triage' ? (
+                <Activity className="w-10 h-10 sm:w-14 sm:h-14 animate-heartbeat" />
+              ) : (
+                <Stethoscope className="w-10 h-10 sm:w-14 sm:h-14 animate-soft-pulse" />
+              )}
+            </div>
+
+            {/* Patient name - HUGE and centered */}
+            <h1 className={`calling-patient-name ${
+              announcingType === 'triage' 
+                ? 'calling-patient-name-triage' 
+                : 'calling-patient-name-doctor'
+            }`}>
+              {announcingType === 'triage' 
+                ? currentTriageCall?.name 
+                : currentDoctorCall?.name}
+            </h1>
+
+            {/* Destination */}
+            <p className={`calling-destination ${
+              announcingType === 'triage' 
+                ? 'calling-destination-triage' 
+                : 'calling-destination-doctor'
+            }`}>
+              {announcingType === 'triage' 
+                ? (currentTriageCall?.destination || 'Triagem')
+                : (currentDoctorCall?.destination || 'Consultório')}
+            </p>
+
+            {/* Sound wave indicator */}
+            <div className="calling-sound-wave">
               {[...Array(5)].map((_, i) => (
-                <div
+                <span
                   key={i}
-                  className={`w-2 sm:w-3 rounded-full ${
-                    announcingType === 'triage' ? 'bg-blue-400' : 'bg-emerald-400'
-                  }`}
-                  style={{
-                    height: `${20 + Math.random() * 30}px`,
-                    animation: `soundWave 0.5s ease-in-out infinite alternate`,
-                    animationDelay: `${i * 0.1}s`
-                  }}
+                  className={announcingType === 'triage' ? 'bg-blue-400' : 'bg-emerald-400'}
                 />
               ))}
             </div>
-            
-            <div className="text-center">
-              <p className={`text-lg sm:text-2xl font-bold ${
-                announcingType === 'triage' ? 'text-blue-100' : 'text-emerald-100'
-              }`}>
-                🔊 Reproduzindo Anúncio
-              </p>
-              <p className={`text-sm sm:text-base mt-1 ${
-                announcingType === 'triage' ? 'text-blue-300' : 'text-emerald-300'
-              }`}>
-                Por favor, aguarde...
-              </p>
-            </div>
+
+            {/* Megaphone icon */}
+            <Megaphone className={`w-8 h-8 sm:w-12 sm:h-12 mt-4 animate-bounce ${
+              announcingType === 'triage' ? 'text-blue-300' : 'text-emerald-300'
+            }`} />
           </div>
         </div>
       )}
