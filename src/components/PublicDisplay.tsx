@@ -59,6 +59,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
+  const [showFlash, setShowFlash] = useState(false);
+  const [flashColor, setFlashColor] = useState<'blue' | 'green'>('blue');
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
@@ -1318,6 +1320,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       
       isSpeakingRef.current = true;
       setAnnouncingType('triage');
+      setFlashColor('blue');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 800);
       
       try {
         // Play notification sound first
@@ -1491,6 +1496,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         
         isSpeakingRef.current = true;
         setAnnouncingType('triage');
+        setFlashColor('blue');
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 800);
 
         try {
           // Repeat according to repeat_count
@@ -1556,6 +1564,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const playImmediateAnnouncement = async () => {
       isSpeakingRef.current = true;
       setAnnouncingType('triage');
+      setFlashColor('blue');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 800);
 
       try {
         for (let i = 0; i < announcement.repeat_count; i++) {
@@ -1616,6 +1627,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       isSpeakingRef.current = true;
       setAnnouncingType('triage');
+      setFlashColor('blue');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 800);
 
       await playNotificationSound();
       await speakWithGoogleTTS(
@@ -1718,6 +1732,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       // Start visual alert (use triage color for custom announcements)
       setAnnouncingType('triage');
+      setFlashColor('blue');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 800);
 
       try {
         // Repeat the announcement 2 times (to ensure it's heard)
@@ -1800,7 +1817,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       // Start visual alert; it will auto-stop after 10s in the effect below
       // (We keep the UI as triage vs non-triage for now)
-      setAnnouncingType(caller === 'triage' ? 'triage' : 'doctor');
+      const callType = caller === 'triage' ? 'triage' : 'doctor';
+      setAnnouncingType(callType);
+      
+      // Trigger flash effect
+      setFlashColor(callType === 'triage' ? 'blue' : 'green');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 800);
 
       const defaultLocationByCaller: Record<typeof caller, string> = {
         triage: 'Triagem',
@@ -2285,6 +2308,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
+      {/* ========== FLASH EFFECT ON CALL START ========== */}
+      {showFlash && (
+        <div className="fixed inset-0 z-[200] pointer-events-none">
+          {/* Main flash overlay */}
+          <div className={`absolute inset-0 ${
+            flashColor === 'blue' ? 'animate-call-flash-blue' : 'animate-call-flash-green'
+          }`} />
+          
+          {/* Light burst rays from center */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`w-[200vw] h-[200vw] animate-light-burst ${
+              flashColor === 'blue' 
+                ? 'bg-[conic-gradient(from_0deg,transparent,rgba(59,130,246,0.4),transparent,rgba(147,197,253,0.3),transparent,rgba(59,130,246,0.4),transparent)]' 
+                : 'bg-[conic-gradient(from_0deg,transparent,rgba(16,185,129,0.4),transparent,rgba(167,243,208,0.3),transparent,rgba(16,185,129,0.4),transparent)]'
+            }`} />
+          </div>
+          
+          {/* Central white core flash */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 rounded-full blur-3xl animate-pulse ${
+              flashColor === 'blue' ? 'bg-blue-200' : 'bg-emerald-200'
+            }`} style={{ animation: 'callFlashBlue 0.6s ease-out forwards' }} />
+          </div>
+        </div>
+      )}
+
       {/* ========== DRAMATIC FULL-SCREEN CALLING OVERLAY ========== */}
       {announcingType && currentCallName && (
         <div className="fixed inset-0 z-[100] pointer-events-none animate-calling-overlay-enter">
