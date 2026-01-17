@@ -411,7 +411,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
-      {/* Forecast Cards - Compact 3D Glass Style - visible on lg+ */}
+      {/* Forecast Cards - Compact 3D Glass Style with smooth animations - visible on lg+ */}
       <div className="hidden lg:flex gap-1 shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
@@ -421,34 +421,64 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           const dayName = index === 0 ? 'HOJE' : dayNames[targetDate.getDay()];
 
           return (
-            <div key={index} className="relative">
-              {/* Glow effect */}
-              <div className={`absolute -inset-0.5 rounded-lg blur-sm opacity-40 ${
-                index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-500/20' : 'bg-gradient-to-br from-purple-500/25 to-indigo-500/15'
+            <div 
+              key={`forecast-${index}-${day.date}`} 
+              className="relative group animate-[forecastCardIn_0.5s_ease-out_forwards] opacity-0"
+              style={{ 
+                animationDelay: `${index * 150}ms`,
+                animationFillMode: 'forwards'
+              }}
+            >
+              {/* Animated glow effect */}
+              <div className={`absolute -inset-0.5 rounded-lg blur-sm transition-all duration-500 group-hover:blur-md ${
+                index === 0 
+                  ? 'bg-gradient-to-br from-amber-500/30 to-orange-500/20 opacity-40 group-hover:opacity-70' 
+                  : 'bg-gradient-to-br from-purple-500/25 to-indigo-500/15 opacity-40 group-hover:opacity-60'
               }`} />
               
-              <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-lg px-1 lg:px-1.5 py-0.5 lg:py-1 border shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] ${
-                index === 0 ? 'border-amber-500/40' : 'border-purple-500/30'
+              {/* Shimmer overlay on hover */}
+              <div className="absolute inset-0 rounded-lg overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              </div>
+              
+              <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-lg px-1 lg:px-1.5 py-0.5 lg:py-1 border shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.4)] ${
+                index === 0 ? 'border-amber-500/40 group-hover:border-amber-400/60' : 'border-purple-500/30 group-hover:border-purple-400/50'
               }`}>
-                <span className={`font-bold text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs tracking-wide ${
-                  index === 0 ? 'text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.4)]' : 'text-purple-300 drop-shadow-[0_0_3px_rgba(168,85,247,0.3)]'
+                {/* Animated top highlight */}
+                <div className={`absolute top-0 left-[10%] right-[10%] h-px transition-all duration-300 ${
+                  index === 0 
+                    ? 'bg-gradient-to-r from-transparent via-amber-400/30 to-transparent group-hover:via-amber-400/60' 
+                    : 'bg-gradient-to-r from-transparent via-purple-400/20 to-transparent group-hover:via-purple-400/50'
+                }`} />
+                
+                <span className={`font-bold text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs tracking-wide transition-all duration-300 ${
+                  index === 0 
+                    ? 'text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.4)] group-hover:text-amber-200 group-hover:drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
+                    : 'text-purple-300 drop-shadow-[0_0_3px_rgba(168,85,247,0.3)] group-hover:text-purple-200 group-hover:drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]'
                 }`}>
                   {dayName}
                 </span>
                 
-                <div className="my-0.5">
+                <div className="my-0.5 transition-transform duration-300 group-hover:scale-110">
                   <Weather3DIcon description={day.icon || 'cloud'} size="sm" />
                 </div>
                 
                 <div className="flex items-center gap-0.5">
-                  <span className="text-cyan-300 font-bold tabular-nums text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs drop-shadow-sm">
+                  <span className="text-cyan-300 font-bold tabular-nums text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs drop-shadow-sm transition-all duration-300 group-hover:text-cyan-200 group-hover:drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]">
                     {day.minTemp}°
                   </span>
-                  <span className="text-white/40 font-bold text-[5px] lg:text-[6px]">/</span>
-                  <span className="text-orange-300 font-bold tabular-nums text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs drop-shadow-sm">
+                  <span className="text-white/40 font-bold text-[5px] lg:text-[6px] transition-colors duration-300 group-hover:text-white/60">/</span>
+                  <span className="text-orange-300 font-bold tabular-nums text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs drop-shadow-sm transition-all duration-300 group-hover:text-orange-200 group-hover:drop-shadow-[0_0_6px_rgba(251,146,60,0.5)]">
                     {day.maxTemp}°
                   </span>
                 </div>
+                
+                {/* Bottom animated bar */}
+                <div className={`absolute bottom-0 left-[20%] right-[20%] h-px transition-all duration-500 ${
+                  index === 0 
+                    ? 'bg-gradient-to-r from-transparent via-amber-500/0 to-transparent group-hover:via-amber-500/40' 
+                    : 'bg-gradient-to-r from-transparent via-purple-500/0 to-transparent group-hover:via-purple-500/30'
+                }`} />
               </div>
             </div>
           );
