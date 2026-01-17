@@ -2303,7 +2303,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''} ${
+      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col tv-font-body ${!cursorVisible ? 'cursor-none' : ''} ${
         announcingType ? 'animate-calling-background' : 'animate-waiting-background'
       }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
@@ -2384,11 +2384,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 }}
               />
               <h1 
-                className="font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] leading-tight tracking-wide animate-name-mega-pulse text-yellow-300 relative z-10"
+                className="tv-font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] leading-tight tracking-wide animate-name-mega-pulse text-yellow-300 relative z-10"
                 style={{ 
                   wordBreak: 'break-word',
                   WebkitTextStroke: '2px rgba(255, 200, 0, 0.3)',
-                  letterSpacing: '0.05em'
+                  letterSpacing: '0.02em'
                 }}
               >
                 {currentCallName}
@@ -2401,7 +2401,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   WebkitMaskImage: 'linear-gradient(to bottom, white, transparent)'
                 }}
               >
-                <span className="font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] text-yellow-300">
+                <span className="tv-font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] text-yellow-300">
                   {currentCallName}
                 </span>
               </div>
@@ -2413,7 +2413,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 ? 'bg-blue-900/80 border-2 border-blue-400' 
                 : 'bg-emerald-900/80 border-2 border-emerald-400'
             }`}>
-              <p className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${
+              <p className={`tv-font-heading text-2xl sm:text-3xl lg:text-4xl font-bold ${
                 announcingType === 'triage' ? 'text-blue-200' : 'text-emerald-200'
               }`}>
                 {announcingType === 'triage' ? '🏥' : '👨‍⚕️'} {currentCallDestination || (announcingType === 'triage' ? 'Triagem' : 'Consultório')}
@@ -2510,10 +2510,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </div>
               </div>
               <div className="hidden sm:block shrink-0">
-                <h1 className="font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
+                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
-                <p className="text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap drop-shadow-md">
+                <p className="tv-font-body text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap drop-shadow-md">
                   {unitName || 'Unidade de Saúde'}
                 </p>
               </div>
@@ -2546,7 +2546,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             }`}>
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
-              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
+              <p className="tv-font-heading text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
                 <Activity className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
                   announcingType === 'triage' ? 'animate-pulse' : ''
                 }`} />
@@ -2567,14 +2567,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-110' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
+                  <h2 className={`tv-font-display font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'triage' 
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className={`mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md ${
+                  <p className={`tv-font-body mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md ${
                     announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-400'
                   }`}>
                     {currentTriageCall.destination || 'Triagem'}
@@ -2605,7 +2605,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             }`}>
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
-              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
+              <p className="tv-font-heading text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
                 <Stethoscope className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
                   announcingType === 'doctor' ? 'animate-pulse' : ''
                 }`} />
@@ -2626,14 +2626,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-110' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
+                  <h2 className={`tv-font-display font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'doctor' 
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className={`mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md ${
+                  <p className={`tv-font-body mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md ${
                     announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-400'
                   }`}>
                     {currentDoctorCall.destination || 'Consultório'}
@@ -2655,7 +2655,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         {/* Right Column: History Panel - 3D Glass effect */}
         <div className="col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-2 sm:p-3 lg:p-4 flex-col min-h-0 border border-purple-500/20">
-          <h3 className="font-bold text-white mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm lg:text-base drop-shadow-md">
+          <h3 className="tv-font-heading font-bold text-white mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm lg:text-base drop-shadow-md">
             <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-cyan-400 shrink-0 animate-pulse" />
             <span className="shimmer-text">Últimas Chamadas</span>
           </h3>
@@ -2686,10 +2686,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white truncate text-[10px] sm:text-xs lg:text-sm">
+                      <p className="tv-font-body font-semibold text-white truncate text-[10px] sm:text-xs lg:text-sm">
                         {item.name}
                       </p>
-                      <p className="text-slate-400 text-[8px] sm:text-[10px] lg:text-xs">
+                      <p className="tv-font-body text-slate-400 text-[8px] sm:text-[10px] lg:text-xs">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
