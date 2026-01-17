@@ -2767,7 +2767,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Gazeta' ? 'bg-teal-600' :
                         item.source === 'Poder360' ? 'bg-indigo-600' :
                         item.source === 'Nexo' ? 'bg-rose-600' :
-                        item.source === 'Ag. Brasil' ? 'bg-cyan-600' :
+                        item.source === 'Ag. Brasil' || item.source === 'Agência Brasil' ? 'bg-cyan-600' :
                         item.source === 'InfoMoney' ? 'bg-lime-600' :
                         item.source === 'Exame' ? 'bg-amber-600' :
                         item.source === 'Época' ? 'bg-fuchsia-600' :
@@ -2782,6 +2782,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'GE' ? 'bg-green-700' :
                         item.source === 'Lance' ? 'bg-red-500' :
                         item.source === 'ESPN' ? 'bg-red-800' :
+                        item.source === 'Google' ? 'bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500' :
+                        item.source === 'R7' ? 'bg-orange-700' :
+                        item.source === 'Tecnoblog' ? 'bg-indigo-500' :
+                        item.source === 'TechTudo' ? 'bg-sky-500' :
+                        item.source === 'iG Saúde' ? 'bg-pink-600' :
+                        item.source === 'VivaBem' ? 'bg-emerald-600' :
+                        item.source === 'Notícias ao Minuto' ? 'bg-rose-500' :
+                        item.source === 'ONU News' ? 'bg-sky-700' :
+                        item.source === 'Inovação Tec' ? 'bg-gradient-to-r from-cyan-500 to-blue-600' :
+                        item.source === 'Intercept' ? 'bg-gradient-to-r from-slate-800 to-slate-600' :
+                        item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-600' :
                         'bg-gray-500'
                         } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
                           {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
@@ -2847,7 +2858,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Gazeta' ? 'bg-teal-600' :
                         item.source === 'Poder360' ? 'bg-indigo-600' :
                         item.source === 'Nexo' ? 'bg-rose-600' :
-                        item.source === 'Ag. Brasil' ? 'bg-cyan-600' :
+                        item.source === 'Ag. Brasil' || item.source === 'Agência Brasil' ? 'bg-cyan-600' :
                         item.source === 'InfoMoney' ? 'bg-lime-600' :
                         item.source === 'Exame' ? 'bg-amber-600' :
                         item.source === 'Época' ? 'bg-fuchsia-600' :
@@ -2862,6 +2873,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'GE' ? 'bg-green-700' :
                         item.source === 'Lance' ? 'bg-red-500' :
                         item.source === 'ESPN' ? 'bg-red-800' :
+                        item.source === 'Google' ? 'bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500' :
+                        item.source === 'R7' ? 'bg-orange-700' :
+                        item.source === 'Tecnoblog' ? 'bg-indigo-500' :
+                        item.source === 'TechTudo' ? 'bg-sky-500' :
+                        item.source === 'iG Saúde' ? 'bg-pink-600' :
+                        item.source === 'VivaBem' ? 'bg-emerald-600' :
+                        item.source === 'Notícias ao Minuto' ? 'bg-rose-500' :
+                        item.source === 'ONU News' ? 'bg-sky-700' :
+                        item.source === 'Inovação Tec' ? 'bg-gradient-to-r from-cyan-500 to-blue-600' :
+                        item.source === 'Intercept' ? 'bg-gradient-to-r from-slate-800 to-slate-600' :
+                        item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-600' :
                         'bg-gray-500'
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
                         {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
