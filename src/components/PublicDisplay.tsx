@@ -107,18 +107,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return Math.min(1, Math.max(0, v));
   };
 
-  // Format patient name: first name in UPPERCASE, rest in Title Case for better readability
+  // Format patient name: full name in UPPERCASE for better visibility
   const formatPatientName = (name: string): string => {
     if (!name) return '';
-    const words = name.trim().split(/\s+/);
-    if (words.length === 0) return '';
-    
-    const firstName = words[0].toUpperCase();
-    const restOfName = words.slice(1).map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
-    
-    return restOfName ? `${firstName} ${restOfName}` : firstName;
+    return name.trim().toUpperCase();
   };
 
   // Get dynamic font size based on name length to prevent truncation
