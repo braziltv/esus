@@ -2539,8 +2539,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="absolute top-[60%] left-[50%] w-[12vw] h-[12vw] max-w-[150px] max-h-[150px] bg-gradient-to-br from-teal-500/15 to-green-500/10 rounded-full blur-[40px] animate-float-orb-slow" style={{ animationDelay: '-10s' }} />
       </div>
 
+      {/* Dimming overlay when announcing - darkens everything except active call */}
+      {announcingType && (
+        <div className="fixed inset-0 z-[15] bg-black/70 animate-[fadeIn_0.3s_ease-out] pointer-events-none" />
+      )}
+
       {/* Header - 3D Modern gradient bar with glow */}
-      <div className="relative z-10 mb-0.5 sm:mb-1 lg:mb-2 3xl:mb-3 4k:mb-5 shrink-0">
+      <div className={`relative z-10 mb-0.5 sm:mb-1 lg:mb-2 3xl:mb-3 4k:mb-5 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
         <div className="glass-3d animate-header-glow rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl px-2 py-1 sm:px-4 sm:py-1.5 lg:px-5 lg:py-2 xl:px-6 xl:py-2.5 3xl:px-8 3xl:py-3 4k:px-12 4k:py-5 relative overflow-hidden tv-card-3d mx-1 sm:mx-2 lg:mx-3 xl:mx-4 3xl:mx-6">
           {/* Animated gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/30 via-purple-600/40 to-indigo-600/30 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl opacity-80" />
@@ -2590,8 +2595,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Triage Call - 3D Modern Card */}
           <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
             announcingType === 'triage' 
-              ? 'border-4 animate-border-glow-intense animate-card-zoom-call' 
-              : 'border border-indigo-500/30 hover:border-indigo-400/50'
+              ? 'border-4 animate-border-glow-intense animate-card-zoom-call relative z-20 shadow-[0_0_60px_20px_rgba(234,179,8,0.4)]' 
+              : announcingType === 'doctor'
+                ? 'border border-indigo-500/30 opacity-30'
+                : 'border border-indigo-500/30 hover:border-indigo-400/50'
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
             {/* Header with animated gradient */}
             <div className={`px-1.5 py-1 sm:px-2 sm:py-1.5 lg:px-3 lg:py-2 xl:px-4 xl:py-2.5 3xl:px-6 3xl:py-3 4k:px-8 4k:py-4 shrink-0 relative overflow-hidden ${
@@ -2651,8 +2658,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Doctor Call - 3D Modern Card */}
           <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
             announcingType === 'doctor' 
-              ? 'border-4 animate-border-glow-intense animate-card-zoom-call' 
-              : 'border border-emerald-500/30 hover:border-emerald-400/50'
+              ? 'border-4 animate-border-glow-intense animate-card-zoom-call relative z-20 shadow-[0_0_60px_20px_rgba(16,185,129,0.4)]' 
+              : announcingType === 'triage'
+                ? 'border border-emerald-500/30 opacity-30'
+                : 'border border-emerald-500/30 hover:border-emerald-400/50'
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
             {/* Header with animated gradient */}
             <div className={`px-1.5 py-1 sm:px-2 sm:py-1.5 lg:px-3 lg:py-2 xl:px-4 xl:py-2.5 3xl:px-6 3xl:py-3 4k:px-8 4k:py-4 shrink-0 relative overflow-hidden ${
@@ -2711,7 +2720,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* Right Column: History Panel - 3D Glass effect */}
-        <div className="col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-1 sm:p-1.5 lg:p-2 xl:p-3 3xl:p-4 flex-col min-h-0 border border-purple-500/20">
+        <div className={`col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-1 sm:p-1.5 lg:p-2 xl:p-3 3xl:p-4 flex-col min-h-0 border border-purple-500/20 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
           <h3 className="tv-font-heading font-bold text-white mb-1 sm:mb-2 flex items-center gap-1 sm:gap-1.5 lg:gap-2 shrink-0 text-[10px] sm:text-xs lg:text-sm xl:text-base drop-shadow-md">
             <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-cyan-400 shrink-0 animate-pulse" />
             <span className="shimmer-text">Últimas Chamadas</span>
@@ -2763,7 +2772,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* News Ticker - Fixed at bottom like TV news breaking news style */}
       {newsItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0">
+        <div className={`fixed bottom-0 left-0 right-0 z-40 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
           <div className="flex items-stretch h-12 sm:h-14 lg:h-16 xl:h-20 3xl:h-24 4k:h-32 animate-ticker-glow">
             {/* Scrolling News Section - 3D Glass effect */}
             <div className="flex-1 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl overflow-hidden flex items-center relative border-t border-white/10">
