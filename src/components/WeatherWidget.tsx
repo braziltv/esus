@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Cloud, Droplets, Sun, CloudRain, CloudSnow, CloudLightning, Wind, CloudSun, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
-import { AnalogClock } from './AnalogClock';
 
 interface WeatherData {
   current: {
@@ -24,7 +23,6 @@ interface WeatherData {
 interface WeatherWidgetProps {
   currentTime?: Date;
   formatTime?: (date: Date, format: string) => string;
-  showAnalogClock?: boolean;
 }
 
 // Modern transparent weather icon component with glass morphism
@@ -162,7 +160,7 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
   );
 }
 
-export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTime, showAnalogClock = false }: WeatherWidgetProps) {
+export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTime }: WeatherWidgetProps) {
   const { currentTime: hookTime } = useBrazilTime();
   const currentTime = propTime || hookTime;
   const formatTime = propFormatTime || formatBrazilTime;
@@ -510,35 +508,8 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         })}
       </div>
 
-      {/* Date + Clock - Alternates between digital and analog */}
-      {showAnalogClock ? (
-        <div className="flex flex-col items-center gap-0.5 sm:gap-1 shrink-0">
-          {/* Date pill */}
-          <div className="flex items-center gap-1 sm:gap-1.5">
-            <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-amber-400/40 backdrop-blur-sm">
-              <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]">
-                {safeFormatTime(currentTime, 'EEEE')}
-              </p>
-            </div>
-            <div className="bg-white/10 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-cyan-400/30 backdrop-blur-sm">
-              <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_4px_rgba(6,182,212,0.4)]">
-                {safeFormatTime(currentTime, 'dd/MM/yyyy')}
-              </p>
-            </div>
-          </div>
-          {/* Analog Clock with animation */}
-          <div className="relative animate-scale-in">
-            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-purple-500/20 rounded-full blur-md opacity-60" />
-            <AnalogClock 
-              time={currentTime} 
-              size={80} 
-              className="relative drop-shadow-[0_0_10px_rgba(99,102,241,0.3)]" 
-            />
-          </div>
-        </div>
-      ) : (
-        renderDateTimeCompact()
-      )}
+      {/* Date + Clock */}
+      {renderDateTimeCompact()}
     </div>
   );
 }

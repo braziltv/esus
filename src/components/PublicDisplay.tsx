@@ -2320,19 +2320,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
-      {/* ========== DYNAMIC PARTICLE BACKGROUND ========== */}
-      <ParticleBackground 
-        count={25} 
-        color={announcingType === 'triage' ? 'cyan' : announcingType === 'doctor' ? 'green' : 'purple'} 
-        active={true}
-        className="z-[1]"
-      />
-
-      {/* ========== SPOTLIGHT OVERLAY WITH PARTICLES ON CALL ========== */}
-      <SpotlightOverlay 
-        active={!!announcingType} 
-        color={announcingType === 'triage' ? 'blue' : announcingType === 'doctor' ? 'green' : 'gold'} 
-      />
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {showFlash && (
         <div className="fixed inset-0 z-[200] pointer-events-none">
@@ -2552,7 +2539,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             
             {/* Right: Weather + Clock */}
             <div className="flex-1 min-w-0 flex items-center justify-end overflow-visible">
-              <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} showAnalogClock={showAnalogClock} />
+              <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
         </div>
@@ -2696,12 +2683,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               historyItems.slice(0, 8).map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-1 sm:p-1.5 lg:p-2 xl:p-2.5 rounded sm:rounded-md lg:rounded-lg animate-item-enter ${
+                  className={`p-1 sm:p-1.5 lg:p-2 xl:p-2.5 rounded sm:rounded-md lg:rounded-lg ${
                     index === 0 
-                      ? 'bg-primary/20 border border-primary/40 ring-1 ring-primary/20 animate-glow-pulse' 
-                      : 'bg-slate-700/50 hover:bg-slate-600/50'
-                  } transition-all duration-300 hover:scale-[1.02] card-3d-hover`}
-                  style={{ animationDelay: `${index * 80}ms` }}
+                      ? 'bg-primary/20 border border-primary/40 ring-1 ring-primary/20 animate-call-entrance' 
+                      : 'bg-slate-700/50'
+                  } transition-all`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2">
                     <div className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 rounded-full flex items-center justify-center shrink-0 ${
