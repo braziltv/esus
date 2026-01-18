@@ -1,6 +1,6 @@
 import { Clock, Activity, Megaphone, VolumeX, LogOut, Minimize2, AlertTriangle, X } from 'lucide-react';
 import { HealthCrossIcon } from './HealthCrossIcon';
-import stethoscopeHeart from '@/assets/stethoscope-heart.jpg';
+import stethoscopeHeart from '@/assets/stethoscope-heart.png';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
