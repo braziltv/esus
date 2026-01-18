@@ -170,6 +170,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [showMaxTemp, setShowMaxTemp] = useState(true);
   const [rotationCount, setRotationCount] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const fetchingRef = useRef(false);
 
   const availableCities = Object.keys(weatherCache);
@@ -220,6 +221,16 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     return () => clearInterval(interval);
   }, [loadWeatherFromDB]);
 
+  const changeCityWithTransition = useCallback((newCity: string) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setDisplayCity(newCity);
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 300);
+  }, []);
+
   useEffect(() => {
     if (availableCities.length === 0) return;
     
@@ -229,19 +240,19 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       setRotationCount(prev => {
         const next = prev + 1;
         if (next % 5 === 0 && weatherCache['Paineiras']) {
-          setDisplayCity('Paineiras');
+          changeCityWithTransition('Paineiras');
         } else if (otherCities.length > 0) {
           currentIndex = (currentIndex + 1) % otherCities.length;
-          setDisplayCity(otherCities[currentIndex]);
+          changeCityWithTransition(otherCities[currentIndex]);
         } else if (availableCities.length > 0) {
           currentIndex = (currentIndex + 1) % availableCities.length;
-          setDisplayCity(availableCities[currentIndex]);
+          changeCityWithTransition(availableCities[currentIndex]);
         }
         return next;
       });
     }, 10000);
     return () => clearInterval(interval);
-  }, [availableCities.length, otherCities.length, weatherCache]);
+  }, [availableCities.length, otherCities.length, weatherCache, changeCityWithTransition]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -362,9 +373,11 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
               Previsão do Tempo
             </span>
             <div className="flex items-center justify-center gap-1.5 w-full overflow-hidden mt-0.5">
-              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6 text-amber-400 animate-bounce shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]" />
+              <MapPin className={`w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6 text-amber-400 shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)] transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-75' : 'opacity-100 scale-100 animate-bounce'}`} />
               <span 
-                className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-md leading-tight whitespace-nowrap ${
+                className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-md leading-tight whitespace-nowrap transition-all duration-300 ${
+                  isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
+                } ${
                   displayCity.length > 18 
                     ? 'text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base' 
                     : displayCity.length > 12 
