@@ -2562,9 +2562,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
               <p className="tv-font-heading text-white font-bold flex items-center gap-1 sm:gap-1.5 lg:gap-2 3xl:gap-3 text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl relative z-10 drop-shadow-lg">
-                <Activity className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 3xl:w-7 3xl:h-7 4k:w-9 4k:h-9 shrink-0 drop-shadow-md ${
+                <Activity className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 3xl:w-7 3xl:h-7 4k:w-9 4k:h-9 shrink-0 ${
                   announcingType === 'triage' ? 'animate-pulse' : 'animate-triage-icon'
-                }`} />
+                }`} style={{ filter: 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.8)) drop-shadow(0 0 16px rgba(99, 102, 241, 0.6)) drop-shadow(0 0 24px rgba(99, 102, 241, 0.4))' }} />
                 <span className="drop-shadow-md">
                   {announcingType === 'triage' ? '🔔 CHAMANDO!' : 'TRIAGEM'}
                 </span>
@@ -2621,9 +2621,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
               <p className="tv-font-heading text-white font-bold flex items-center gap-1 sm:gap-1.5 lg:gap-2 3xl:gap-3 text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl relative z-10 drop-shadow-lg">
-                <Stethoscope className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 3xl:w-7 3xl:h-7 4k:w-9 4k:h-9 shrink-0 drop-shadow-md ${
+                <Stethoscope className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 3xl:w-7 3xl:h-7 4k:w-9 4k:h-9 shrink-0 ${
                   announcingType === 'doctor' ? 'animate-pulse' : 'animate-doctor-icon'
-                }`} />
+                }`} style={{ filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.8)) drop-shadow(0 0 16px rgba(16, 185, 129, 0.6)) drop-shadow(0 0 24px rgba(16, 185, 129, 0.4))' }} />
                 <span className="drop-shadow-md">
                   {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}
                 </span>
