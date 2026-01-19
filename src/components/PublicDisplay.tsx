@@ -2556,7 +2556,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   <HealthCrossIcon size={32} className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-9 xl:h-9 3xl:w-12 3xl:h-12 4k:w-18 4k:h-18" />
                 </div>
               </div>
-              <div className="shrink-0 max-w-[180px] sm:max-w-[240px] lg:max-w-[320px] xl:max-w-[400px] 3xl:max-w-[500px] 4k:max-w-[700px]">
+              <div className="shrink-0 max-w-[160px] sm:max-w-[200px] lg:max-w-[260px] xl:max-w-[320px] 3xl:max-w-[400px] 4k:max-w-[550px]">
                 <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
@@ -2572,8 +2572,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             {/* Animated separator */}
             <div className="hidden sm:block w-px h-6 lg:h-8 xl:h-10 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0 animate-pulse" />
             
-            {/* Right: Weather + Clock - takes remaining space */}
-            <div className="flex-1 flex items-center justify-end overflow-hidden">
+            {/* Right: Weather + Clock - takes remaining space, no overflow hidden */}
+            <div className="flex-1 flex items-center justify-end min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
