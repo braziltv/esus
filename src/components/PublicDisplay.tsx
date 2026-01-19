@@ -2556,7 +2556,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   <HealthCrossIcon size={32} className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-9 xl:h-9 3xl:w-12 3xl:h-12 4k:w-18 4k:h-18" />
                 </div>
               </div>
-              <div className="shrink-0 max-w-[140px] sm:max-w-[180px] lg:max-w-[220px] xl:max-w-[280px] 3xl:max-w-[350px] 4k:max-w-[500px]">
+              <div className="shrink-0 max-w-[180px] sm:max-w-[240px] lg:max-w-[320px] xl:max-w-[400px] 3xl:max-w-[500px] 4k:max-w-[700px]">
                 <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
