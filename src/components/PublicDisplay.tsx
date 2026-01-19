@@ -2537,8 +2537,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* Header - 3D Modern gradient bar with glow */}
-      <div className={`relative z-10 mb-0.5 sm:mb-1 lg:mb-2 3xl:mb-3 4k:mb-5 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
-        <div className="glass-3d animate-header-glow rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl px-2 py-1 sm:px-4 sm:py-1.5 lg:px-5 lg:py-2 xl:px-6 xl:py-2.5 3xl:px-8 3xl:py-3 4k:px-12 4k:py-5 relative overflow-hidden tv-card-3d mx-1 sm:mx-2 lg:mx-3 xl:mx-4 3xl:mx-6">
+      <div className={`relative z-10 mb-1 sm:mb-2 lg:mb-3 3xl:mb-4 4k:mb-6 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
+        <div className="glass-3d animate-header-glow rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 xl:px-8 xl:py-3 3xl:px-10 3xl:py-4 4k:px-14 4k:py-6 relative overflow-visible tv-card-3d mx-2 sm:mx-3 lg:mx-4 xl:mx-6 3xl:mx-8 4k:mx-12">
           {/* Animated gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/30 via-purple-600/40 to-indigo-600/30 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl opacity-80" />
           {/* Top highlight line */}
@@ -2546,21 +2546,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Bottom subtle line */}
           <div className="absolute bottom-0 left-[20%] w-[60%] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           
-          <div className="flex items-center relative z-10 w-full gap-1 sm:gap-2 lg:gap-3 3xl:gap-5 4k:gap-7">
+          <div className="flex items-center relative z-10 w-full gap-2 sm:gap-3 lg:gap-4 xl:gap-5 3xl:gap-6 4k:gap-8">
             {/* Left: Logo + Title with 3D effect */}
-            <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 xl:gap-3 3xl:gap-4 shrink-0">
-              <div className="relative w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 3xl:w-16 3xl:h-16 4k:w-24 4k:h-24">
+            <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3 xl:gap-4 3xl:gap-5 shrink-0 min-w-0 max-w-[40%] xl:max-w-[45%]">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 3xl:w-18 3xl:h-18 4k:w-26 4k:h-26 shrink-0">
                 {/* Glow behind logo */}
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-md opacity-60" />
-                <div className="relative w-full h-full rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/95 flex items-center justify-center shadow-xl shrink-0">
-                  <HealthCrossIcon size={32} className="w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 3xl:w-11 3xl:h-11 4k:w-16 4k:h-16" />
+                <div className="relative w-full h-full rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/95 flex items-center justify-center shadow-xl">
+                  <HealthCrossIcon size={32} className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-9 xl:h-9 3xl:w-12 3xl:h-12 4k:w-18 4k:h-18" />
                 </div>
               </div>
-              <div className="shrink-0">
-                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-[10px] sm:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-3xl drop-shadow-lg">
+              <div className="min-w-0">
+                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
-                <p className="tv-font-body text-amber-300 leading-tight font-medium text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-lg whitespace-nowrap drop-shadow-md">
+                <p className="tv-font-body text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl drop-shadow-md line-clamp-2">
                   {unitName || 'Unidade de Saúde'}
                 </p>
                 <p className="tv-font-body leading-tight font-medium text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.3)]">
@@ -2570,10 +2570,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             
             {/* Animated separator */}
-            <div className="hidden sm:block w-px h-5 lg:h-6 xl:h-8 3xl:h-10 4k:h-14 bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0 animate-pulse" />
+            <div className="hidden sm:block w-px h-6 lg:h-8 xl:h-10 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0 animate-pulse" />
             
             {/* Right: Weather + Clock */}
-            <div className="flex-1 min-w-0 flex items-center justify-end overflow-visible">
+            <div className="flex-1 min-w-0 flex items-center justify-end">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
