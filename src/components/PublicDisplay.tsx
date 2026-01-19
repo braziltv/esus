@@ -2546,9 +2546,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Bottom subtle line */}
           <div className="absolute bottom-0 left-[20%] w-[60%] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           
-          <div className="flex items-center relative z-10 w-full gap-2 sm:gap-3 lg:gap-4 xl:gap-5 3xl:gap-6 4k:gap-8">
-            {/* Left: Logo + Title with 3D effect */}
-            <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3 xl:gap-4 3xl:gap-5 shrink-0 min-w-0 max-w-[40%] xl:max-w-[45%]">
+          <div className="flex items-center relative z-10 w-full gap-3 sm:gap-4 lg:gap-5 xl:gap-6 3xl:gap-8 4k:gap-10">
+            {/* Left: Logo + Title with 3D effect - fixed width to prevent overlap */}
+            <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3 xl:gap-4 3xl:gap-5 shrink-0">
               <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 3xl:w-18 3xl:h-18 4k:w-26 4k:h-26 shrink-0">
                 {/* Glow behind logo */}
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-md opacity-60" />
@@ -2556,14 +2556,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   <HealthCrossIcon size={32} className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-9 xl:h-9 3xl:w-12 3xl:h-12 4k:w-18 4k:h-18" />
                 </div>
               </div>
-              <div className="min-w-0">
+              <div className="shrink-0 max-w-[140px] sm:max-w-[180px] lg:max-w-[220px] xl:max-w-[280px] 3xl:max-w-[350px] 4k:max-w-[500px]">
                 <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
-                <p className="tv-font-body text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl drop-shadow-md line-clamp-2">
+                <p className="tv-font-body text-amber-300 leading-tight font-medium text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl drop-shadow-md truncate" title={unitName || 'Unidade de Saúde'}>
                   {unitName || 'Unidade de Saúde'}
                 </p>
-                <p className="tv-font-body leading-tight font-medium text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.3)]">
+                <p className="tv-font-body leading-tight font-medium text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[11px] 4k:text-sm whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.3)]">
                   Solução criada por Kalebe Gomes
                 </p>
               </div>
@@ -2572,8 +2572,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             {/* Animated separator */}
             <div className="hidden sm:block w-px h-6 lg:h-8 xl:h-10 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0 animate-pulse" />
             
-            {/* Right: Weather + Clock */}
-            <div className="flex-1 min-w-0 flex items-center justify-end">
+            {/* Right: Weather + Clock - takes remaining space */}
+            <div className="flex-1 flex items-center justify-end overflow-hidden">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
