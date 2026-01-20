@@ -52,7 +52,7 @@ interface CommercialPhrase {
   display_order: number;
 }
 
-// Mascara nomes progressivamente: 3min = mascara do 3º em diante, 10min = só primeiro nome
+// Mascara nomes progressivamente: 3min = mascara do 3º em diante, 10min = só primeiro nome + iniciais
 const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date): string => {
   const threeMinutesMs = 3 * 60 * 1000;
   const tenMinutesMs = 10 * 60 * 1000;
@@ -60,9 +60,12 @@ const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date)
   
   const parts = name.trim().split(/\s+/);
   
-  // Após 10 minutos, mostra apenas o primeiro nome
+  // Após 10 minutos, mostra primeiro nome + iniciais dos sobrenomes com ***
   if (elapsed >= tenMinutesMs) {
-    return parts[0];
+    if (parts.length <= 1) return parts[0];
+    const firstName = parts[0];
+    const maskedSurnames = parts.slice(1).map(part => part[0] + '***');
+    return [firstName, ...maskedSurnames].join(' ');
   }
   
   // Se passou menos de 3 minutos, mostra o nome completo
@@ -70,18 +73,15 @@ const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date)
     return name;
   }
   
-  // Entre 3-10 minutos: primeiro e segundo nome visíveis, demais mascarados
+  // Entre 3-10 minutos: primeiro e segundo nome visíveis, demais mascarados com inicial
   if (parts.length <= 2) {
     return name; // Até 2 nomes, não mascara
   }
   
   const visibleNames = parts.slice(0, 2);
-  const maskedNames = parts.slice(2).map(part => {
-    if (part.length <= 2) return '***';
-    return part[0] + '***';
-  });
+  const maskedNames = parts.slice(2).map(part => part[0] + '***');
   
-  return [...visibleNames, ...maskedNames].join(' ');
+  return [...visibleNames, ...maskedNames].join(' ')
 };
 
 export function PublicDisplay(_props: PublicDisplayProps) {
