@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import {
   Users,
   Globe,
@@ -101,6 +102,9 @@ export function ActiveUsersPanel() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
   const [selectedUnit, setSelectedUnit] = useState<string>('all');
+  const [reloadTargetUnit, setReloadTargetUnit] = useState<string>('all');
+  const [isReloadDialogOpen, setIsReloadDialogOpen] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
 
   // Get unique unit names from sessions
   const unitNames = useMemo(() => {
@@ -157,8 +161,9 @@ export function ActiveUsersPanel() {
     }
   }, [loadSessions]);
 
-  // Send remote reload command to all TVs via Edge Function
+  // Send remote reload command to TVs via Edge Function
   const sendTvReloadCommand = useCallback(async (unitName?: string) => {
+    setIsReloading(true);
     try {
       const { data, error } = await supabase.functions.invoke('tv-reload-command', {
         body: { unitName: unitName || null }
@@ -172,12 +177,16 @@ export function ActiveUsersPanel() {
             ? `Comando de reload enviado para TV: ${unitName}`
             : 'Comando de reload enviado para todas as TVs'
         );
+        setIsReloadDialogOpen(false);
+        setReloadTargetUnit('all');
       } else {
         throw new Error(data?.error || 'Falha ao enviar comando');
       }
     } catch (error) {
       console.error('Error sending TV reload command:', error);
       toast.error('Erro ao enviar comando de reload');
+    } finally {
+      setIsReloading(false);
     }
   }, []);
 
@@ -475,7 +484,7 @@ export function ActiveUsersPanel() {
             </Select>
             
             {/* TV Reload Button */}
-            <AlertDialog>
+            <AlertDialog open={isReloadDialogOpen} onOpenChange={setIsReloadDialogOpen}>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-1">
                   <RotateCcw className="w-4 h-4" />
@@ -485,16 +494,46 @@ export function ActiveUsersPanel() {
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Recarregar TVs Remotamente</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Isso enviará um comando para todas as TVs ativas recarregarem a página. 
-                    Use para aplicar atualizações de código.
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-4">
+                      <p>Envie um comando para as TVs recarregarem a página. Use para aplicar atualizações de código.</p>
+                      <div className="space-y-2">
+                        <Label>Selecione a unidade:</Label>
+                        <Select value={reloadTargetUnit} onValueChange={setReloadTargetUnit}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma unidade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">🌐 Todas as unidades</SelectItem>
+                            {unitNames.map(unit => (
+                              <SelectItem key={unit} value={unit}>
+                                🏥 {unit}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => sendTvReloadCommand()}>
-                    Recarregar Todas as TVs
-                  </AlertDialogAction>
+                  <AlertDialogCancel disabled={isReloading}>Cancelar</AlertDialogCancel>
+                  <Button 
+                    onClick={() => sendTvReloadCommand(reloadTargetUnit === 'all' ? undefined : reloadTargetUnit)}
+                    disabled={isReloading}
+                  >
+                    {isReloading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        {reloadTargetUnit === 'all' ? 'Recarregar Todas' : `Recarregar ${reloadTargetUnit}`}
+                      </>
+                    )}
+                  </Button>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
