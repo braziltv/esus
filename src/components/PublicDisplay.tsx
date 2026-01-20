@@ -52,6 +52,32 @@ interface CommercialPhrase {
   display_order: number;
 }
 
+// Mascara o sobrenome após 1 minuto, deixando apenas o primeiro nome visível
+const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date): string => {
+  const oneMinuteMs = 60 * 1000;
+  const elapsed = currentTime.getTime() - callTime.getTime();
+  
+  // Se passou menos de 1 minuto, mostra o nome completo
+  if (elapsed < oneMinuteMs) {
+    return name;
+  }
+  
+  // Após 1 minuto, mascara os sobrenomes
+  const parts = name.trim().split(/\s+/);
+  if (parts.length <= 1) {
+    return name; // Nome único, não mascara
+  }
+  
+  // Primeiro nome + sobrenomes mascarados
+  const firstName = parts[0];
+  const maskedSurnames = parts.slice(1).map(part => {
+    if (part.length <= 2) return '***';
+    return part[0] + '***';
+  });
+  
+  return [firstName, ...maskedSurnames].join(' ');
+};
+
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
   const { playHourAudio } = useHourAudio();
@@ -2745,7 +2771,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="tv-font-body font-semibold text-white truncate text-[8px] sm:text-[10px] lg:text-xs xl:text-sm">
-                        {item.name}
+                        {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                       </p>
                       <p className="tv-font-body text-slate-400 text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
