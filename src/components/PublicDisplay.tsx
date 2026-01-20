@@ -1,4 +1,4 @@
-import { Clock, Stethoscope, Activity, Megaphone, VolumeX, LogOut, Minimize2, AlertTriangle, X, Lock, ShieldCheck } from 'lucide-react';
+import { Clock, Stethoscope, Activity, Megaphone, VolumeX, LogOut, Minimize2, AlertTriangle, X } from 'lucide-react';
 import { HealthCrossIcon } from './HealthCrossIcon';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,17 +51,6 @@ interface CommercialPhrase {
   is_active: boolean;
   display_order: number;
 }
-
-// Retorna o nível de mascaramento: 'none' | 'partial' | 'full'
-const getMaskLevel = (callTime: Date, currentTime: Date): 'none' | 'partial' | 'full' => {
-  const threeMinutesMs = 3 * 60 * 1000;
-  const tenMinutesMs = 10 * 60 * 1000;
-  const elapsed = currentTime.getTime() - callTime.getTime();
-  
-  if (elapsed >= tenMinutesMs) return 'full';
-  if (elapsed >= threeMinutesMs) return 'partial';
-  return 'none';
-};
 
 // Mascara nomes progressivamente: 3min = mascara do 3º em diante, 10min = só primeiro nome
 const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date): string => {
@@ -2787,23 +2776,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
-                        <p className="tv-font-body font-semibold text-white truncate text-[8px] sm:text-[10px] lg:text-xs xl:text-sm">
-                          {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
-                        </p>
-                        {currentTime && getMaskLevel(item.time, currentTime) !== 'none' && (
-                          <div 
-                            className={`shrink-0 animate-fade-in transition-all duration-500 ${getMaskLevel(item.time, currentTime) === 'full' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} 
-                            title={getMaskLevel(item.time, currentTime) === 'full' ? 'Nome protegido (privacidade total)' : 'Nome parcialmente protegido'}
-                          >
-                            {getMaskLevel(item.time, currentTime) === 'full' ? (
-                              <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 drop-shadow-[0_0_4px_rgba(251,191,36,0.6)]" />
-                            ) : (
-                              <Lock className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3" />
-                            )}
-                          </div>
-                        )}
-                      </div>
+                      <p className="tv-font-body font-semibold text-white truncate text-[8px] sm:text-[10px] lg:text-xs xl:text-sm">
+                        {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
+                      </p>
                       <p className="tv-font-body text-slate-400 text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
