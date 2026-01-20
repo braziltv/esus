@@ -157,35 +157,24 @@ export function ActiveUsersPanel() {
     }
   }, [loadSessions]);
 
-  // Send remote reload command to all TVs
+  // Send remote reload command to all TVs via Edge Function
   const sendTvReloadCommand = useCallback(async (unitName?: string) => {
     try {
-      const channel = supabase.channel('tv-commands');
-      
-      await channel.subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.send({
-            type: 'broadcast',
-            event: 'reload',
-            payload: { 
-              command: 'reload',
-              unit: unitName || 'all',
-              timestamp: new Date().toISOString()
-            }
-          });
-          
-          toast.success(
-            unitName 
-              ? `Comando de reload enviado para TV: ${unitName}`
-              : 'Comando de reload enviado para todas as TVs'
-          );
-          
-          // Cleanup channel after sending
-          setTimeout(() => {
-            supabase.removeChannel(channel);
-          }, 1000);
-        }
+      const { data, error } = await supabase.functions.invoke('tv-reload-command', {
+        body: { unitName: unitName || null }
       });
+      
+      if (error) throw error;
+      
+      if (data?.success) {
+        toast.success(
+          unitName 
+            ? `Comando de reload enviado para TV: ${unitName}`
+            : 'Comando de reload enviado para todas as TVs'
+        );
+      } else {
+        throw new Error(data?.error || 'Falha ao enviar comando');
+      }
     } catch (error) {
       console.error('Error sending TV reload command:', error);
       toast.error('Erro ao enviar comando de reload');
