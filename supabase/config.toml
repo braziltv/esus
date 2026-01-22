@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.generate-marketing-audio]
 verify_jwt = false
+
+[functions.cleanup-inactive-sessions]
+verify_jwt = false
