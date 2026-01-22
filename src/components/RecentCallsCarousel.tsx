@@ -17,7 +17,7 @@ interface RecentCallsCarouselProps {
 }
 
 const ITEMS_PER_PAGE = 4;
-const SLIDE_INTERVAL = 20000; // 20 seconds
+const SLIDE_INTERVAL = 30000; // 30 seconds
 
 export function RecentCallsCarousel({ 
   historyItems, 
