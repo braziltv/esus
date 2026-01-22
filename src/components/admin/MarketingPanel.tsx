@@ -185,6 +185,41 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
     setPhraseDialogOpen(true);
   };
 
+  // Auto-generate audio cache for announcement
+  const autoGenerateCache = async (announcementId: string) => {
+    try {
+      console.log(`[MarketingPanel] Auto-generating cache for announcement ${announcementId}`);
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cache-marketing-audio`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            action: 'generate-cache',
+            announcementId,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[MarketingPanel] Cache generation failed:', errorData);
+        return false;
+      }
+
+      const result = await response.json();
+      console.log('[MarketingPanel] Cache generated:', result);
+      return true;
+    } catch (error) {
+      console.error('[MarketingPanel] Error generating cache:', error);
+      return false;
+    }
+  };
+
   const handleSubmitAnnouncement = async () => {
     if (!formData.title.trim() || !formData.text_content.trim()) {
       toast.error('Preencha todos os campos obrigatórios');
@@ -192,27 +227,48 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
     }
 
     try {
+      let announcementId: string | null = null;
+      
       if (editingAnnouncement) {
         const { error } = await supabase
           .from('scheduled_announcements')
           .update({
             ...formData,
             updated_at: new Date().toISOString(),
+            // Clear cache if text changed
+            audio_cache_url: formData.text_content !== editingAnnouncement.text_content ? null : editingAnnouncement.audio_cache_url,
+            audio_generated_at: formData.text_content !== editingAnnouncement.text_content ? null : editingAnnouncement.audio_generated_at,
           })
           .eq('id', editingAnnouncement.id);
 
         if (error) throw error;
+        announcementId = editingAnnouncement.id;
+        
+        // Regenerate cache if text changed
+        if (formData.text_content !== editingAnnouncement.text_content) {
+          toast.info('Gerando cache de áudio com voz Kore...');
+          autoGenerateCache(announcementId);
+        }
+        
         toast.success('Anúncio atualizado com sucesso');
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('scheduled_announcements')
           .insert({
             ...formData,
             unit_name: unitName,
             audio_type: 'tts',
-          });
+          })
+          .select('id')
+          .single();
 
         if (error) throw error;
+        announcementId = data.id;
+        
+        // Auto-generate cache for new announcements
+        toast.info('Gerando cache de áudio com voz Kore...');
+        autoGenerateCache(announcementId);
+        
         toast.success('Anúncio criado com sucesso');
       }
 
@@ -317,8 +373,21 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
   const handleTestAnnouncement = async (announcement: VoiceAnnouncement) => {
     setTesting(announcement.id);
     try {
+      // If we have cached audio, use it
+      if (announcement.audio_cache_url) {
+        const audio = new Audio(announcement.audio_cache_url);
+        audio.onerror = () => {
+          toast.error('Erro ao reproduzir áudio do cache');
+        };
+        await audio.play();
+        toast.success('Reproduzindo do cache (voz Kore)');
+        setTesting(null);
+        return;
+      }
+
+      // Otherwise generate on-the-fly with Kore voice
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cache-marketing-audio`,
         {
           method: 'POST',
           headers: {
@@ -327,8 +396,8 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
+            action: 'generate-from-text',
             text: announcement.text_content,
-            voiceName: localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A',
           }),
         }
       );
@@ -338,7 +407,6 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
         throw new Error(errorData.error || 'Falha ao gerar áudio');
       }
 
-      // A edge function retorna o áudio como binário, não como JSON
       const audioBuffer = await response.arrayBuffer();
       const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -351,7 +419,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
       };
       
       await audio.play();
-      toast.success('Reproduzindo anúncio');
+      toast.success('Reproduzindo anúncio (voz Kore)');
     } catch (error) {
       console.error('Error testing announcement:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao reproduzir anúncio');
@@ -364,7 +432,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
     setGeneratingAudio(announcement.id);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cache-marketing-audio`,
         {
           method: 'POST',
           headers: {
@@ -373,20 +441,22 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
-            text: announcement.text_content,
-            voiceName: localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A',
-            cacheForAnnouncement: announcement.id,
+            action: 'generate-cache',
+            announcementId: announcement.id,
           }),
         }
       );
 
-      if (!response.ok) throw new Error('Falha ao gerar cache de áudio');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Falha ao gerar cache de áudio');
+      }
 
-      toast.success('Cache de áudio gerado com sucesso');
+      toast.success('Cache de áudio gerado com voz Kore!');
       loadData();
     } catch (error) {
       console.error('Error generating audio cache:', error);
-      toast.error('Erro ao gerar cache de áudio');
+      toast.error(error instanceof Error ? error.message : 'Erro ao gerar cache de áudio');
     } finally {
       setGeneratingAudio(null);
     }
