@@ -2554,7 +2554,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col tv-font-body landscape:flex-col ${!cursorVisible ? 'cursor-none' : ''} ${
         ENABLE_BACKGROUND_ANIMATION ? (announcingType ? 'animate-calling-background' : 'animate-waiting-background') : 'bg-gradient-to-br from-slate-900 via-slate-950 to-black'
       }`}
-      style={{ cursor: cursorVisible ? 'auto' : 'none' }}
+      style={{ 
+        cursor: cursorVisible ? 'auto' : 'none',
+        imageRendering: 'crisp-edges',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+      }}
     >
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
@@ -2788,9 +2793,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       </div>
 
       {/* Main Content - Fully responsive grid for all horizontal TV sizes */}
-      <div className="relative z-10 flex-1 grid grid-cols-12 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 xl:gap-4 2xl:gap-5 3xl:gap-6 4k:gap-8 min-h-0 pb-12 xs:pb-14 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 3xl:pb-24 4k:pb-28 px-0.5 xs:px-1 sm:px-1.5 lg:px-2">
+      <div className="relative z-10 flex-1 grid grid-cols-12 gap-1 xs:gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 xl:gap-4 2xl:gap-5 3xl:gap-6 4k:gap-8 min-h-0 pb-12 xs:pb-14 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 3xl:pb-24 4k:pb-28 px-1 xs:px-1.5 sm:px-2 lg:px-3 xl:px-4 3xl:px-6 4k:px-8">
         {/* Current Calls - Always side by side on landscape screens */}
-        <div className="col-span-9 grid grid-cols-2 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 xl:gap-4 2xl:gap-5 3xl:gap-6 4k:gap-8">
+        <div className="col-span-9 grid grid-cols-2 gap-1 xs:gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 xl:gap-4 2xl:gap-5 3xl:gap-6 4k:gap-8">
           {/* Triage Call - 3D Modern Card - Optimized for landscape TV */}
           <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
             announcingType === 'triage' 
