@@ -153,8 +153,8 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
       audioConfig: {
         audioEncoding: 'MP3',
         speakingRate: 0.90, // Slower for clear, natural time announcements
-        pitch: -0.8, // Warmer, more human-like tone
-        volumeGainDb: 1.5, // Enhanced clarity
+        // Note: Chirp3-HD voices don't support pitch parameter
+        volumeGainDb: 2.0, // Enhanced clarity for TV speakers
         effectsProfileId: ['large-home-entertainment-class-device'], // Optimized for TV/speakers
       },
     }),
