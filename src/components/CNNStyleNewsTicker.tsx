@@ -163,16 +163,6 @@ export function CNNStyleNewsTicker({
             </div>
           </div>
 
-          {/* VIVO badge - CNN style red box on the right */}
-          <div className="bg-gradient-to-b from-red-600 to-red-700 flex items-center justify-center px-2 xs:px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 3xl:px-10 4k:px-14 shrink-0 relative">
-            {/* Inner shadow effect */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            {/* Pulsing dot */}
-            <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 rounded-full bg-white mr-1 xs:mr-1.5 sm:mr-2 animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-            <span className="text-white font-black relative z-10 text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl tracking-widest uppercase drop-shadow-lg">
-              VIVO
-            </span>
-          </div>
         </div>
       </div>
     </div>
