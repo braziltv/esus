@@ -2596,7 +2596,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   {unitName || 'Unidade de Saúde'}
                 </p>
                 {/* Kalebe Credits - Larger and more prominent */}
-                <p className="tv-font-body leading-tight font-bold text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse mt-0.5">
+                <p className="tv-font-body leading-tight font-bold text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] animate-pulse mt-0.5">
                   ✨ Solução criada por Kalebe Gomes
                 </p>
               </div>
