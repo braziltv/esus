@@ -25,70 +25,7 @@ interface WeatherWidgetProps {
   formatTime?: (date: Date, format: string) => string;
 }
 
-// Get contextual weather tip based on conditions
-function getWeatherTip(description: string, temperature: number, humidity: number): string | null {
-  const desc = description.toLowerCase();
-  
-  // Storm/Rain conditions
-  if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) {
-    return '⚡ Risco de tempestade — evite áreas abertas';
-  }
-  
-  // Heavy rain
-  if ((desc.includes('rain') || desc.includes('chuva')) && (desc.includes('heavy') || desc.includes('forte') || desc.includes('pancada'))) {
-    return '🌧️ Risco de chuva forte à tarde';
-  }
-  
-  // Light rain
-  if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('garoa')) {
-    return '☔ Tempo instável — leve guarda-chuva';
-  }
-  
-  // Hot weather
-  if (temperature >= 32) {
-    return '🔥 Calor intenso — hidrate-se bem';
-  }
-  
-  // Very hot and humid
-  if (temperature >= 28 && humidity >= 70) {
-    return '💧 Quente e úmido — beba água';
-  }
-  
-  // Cold weather
-  if (temperature <= 15) {
-    return '🧥 Tempo frio — agasalhe-se';
-  }
-  
-  // Fog/Mist
-  if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) {
-    return '🌫️ Neblina — dirija com cuidado';
-  }
-  
-  // Cloudy/Overcast
-  if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) {
-    if (humidity >= 80) {
-      return '☁️ Tempo instável — pode chover';
-    }
-    return '☁️ Céu nublado — tempo ameno';
-  }
-  
-  // Sunny/Clear
-  if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) {
-    if (temperature >= 28) {
-      return '☀️ Sol forte — use protetor solar';
-    }
-    return '☀️ Tempo bom — aproveite o dia';
-  }
-  
-  // Partly cloudy
-  if (desc.includes('partly') || desc.includes('parcialmente')) {
-    return '🌤️ Sol entre nuvens — tempo agradável';
-  }
-  
-  return null;
-}
-
-// Animated weather icons with subtle 5-8s loop animations
+// Minimalist line icon weather component
 function Weather3DIcon({ description, size = 'sm' }: { description: string; size?: 'sm' | 'lg' }) {
   const desc = description.toLowerCase();
   
@@ -100,81 +37,77 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
     ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12'
     : 'w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5';
 
-  // Determine icon type, colors and animation based on weather
+  // Determine icon type, colors and animation
   let IconComponent = CloudSun;
   let iconColor = 'text-amber-300';
   let glowColor = 'rgba(251, 191, 36, 0.5)';
-  let animationClass = 'animate-weather-glow';
-  let additionalEffects: React.ReactNode = null;
+  let bgGradient = 'from-amber-500/10 via-orange-500/5 to-transparent';
+  let borderColor = 'border-amber-400/20';
+  let animation = 'animate-pulse';
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) {
     IconComponent = Sun;
     iconColor = 'text-yellow-300';
     glowColor = 'rgba(253, 224, 71, 0.6)';
-    animationClass = 'animate-weather-sun';
+    bgGradient = 'from-yellow-500/15 via-amber-500/10 to-transparent';
+    borderColor = 'border-yellow-400/30';
+    animation = 'animate-[spin_20s_linear_infinite]';
   } else if (desc.includes('partly') || desc.includes('parcialmente')) {
     IconComponent = CloudSun;
     iconColor = 'text-amber-200';
     glowColor = 'rgba(251, 191, 36, 0.4)';
-    animationClass = 'animate-weather-cloud-drift';
+    bgGradient = 'from-amber-500/10 via-slate-500/5 to-transparent';
+    borderColor = 'border-amber-400/25';
+    animation = 'animate-pulse';
   } else if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('pancada')) {
     IconComponent = CloudRain;
     iconColor = 'text-sky-300';
     glowColor = 'rgba(56, 189, 248, 0.5)';
-    animationClass = 'animate-weather-rain';
-    // Rain drops effect
-    if (size === 'lg') {
-      additionalEffects = (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/2 left-1/4 w-0.5 h-2 bg-gradient-to-b from-sky-400/60 to-transparent rounded-full animate-weather-raindrop" style={{ animationDelay: '0s' }} />
-          <div className="absolute top-1/2 left-1/2 w-0.5 h-2 bg-gradient-to-b from-sky-400/60 to-transparent rounded-full animate-weather-raindrop" style={{ animationDelay: '0.3s' }} />
-          <div className="absolute top-1/2 left-3/4 w-0.5 h-2 bg-gradient-to-b from-sky-400/60 to-transparent rounded-full animate-weather-raindrop" style={{ animationDelay: '0.6s' }} />
-        </div>
-      );
-    }
+    bgGradient = 'from-sky-500/15 via-blue-500/10 to-transparent';
+    borderColor = 'border-sky-400/30';
+    animation = 'animate-[bounce_1.5s_ease-in-out_infinite]';
   } else if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) {
     IconComponent = CloudLightning;
     iconColor = 'text-violet-300';
     glowColor = 'rgba(196, 181, 253, 0.6)';
-    animationClass = 'animate-weather-storm';
-    // Lightning flash effect
-    if (size === 'lg') {
-      additionalEffects = (
-        <div className="absolute inset-0 bg-white/5 rounded-full animate-weather-flash pointer-events-none" />
-      );
-    }
+    bgGradient = 'from-violet-500/15 via-purple-500/10 to-transparent';
+    borderColor = 'border-violet-400/30';
+    animation = 'animate-[pulse_0.8s_ease-in-out_infinite]';
   } else if (desc.includes('snow') || desc.includes('neve')) {
     IconComponent = CloudSnow;
     iconColor = 'text-cyan-200';
     glowColor = 'rgba(165, 243, 252, 0.5)';
-    animationClass = 'animate-weather-snow';
+    bgGradient = 'from-cyan-500/15 via-slate-400/10 to-transparent';
+    borderColor = 'border-cyan-300/30';
+    animation = 'animate-[bounce_2.5s_ease-in-out_infinite]';
   } else if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) {
     IconComponent = Wind;
     iconColor = 'text-slate-300';
     glowColor = 'rgba(203, 213, 225, 0.4)';
-    animationClass = 'animate-weather-fog';
+    bgGradient = 'from-slate-500/10 via-slate-400/5 to-transparent';
+    borderColor = 'border-slate-400/20';
+    animation = 'animate-pulse';
   } else if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) {
     IconComponent = Cloud;
     iconColor = 'text-slate-300';
     glowColor = 'rgba(203, 213, 225, 0.4)';
-    animationClass = 'animate-weather-cloud-drift';
+    bgGradient = 'from-slate-400/10 via-slate-500/5 to-transparent';
+    borderColor = 'border-slate-400/20';
+    animation = 'animate-[pulse_3s_ease-in-out_infinite]';
   }
 
   if (size === 'lg') {
     return (
       <div className="relative group">
-        {/* Subtle outer glow with animation */}
+        {/* Subtle outer glow */}
         <div 
-          className={`absolute -inset-2 rounded-full blur-lg opacity-30 ${animationClass}`}
+          className="absolute -inset-2 rounded-full blur-lg opacity-30"
           style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)` }}
         />
         
-        {/* Additional weather effects */}
-        {additionalEffects}
-        
         {/* Minimalist container */}
         <div className={`relative ${sizeClasses} flex items-center justify-center`}>
-          <div className={animationClass}>
+          <div className={animation}>
             <IconComponent 
               className={`${iconSizeClasses} ${iconColor}`}
               strokeWidth={1.25}
@@ -192,7 +125,7 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
   return (
     <div className="relative flex items-center justify-center">
       <IconComponent 
-        className={`${iconSizeClasses} ${iconColor} ${animationClass}`}
+        className={`${iconSizeClasses} ${iconColor} ${animation}`}
         strokeWidth={1.25}
         style={{ 
           filter: `drop-shadow(0 0 4px ${glowColor})`
@@ -213,10 +146,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [rotationCount, setRotationCount] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isTipTransitioning, setIsTipTransitioning] = useState(false);
-  const [displayedTip, setDisplayedTip] = useState<string | null>(null);
   const fetchingRef = useRef(false);
-  const previousTipRef = useRef<string | null>(null);
 
   const availableCities = Object.keys(weatherCache);
   const otherCities = availableCities.filter(c => c !== 'Paineiras');
@@ -305,30 +235,6 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }, 3000);
     return () => clearInterval(interval);
   }, []);
-
-  // Handle weather tip transitions with smooth animation
-  useEffect(() => {
-    const weather = currentWeather || weatherCache['Paineiras'] || Object.values(weatherCache)[0];
-    if (!weather) return;
-    
-    const newTip = getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity);
-    
-    if (newTip !== previousTipRef.current) {
-      // Fade out current tip
-      setIsTipTransitioning(true);
-      
-      setTimeout(() => {
-        // Update the displayed tip
-        setDisplayedTip(newTip);
-        previousTipRef.current = newTip;
-        
-        // Fade in new tip
-        setTimeout(() => {
-          setIsTipTransitioning(false);
-        }, 50);
-      }, 300);
-    }
-  }, [currentWeather, weatherCache]);
 
   const safeFormatTime = (date: Date, format: string): string => {
     try {
@@ -508,6 +414,16 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
+      {/* Humidity - Minimalist with reduced opacity */}
+      <div className="relative shrink-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
+        <div className="relative flex items-center gap-1 bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-blue-500/20">
+          <Droplets className="w-3 h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 3xl:w-5 3xl:h-5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
+          <span className="font-medium text-cyan-300/80 tabular-nums text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base">
+            {weather.current.humidity}%
+          </span>
+        </div>
+      </div>
+
       {/* Forecast Cards - Compact 3D Glass Style with smooth animations - visible on lg+ */}
       <div className="hidden lg:flex gap-1.5 shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
@@ -582,70 +498,8 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         })}
       </div>
 
-      {/* Clock + Date + Weather Tip - Grouped together */}
-      <div className="flex flex-col items-center gap-0.5 shrink-0">
-        {/* Clock on top */}
-        <div className="relative group">
-          {/* Glow background */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 rounded-lg blur-sm opacity-70" />
-          
-          {/* Main clock container */}
-          <div className="relative flex items-center gap-0.5 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-md sm:rounded-lg px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
-            
-            {/* Hours */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl 3xl:text-4xl 4k:text-5xl drop-shadow-[0_0_10px_rgba(6,182,212,0.7)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
-              {safeFormatTime(currentTime, 'HH')}
-            </span>
-            
-            {/* Animated colon separator */}
-            <div className="flex flex-col items-center justify-center gap-0.5 mx-0.5">
-              <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 lg:w-1.5 lg:h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
-              <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 lg:w-1.5 lg:h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.8)]" style={{ animationDelay: '0.5s' }} />
-            </div>
-            
-            {/* Minutes */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl 3xl:text-4xl 4k:text-5xl drop-shadow-[0_0_10px_rgba(6,182,212,0.7)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
-              {safeFormatTime(currentTime, 'mm')}
-            </span>
-            
-            {/* Seconds with accent color */}
-            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-amber-400 to-orange-400 text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl animate-pulse drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] ml-0.5" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
-              {safeFormatTime(currentTime, 'ss')}
-            </span>
-          </div>
-        </div>
-
-        {/* Date pills below clock */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-amber-400/40 backdrop-blur-sm">
-            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]">
-              {safeFormatTime(currentTime, 'EEEE')}
-            </p>
-          </div>
-          <div className="bg-white/10 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-cyan-400/30 backdrop-blur-sm">
-            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_4px_rgba(6,182,212,0.4)]">
-              {safeFormatTime(currentTime, 'dd/MM/yyyy')}
-            </p>
-          </div>
-        </div>
-
-        {/* Weather Tip + Humidity below date */}
-        <div className="relative flex flex-col items-center bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-white/10 max-w-[120px] sm:max-w-[140px] lg:max-w-[160px] xl:max-w-[180px] 3xl:max-w-[200px] 4k:max-w-[240px]">
-          {/* Contextual Weather Tip - Fixed, no animation */}
-          {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity) && (
-            <span className="text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/80 leading-tight line-clamp-2 text-center">
-              {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity)}
-            </span>
-          )}
-          {/* Humidity inline */}
-          <div className="flex items-center gap-0.5 sm:gap-1 mt-0.5">
-            <Droplets className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 3xl:w-3.5 3xl:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
-            <span className="font-medium text-cyan-300/80 tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm">
-              {weather.current.humidity}%
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* Date + Clock */}
+      {renderDateTimeCompact()}
     </div>
   );
 }
