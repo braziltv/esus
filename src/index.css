@@ -145,20 +145,30 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  /* TV Mode Modern Typography */
+  /* TV Mode Modern Typography - Enhanced for sharpness */
   .tv-font-display {
     font-family: 'Outfit', 'Space Grotesk', 'Inter', sans-serif;
     letter-spacing: -0.02em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
   }
 
   .tv-font-heading {
     font-family: 'Space Grotesk', 'Outfit', 'Inter', sans-serif;
     letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   .tv-font-body {
     font-family: 'Outfit', 'Inter', sans-serif;
     letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 
@@ -186,7 +196,19 @@
     height: 100dvh;
   }
 
-  /* Landscape mode optimizations */
+  /* Landscape mode optimizations - Enhanced for TV */
+  @media (orientation: landscape) {
+    .tv-safe-area {
+      /* Ensure full viewport usage in landscape */
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-height: 100vh;
+      max-height: 100dvh;
+      overflow: hidden;
+    }
+  }
+
   @media (orientation: landscape) and (max-height: 500px) {
     .landscape-compact {
       @apply py-1;
@@ -721,32 +743,63 @@
   animation: floatOrb 15s ease-in-out infinite;
 }
 
-/* 3D Card hover effect */
+/* 3D Card hover effect - Enhanced for landscape sharpness */
 .tv-card-3d {
   transform-style: preserve-3d;
   perspective: 1000px;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .tv-card-3d:hover {
   transform: translateZ(20px) rotateX(2deg) rotateY(-2deg);
 }
 
-/* Glassmorphism with depth */
+/* TV Card base styles with enhanced contrast */
+.tv-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .tv-card {
+    border-radius: 1rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .tv-card {
+    border-radius: 1.25rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .tv-card {
+    border-radius: 1.5rem;
+  }
+}
+
+/* Glassmorphism with depth - Enhanced for sharpness */
 .glass-3d {
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.02) 50%,
-    rgba(0, 0, 0, 0.05) 100%
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(0, 0, 0, 0.06) 100%
   );
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px) saturate(200%) contrast(1.05);
+  -webkit-backdrop-filter: blur(16px) saturate(200%) contrast(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  /* Enhanced text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header glow animation */
@@ -825,7 +878,7 @@
   animation: neonPulse 2s ease-in-out infinite;
 }
 
-/* Shimmer effect */
+/* Shimmer effect - Enhanced for TV sharpness */
 @keyframes shimmer {
   0% {
     background-position: -200% center;
@@ -838,17 +891,21 @@
 .shimmer-text {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.85) 0%,
     rgba(255, 255, 255, 1) 25%,
-    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.85) 50%,
     rgba(255, 255, 255, 1) 75%,
-    rgba(255, 255, 255, 0.8) 100%
+    rgba(255, 255, 255, 0.85) 100%
   );
   background-size: 200% auto;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 3s linear infinite;
+  /* Enhanced text rendering */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
 }
 
 /* Particle floating effect */
