@@ -25,7 +25,70 @@ interface WeatherWidgetProps {
   formatTime?: (date: Date, format: string) => string;
 }
 
-// Minimalist line icon weather component
+// Get contextual weather tip based on conditions
+function getWeatherTip(description: string, temperature: number, humidity: number): string | null {
+  const desc = description.toLowerCase();
+  
+  // Storm/Rain conditions
+  if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) {
+    return '⚡ Risco de tempestade — evite áreas abertas';
+  }
+  
+  // Heavy rain
+  if ((desc.includes('rain') || desc.includes('chuva')) && (desc.includes('heavy') || desc.includes('forte') || desc.includes('pancada'))) {
+    return '🌧️ Risco de chuva forte à tarde';
+  }
+  
+  // Light rain
+  if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('garoa')) {
+    return '☔ Tempo instável — leve guarda-chuva';
+  }
+  
+  // Hot weather
+  if (temperature >= 32) {
+    return '🔥 Calor intenso — hidrate-se bem';
+  }
+  
+  // Very hot and humid
+  if (temperature >= 28 && humidity >= 70) {
+    return '💧 Quente e úmido — beba água';
+  }
+  
+  // Cold weather
+  if (temperature <= 15) {
+    return '🧥 Tempo frio — agasalhe-se';
+  }
+  
+  // Fog/Mist
+  if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) {
+    return '🌫️ Neblina — dirija com cuidado';
+  }
+  
+  // Cloudy/Overcast
+  if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) {
+    if (humidity >= 80) {
+      return '☁️ Tempo instável — pode chover';
+    }
+    return '☁️ Céu nublado — tempo ameno';
+  }
+  
+  // Sunny/Clear
+  if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) {
+    if (temperature >= 28) {
+      return '☀️ Sol forte — use protetor solar';
+    }
+    return '☀️ Tempo bom — aproveite o dia';
+  }
+  
+  // Partly cloudy
+  if (desc.includes('partly') || desc.includes('parcialmente')) {
+    return '🌤️ Sol entre nuvens — tempo agradável';
+  }
+  
+  return null;
+}
+
+// Animated weather icons with subtle 5-8s loop animations
 function Weather3DIcon({ description, size = 'sm' }: { description: string; size?: 'sm' | 'lg' }) {
   const desc = description.toLowerCase();
   
@@ -37,77 +100,81 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
     ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12'
     : 'w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5';
 
-  // Determine icon type, colors and animation
+  // Determine icon type, colors and animation based on weather
   let IconComponent = CloudSun;
   let iconColor = 'text-amber-300';
   let glowColor = 'rgba(251, 191, 36, 0.5)';
-  let bgGradient = 'from-amber-500/10 via-orange-500/5 to-transparent';
-  let borderColor = 'border-amber-400/20';
-  let animation = 'animate-pulse';
+  let animationClass = 'animate-weather-glow';
+  let additionalEffects: React.ReactNode = null;
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) {
     IconComponent = Sun;
     iconColor = 'text-yellow-300';
     glowColor = 'rgba(253, 224, 71, 0.6)';
-    bgGradient = 'from-yellow-500/15 via-amber-500/10 to-transparent';
-    borderColor = 'border-yellow-400/30';
-    animation = 'animate-[spin_20s_linear_infinite]';
+    animationClass = 'animate-weather-sun';
   } else if (desc.includes('partly') || desc.includes('parcialmente')) {
     IconComponent = CloudSun;
     iconColor = 'text-amber-200';
     glowColor = 'rgba(251, 191, 36, 0.4)';
-    bgGradient = 'from-amber-500/10 via-slate-500/5 to-transparent';
-    borderColor = 'border-amber-400/25';
-    animation = 'animate-pulse';
+    animationClass = 'animate-weather-cloud-drift';
   } else if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('pancada')) {
     IconComponent = CloudRain;
     iconColor = 'text-sky-300';
     glowColor = 'rgba(56, 189, 248, 0.5)';
-    bgGradient = 'from-sky-500/15 via-blue-500/10 to-transparent';
-    borderColor = 'border-sky-400/30';
-    animation = 'animate-[bounce_1.5s_ease-in-out_infinite]';
+    animationClass = 'animate-weather-rain';
+    // Rain drops effect
+    if (size === 'lg') {
+      additionalEffects = (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/2 left-1/4 w-0.5 h-2 bg-gradient-to-b from-sky-400/60 to-transparent rounded-full animate-weather-raindrop" style={{ animationDelay: '0s' }} />
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-2 bg-gradient-to-b from-sky-400/60 to-transparent rounded-full animate-weather-raindrop" style={{ animationDelay: '0.3s' }} />
+          <div className="absolute top-1/2 left-3/4 w-0.5 h-2 bg-gradient-to-b from-sky-400/60 to-transparent rounded-full animate-weather-raindrop" style={{ animationDelay: '0.6s' }} />
+        </div>
+      );
+    }
   } else if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) {
     IconComponent = CloudLightning;
     iconColor = 'text-violet-300';
     glowColor = 'rgba(196, 181, 253, 0.6)';
-    bgGradient = 'from-violet-500/15 via-purple-500/10 to-transparent';
-    borderColor = 'border-violet-400/30';
-    animation = 'animate-[pulse_0.8s_ease-in-out_infinite]';
+    animationClass = 'animate-weather-storm';
+    // Lightning flash effect
+    if (size === 'lg') {
+      additionalEffects = (
+        <div className="absolute inset-0 bg-white/5 rounded-full animate-weather-flash pointer-events-none" />
+      );
+    }
   } else if (desc.includes('snow') || desc.includes('neve')) {
     IconComponent = CloudSnow;
     iconColor = 'text-cyan-200';
     glowColor = 'rgba(165, 243, 252, 0.5)';
-    bgGradient = 'from-cyan-500/15 via-slate-400/10 to-transparent';
-    borderColor = 'border-cyan-300/30';
-    animation = 'animate-[bounce_2.5s_ease-in-out_infinite]';
+    animationClass = 'animate-weather-snow';
   } else if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) {
     IconComponent = Wind;
     iconColor = 'text-slate-300';
     glowColor = 'rgba(203, 213, 225, 0.4)';
-    bgGradient = 'from-slate-500/10 via-slate-400/5 to-transparent';
-    borderColor = 'border-slate-400/20';
-    animation = 'animate-pulse';
+    animationClass = 'animate-weather-fog';
   } else if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) {
     IconComponent = Cloud;
     iconColor = 'text-slate-300';
     glowColor = 'rgba(203, 213, 225, 0.4)';
-    bgGradient = 'from-slate-400/10 via-slate-500/5 to-transparent';
-    borderColor = 'border-slate-400/20';
-    animation = 'animate-[pulse_3s_ease-in-out_infinite]';
+    animationClass = 'animate-weather-cloud-drift';
   }
 
   if (size === 'lg') {
     return (
       <div className="relative group">
-        {/* Subtle outer glow */}
+        {/* Subtle outer glow with animation */}
         <div 
-          className="absolute -inset-2 rounded-full blur-lg opacity-30"
+          className={`absolute -inset-2 rounded-full blur-lg opacity-30 ${animationClass}`}
           style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)` }}
         />
         
+        {/* Additional weather effects */}
+        {additionalEffects}
+        
         {/* Minimalist container */}
         <div className={`relative ${sizeClasses} flex items-center justify-center`}>
-          <div className={animation}>
+          <div className={animationClass}>
             <IconComponent 
               className={`${iconSizeClasses} ${iconColor}`}
               strokeWidth={1.25}
@@ -125,7 +192,7 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
   return (
     <div className="relative flex items-center justify-center">
       <IconComponent 
-        className={`${iconSizeClasses} ${iconColor} ${animation}`}
+        className={`${iconSizeClasses} ${iconColor} ${animationClass}`}
         strokeWidth={1.25}
         style={{ 
           filter: `drop-shadow(0 0 4px ${glowColor})`
@@ -414,11 +481,30 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
-      {/* Humidity - Minimalist with reduced opacity */}
-      <div className="relative shrink-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
+      {/* Weather Tip + Humidity - Combined Card */}
+      <div className="relative shrink-0 hidden xl:block">
+        <div className="relative flex flex-col items-start bg-slate-900/60 rounded-lg px-2 py-1 border border-white/10 max-w-[140px] 3xl:max-w-[180px] 4k:max-w-[220px]">
+          {/* Contextual Weather Tip */}
+          {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity) && (
+            <span className="text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/70 leading-tight animate-weather-tip line-clamp-2">
+              {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity)}
+            </span>
+          )}
+          {/* Humidity inline */}
+          <div className="flex items-center gap-1 mt-0.5">
+            <Droplets className="w-2.5 h-2.5 lg:w-3 lg:h-3 3xl:w-3.5 3xl:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
+            <span className="font-medium text-cyan-300/80 tabular-nums text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm">
+              {weather.current.humidity}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Humidity only on smaller screens */}
+      <div className="relative shrink-0 xl:hidden opacity-60 hover:opacity-100 transition-opacity duration-300">
         <div className="relative flex items-center gap-1 bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-blue-500/20">
-          <Droplets className="w-3 h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 3xl:w-5 3xl:h-5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
-          <span className="font-medium text-cyan-300/80 tabular-nums text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base">
+          <Droplets className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
+          <span className="font-medium text-cyan-300/80 tabular-nums text-[9px] sm:text-[10px] lg:text-[11px]">
             {weather.current.humidity}%
           </span>
         </div>
