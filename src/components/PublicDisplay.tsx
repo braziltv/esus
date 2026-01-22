@@ -2798,12 +2798,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* News Ticker - Fixed at bottom like TV news breaking news style */}
       {newsItems.length > 0 && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
-          <div className="flex items-stretch h-12 sm:h-14 lg:h-16 xl:h-20 3xl:h-24 4k:h-32 animate-ticker-glow">
-            {/* Scrolling News Section - 3D Glass effect */}
-            <div className="flex-1 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl overflow-hidden flex items-center relative border-t border-white/10">
-              <div className="absolute left-0 top-0 bottom-0 w-2 sm:w-4 lg:w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
-              <div className="absolute right-0 top-0 bottom-0 w-2 sm:w-4 lg:w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
-              <div className="animate-marquee whitespace-nowrap inline-flex py-0.5 sm:py-1">
+          <div className="flex items-stretch h-14 sm:h-16 lg:h-20 xl:h-24 3xl:h-28 4k:h-36 animate-ticker-glow">
+            {/* Scrolling News Section - Enhanced Glass effect with better contrast */}
+            <div className="flex-1 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 backdrop-blur-xl overflow-hidden flex items-center relative border-t-2 border-cyan-500/30 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+              {/* Gradient fade edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-4 sm:w-8 lg:w-16 bg-gradient-to-r from-slate-950 to-transparent z-10" />
+              <div className="absolute right-0 top-0 bottom-0 w-4 sm:w-8 lg:w-16 bg-gradient-to-l from-slate-950 to-transparent z-10" />
+              
+              {/* Top highlight line */}
+              <div className="absolute top-0 left-[10%] w-[80%] h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+              
+              <div className="animate-marquee whitespace-nowrap inline-flex py-1 sm:py-1.5">
                 {(() => {
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
                   // Convert commercial phrases to news format
@@ -2839,59 +2844,63 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }
                   
                     return itemsWithExtras.map((item, index) => (
-                      <span key={index} className="mx-2 sm:mx-3 lg:mx-5 inline-flex items-center gap-1 sm:gap-1.5 lg:gap-3 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                        <span className={`px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 lg:py-1.5 rounded text-[8px] sm:text-[10px] lg:text-sm xl:text-base 3xl:text-lg font-bold inline-block ${
-                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
-                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'G1' ? 'bg-red-500' : 
-                        item.source === 'O Globo' ? 'bg-blue-600' :
-                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
-                        item.source === 'UOL' ? 'bg-orange-500' :
-                        item.source === 'Folha' ? 'bg-blue-500' :
-                        item.source === 'Estadão' ? 'bg-slate-600' :
-                        item.source === 'CNN' ? 'bg-red-600' :
-                        item.source === 'Band' ? 'bg-green-600' :
-                        item.source === 'Terra' ? 'bg-emerald-500' :
-                        item.source === 'IG' ? 'bg-pink-500' :
-                        item.source === 'Correio' ? 'bg-sky-600' :
-                        item.source === 'Metrópoles' ? 'bg-purple-600' :
-                        item.source === 'Gazeta' ? 'bg-teal-600' :
-                        item.source === 'Poder360' ? 'bg-indigo-600' :
-                        item.source === 'Nexo' ? 'bg-rose-600' :
-                        item.source === 'Ag. Brasil' || item.source === 'Agência Brasil' ? 'bg-cyan-600' :
-                        item.source === 'InfoMoney' ? 'bg-lime-600' :
-                        item.source === 'Exame' ? 'bg-amber-600' :
-                        item.source === 'Época' ? 'bg-fuchsia-600' :
-                        item.source === 'Valor' ? 'bg-violet-600' :
-                        item.source === 'O Tempo' ? 'bg-orange-600' :
-                        item.source === 'Hoje em Dia' ? 'bg-blue-700' :
-                        item.source === 'EM' ? 'bg-red-700' :
-                        item.source === 'Super' ? 'bg-yellow-600' :
-                        item.source === 'Tecmundo' ? 'bg-purple-500' :
-                        item.source === 'Olhar Digital' ? 'bg-green-500' :
-                        item.source === 'Canaltech' ? 'bg-blue-400' :
-                        item.source === 'GE' ? 'bg-green-700' :
-                        item.source === 'Lance' ? 'bg-red-500' :
-                        item.source === 'ESPN' ? 'bg-red-800' :
-                        item.source === 'Google' ? 'bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500' :
-                        item.source === 'R7' ? 'bg-orange-700' :
-                        item.source === 'Tecnoblog' ? 'bg-indigo-500' :
-                        item.source === 'TechTudo' ? 'bg-sky-500' :
-                        item.source === 'iG Saúde' ? 'bg-pink-600' :
-                        item.source === 'VivaBem' ? 'bg-emerald-600' :
-                        item.source === 'Notícias ao Minuto' ? 'bg-rose-500' :
-                        item.source === 'ONU News' ? 'bg-sky-700' :
-                        item.source === 'Inovação Tec' ? 'bg-gradient-to-r from-cyan-500 to-blue-600' :
-                        item.source === 'Intercept' ? 'bg-gradient-to-r from-slate-800 to-slate-600' :
-                        item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-600' :
-                        'bg-gray-500'
-                        } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                          {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
+                      <span key={index} className="mx-3 sm:mx-4 lg:mx-6 inline-flex items-center gap-2 sm:gap-2.5 lg:gap-4 font-semibold tracking-wide text-sm sm:text-base lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                        <span className={`px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-md text-[10px] sm:text-xs lg:text-base xl:text-lg 3xl:text-xl font-bold inline-flex items-center gap-1.5 shadow-lg ${
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-700 to-red-600 text-white animate-pulse shadow-red-700/50 ring-2 ring-red-400 ring-offset-2 ring-offset-slate-950' :
+                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 shadow-amber-500/40' :
+                        item.source === 'G1' ? 'bg-red-600 text-white shadow-red-600/40' : 
+                        item.source === 'O Globo' ? 'bg-blue-700 text-white shadow-blue-700/40' :
+                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-950 shadow-yellow-500/40' :
+                        item.source === 'UOL' ? 'bg-orange-600 text-white shadow-orange-600/40' :
+                        item.source === 'Folha' ? 'bg-blue-600 text-white shadow-blue-600/40' :
+                        item.source === 'Estadão' ? 'bg-slate-700 text-white shadow-slate-700/40' :
+                        item.source === 'CNN' ? 'bg-red-700 text-white shadow-red-700/40' :
+                        item.source === 'Band' ? 'bg-green-700 text-white shadow-green-700/40' :
+                        item.source === 'Terra' ? 'bg-emerald-600 text-white shadow-emerald-600/40' :
+                        item.source === 'IG' ? 'bg-pink-600 text-white shadow-pink-600/40' :
+                        item.source === 'Correio' ? 'bg-sky-700 text-white shadow-sky-700/40' :
+                        item.source === 'Metrópoles' ? 'bg-purple-700 text-white shadow-purple-700/40' :
+                        item.source === 'Gazeta' ? 'bg-teal-700 text-white shadow-teal-700/40' :
+                        item.source === 'Poder360' ? 'bg-indigo-700 text-white shadow-indigo-700/40' :
+                        item.source === 'Nexo' ? 'bg-rose-700 text-white shadow-rose-700/40' :
+                        item.source === 'Ag. Brasil' || item.source === 'Agência Brasil' ? 'bg-cyan-700 text-white shadow-cyan-700/40' :
+                        item.source === 'InfoMoney' ? 'bg-lime-700 text-white shadow-lime-700/40' :
+                        item.source === 'Exame' ? 'bg-amber-700 text-white shadow-amber-700/40' :
+                        item.source === 'Época' ? 'bg-fuchsia-700 text-white shadow-fuchsia-700/40' :
+                        item.source === 'Valor' ? 'bg-violet-700 text-white shadow-violet-700/40' :
+                        item.source === 'O Tempo' ? 'bg-orange-700 text-white shadow-orange-700/40' :
+                        item.source === 'Hoje em Dia' ? 'bg-blue-800 text-white shadow-blue-800/40' :
+                        item.source === 'EM' ? 'bg-red-800 text-white shadow-red-800/40' :
+                        item.source === 'Super' ? 'bg-yellow-600 text-yellow-950 shadow-yellow-600/40' :
+                        item.source === 'Tecmundo' ? 'bg-purple-600 text-white shadow-purple-600/40' :
+                        item.source === 'Olhar Digital' ? 'bg-green-600 text-white shadow-green-600/40' :
+                        item.source === 'Canaltech' ? 'bg-blue-500 text-white shadow-blue-500/40' :
+                        item.source === 'GE' ? 'bg-green-800 text-white shadow-green-800/40' :
+                        item.source === 'Lance' ? 'bg-red-600 text-white shadow-red-600/40' :
+                        item.source === 'ESPN' ? 'bg-red-900 text-white shadow-red-900/40' :
+                        item.source === 'Google' ? 'bg-gradient-to-r from-blue-600 via-red-600 to-yellow-500 text-white' :
+                        item.source === 'R7' ? 'bg-orange-800 text-white shadow-orange-800/40' :
+                        item.source === 'Tecnoblog' ? 'bg-indigo-600 text-white shadow-indigo-600/40' :
+                        item.source === 'TechTudo' ? 'bg-sky-600 text-white shadow-sky-600/40' :
+                        item.source === 'iG Saúde' ? 'bg-pink-700 text-white shadow-pink-700/40' :
+                        item.source === 'VivaBem' ? 'bg-emerald-700 text-white shadow-emerald-700/40' :
+                        item.source === 'Notícias ao Minuto' ? 'bg-rose-600 text-white shadow-rose-600/40' :
+                        item.source === 'ONU News' ? 'bg-sky-800 text-white shadow-sky-800/40' :
+                        item.source === 'Inovação Tec' ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white' :
+                        item.source === 'Intercept' ? 'bg-gradient-to-r from-slate-800 to-slate-700 text-white' :
+                        item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-700 text-white' :
+                        'bg-gray-600 text-white shadow-gray-600/40'
+                        }`}>
+                          {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 inline animate-bounce" /> <span className="hidden sm:inline">AO VIVO</span></> : item.source}
                         </span>
-                        <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
+                        <span className={`drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
+                          item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
+                          item.source === 'Créditos' ? 'text-amber-300' : 
+                          'text-white'
+                        }`}>
                           {item.title}
                         </span>
-                        <span className="text-slate-500 mx-1 sm:mx-1.5 lg:mx-3">•</span>
+                        <span className="text-cyan-500/60 mx-2 sm:mx-3 lg:mx-4 text-lg lg:text-2xl">●</span>
                       </span>
                   ));
                 })()}
@@ -2930,59 +2939,63 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }
                   
                   return itemsWithExtras.map((item, index) => (
-                    <span key={`dup-${index}`} className="mx-2 sm:mx-3 lg:mx-5 inline-flex items-center gap-1 sm:gap-1.5 lg:gap-3 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 lg:py-1.5 rounded text-[8px] sm:text-[10px] lg:text-sm xl:text-base 3xl:text-lg font-bold inline-block ${
-                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
-                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
-                        item.source === 'G1' ? 'bg-red-500' : 
-                        item.source === 'O Globo' ? 'bg-blue-600' :
-                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-900' :
-                        item.source === 'UOL' ? 'bg-orange-500' :
-                        item.source === 'Folha' ? 'bg-blue-500' :
-                        item.source === 'Estadão' ? 'bg-slate-600' :
-                        item.source === 'CNN' ? 'bg-red-600' :
-                        item.source === 'Band' ? 'bg-green-600' :
-                        item.source === 'Terra' ? 'bg-emerald-500' :
-                        item.source === 'IG' ? 'bg-pink-500' :
-                        item.source === 'Correio' ? 'bg-sky-600' :
-                        item.source === 'Metrópoles' ? 'bg-purple-600' :
-                        item.source === 'Gazeta' ? 'bg-teal-600' :
-                        item.source === 'Poder360' ? 'bg-indigo-600' :
-                        item.source === 'Nexo' ? 'bg-rose-600' :
-                        item.source === 'Ag. Brasil' || item.source === 'Agência Brasil' ? 'bg-cyan-600' :
-                        item.source === 'InfoMoney' ? 'bg-lime-600' :
-                        item.source === 'Exame' ? 'bg-amber-600' :
-                        item.source === 'Época' ? 'bg-fuchsia-600' :
-                        item.source === 'Valor' ? 'bg-violet-600' :
-                        item.source === 'O Tempo' ? 'bg-orange-600' :
-                        item.source === 'Hoje em Dia' ? 'bg-blue-700' :
-                        item.source === 'EM' ? 'bg-red-700' :
-                        item.source === 'Super' ? 'bg-yellow-600' :
-                        item.source === 'Tecmundo' ? 'bg-purple-500' :
-                        item.source === 'Olhar Digital' ? 'bg-green-500' :
-                        item.source === 'Canaltech' ? 'bg-blue-400' :
-                        item.source === 'GE' ? 'bg-green-700' :
-                        item.source === 'Lance' ? 'bg-red-500' :
-                        item.source === 'ESPN' ? 'bg-red-800' :
-                        item.source === 'Google' ? 'bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500' :
-                        item.source === 'R7' ? 'bg-orange-700' :
-                        item.source === 'Tecnoblog' ? 'bg-indigo-500' :
-                        item.source === 'TechTudo' ? 'bg-sky-500' :
-                        item.source === 'iG Saúde' ? 'bg-pink-600' :
-                        item.source === 'VivaBem' ? 'bg-emerald-600' :
-                        item.source === 'Notícias ao Minuto' ? 'bg-rose-500' :
-                        item.source === 'ONU News' ? 'bg-sky-700' :
-                        item.source === 'Inovação Tec' ? 'bg-gradient-to-r from-cyan-500 to-blue-600' :
-                        item.source === 'Intercept' ? 'bg-gradient-to-r from-slate-800 to-slate-600' :
-                        item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-600' :
-                        'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
+                    <span key={`dup-${index}`} className="mx-3 sm:mx-4 lg:mx-6 inline-flex items-center gap-2 sm:gap-2.5 lg:gap-4 font-semibold tracking-wide text-sm sm:text-base lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                      <span className={`px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-md text-[10px] sm:text-xs lg:text-base xl:text-lg 3xl:text-xl font-bold inline-flex items-center gap-1.5 shadow-lg ${
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-700 to-red-600 text-white animate-pulse shadow-red-700/50 ring-2 ring-red-400 ring-offset-2 ring-offset-slate-950' :
+                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 shadow-amber-500/40' :
+                        item.source === 'G1' ? 'bg-red-600 text-white shadow-red-600/40' : 
+                        item.source === 'O Globo' ? 'bg-blue-700 text-white shadow-blue-700/40' :
+                        item.source === 'Itatiaia' ? 'bg-yellow-500 text-yellow-950 shadow-yellow-500/40' :
+                        item.source === 'UOL' ? 'bg-orange-600 text-white shadow-orange-600/40' :
+                        item.source === 'Folha' ? 'bg-blue-600 text-white shadow-blue-600/40' :
+                        item.source === 'Estadão' ? 'bg-slate-700 text-white shadow-slate-700/40' :
+                        item.source === 'CNN' ? 'bg-red-700 text-white shadow-red-700/40' :
+                        item.source === 'Band' ? 'bg-green-700 text-white shadow-green-700/40' :
+                        item.source === 'Terra' ? 'bg-emerald-600 text-white shadow-emerald-600/40' :
+                        item.source === 'IG' ? 'bg-pink-600 text-white shadow-pink-600/40' :
+                        item.source === 'Correio' ? 'bg-sky-700 text-white shadow-sky-700/40' :
+                        item.source === 'Metrópoles' ? 'bg-purple-700 text-white shadow-purple-700/40' :
+                        item.source === 'Gazeta' ? 'bg-teal-700 text-white shadow-teal-700/40' :
+                        item.source === 'Poder360' ? 'bg-indigo-700 text-white shadow-indigo-700/40' :
+                        item.source === 'Nexo' ? 'bg-rose-700 text-white shadow-rose-700/40' :
+                        item.source === 'Ag. Brasil' || item.source === 'Agência Brasil' ? 'bg-cyan-700 text-white shadow-cyan-700/40' :
+                        item.source === 'InfoMoney' ? 'bg-lime-700 text-white shadow-lime-700/40' :
+                        item.source === 'Exame' ? 'bg-amber-700 text-white shadow-amber-700/40' :
+                        item.source === 'Época' ? 'bg-fuchsia-700 text-white shadow-fuchsia-700/40' :
+                        item.source === 'Valor' ? 'bg-violet-700 text-white shadow-violet-700/40' :
+                        item.source === 'O Tempo' ? 'bg-orange-700 text-white shadow-orange-700/40' :
+                        item.source === 'Hoje em Dia' ? 'bg-blue-800 text-white shadow-blue-800/40' :
+                        item.source === 'EM' ? 'bg-red-800 text-white shadow-red-800/40' :
+                        item.source === 'Super' ? 'bg-yellow-600 text-yellow-950 shadow-yellow-600/40' :
+                        item.source === 'Tecmundo' ? 'bg-purple-600 text-white shadow-purple-600/40' :
+                        item.source === 'Olhar Digital' ? 'bg-green-600 text-white shadow-green-600/40' :
+                        item.source === 'Canaltech' ? 'bg-blue-500 text-white shadow-blue-500/40' :
+                        item.source === 'GE' ? 'bg-green-800 text-white shadow-green-800/40' :
+                        item.source === 'Lance' ? 'bg-red-600 text-white shadow-red-600/40' :
+                        item.source === 'ESPN' ? 'bg-red-900 text-white shadow-red-900/40' :
+                        item.source === 'Google' ? 'bg-gradient-to-r from-blue-600 via-red-600 to-yellow-500 text-white' :
+                        item.source === 'R7' ? 'bg-orange-800 text-white shadow-orange-800/40' :
+                        item.source === 'Tecnoblog' ? 'bg-indigo-600 text-white shadow-indigo-600/40' :
+                        item.source === 'TechTudo' ? 'bg-sky-600 text-white shadow-sky-600/40' :
+                        item.source === 'iG Saúde' ? 'bg-pink-700 text-white shadow-pink-700/40' :
+                        item.source === 'VivaBem' ? 'bg-emerald-700 text-white shadow-emerald-700/40' :
+                        item.source === 'Notícias ao Minuto' ? 'bg-rose-600 text-white shadow-rose-600/40' :
+                        item.source === 'ONU News' ? 'bg-sky-800 text-white shadow-sky-800/40' :
+                        item.source === 'Inovação Tec' ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white' :
+                        item.source === 'Intercept' ? 'bg-gradient-to-r from-slate-800 to-slate-700 text-white' :
+                        item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-700 text-white' :
+                        'bg-gray-600 text-white shadow-gray-600/40'
+                      }`}>
+                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 inline animate-bounce" /> <span className="hidden sm:inline">AO VIVO</span></> : item.source}
                       </span>
-                      <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
+                      <span className={`drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
+                        item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
+                        item.source === 'Créditos' ? 'text-amber-300' : 
+                        'text-white'
+                      }`}>
                         {item.title}
                       </span>
-                      <span className="text-slate-500 mx-1 sm:mx-1.5 lg:mx-3">•</span>
+                      <span className="text-cyan-500/60 mx-2 sm:mx-3 lg:mx-4 text-lg lg:text-2xl">●</span>
                     </span>
                   ));
                 })()}
