@@ -1,5 +1,5 @@
 import { Megaphone } from 'lucide-react';
-import { formatBrazilTime } from '@/hooks/useBrazilTime';
+import { AnalogClock } from './AnalogClock';
 
 interface NewsItem {
   title: string;
@@ -31,8 +31,6 @@ export function CNNStyleNewsTicker({
   isAnnouncing = false,
 }: CNNStyleNewsTickerProps) {
   if (newsItems.length === 0) return null;
-
-  const timeStr = currentTime ? formatBrazilTime(currentTime, 'HH:mm') : '--:--';
 
   // Build items array with commercial phrases interleaved
   const buildItemsArray = () => {
@@ -99,13 +97,17 @@ export function CNNStyleNewsTicker({
       <div className="flex flex-col">
         {/* Bottom ticker row - scrolling news */}
         <div className="flex items-stretch h-8 xs:h-10 sm:h-12 md:h-14 lg:h-16 xl:h-18 2xl:h-20 3xl:h-24 4k:h-28">
-          {/* Time badge - CNN style red box */}
-          <div className="bg-gradient-to-b from-red-600 to-red-700 flex items-center justify-center px-2 xs:px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 3xl:px-10 4k:px-14 shrink-0 relative">
+          {/* Analog Clock - CNN style red box */}
+          <div className="bg-gradient-to-b from-red-600 to-red-700 flex items-center justify-center px-1 xs:px-1.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 3xl:px-6 4k:px-8 shrink-0 relative">
             {/* Inner shadow effect */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            <span className="text-white font-bold font-mono relative z-10 text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl tracking-wider drop-shadow-lg">
-              {timeStr}
-            </span>
+            <div className="relative z-10">
+              <AnalogClock 
+                time={currentTime} 
+                size={28}
+                className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 3xl:w-20 3xl:h-20 4k:w-24 4k:h-24"
+              />
+            </div>
           </div>
 
           {/* Scrolling News Section - Dark background like CNN */}
