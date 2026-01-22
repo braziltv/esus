@@ -213,7 +213,10 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [rotationCount, setRotationCount] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTipTransitioning, setIsTipTransitioning] = useState(false);
+  const [displayedTip, setDisplayedTip] = useState<string | null>(null);
   const fetchingRef = useRef(false);
+  const previousTipRef = useRef<string | null>(null);
 
   const availableCities = Object.keys(weatherCache);
   const otherCities = availableCities.filter(c => c !== 'Paineiras');
@@ -302,6 +305,30 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  // Handle weather tip transitions with smooth animation
+  useEffect(() => {
+    const weather = currentWeather || weatherCache['Paineiras'] || Object.values(weatherCache)[0];
+    if (!weather) return;
+    
+    const newTip = getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity);
+    
+    if (newTip !== previousTipRef.current) {
+      // Fade out current tip
+      setIsTipTransitioning(true);
+      
+      setTimeout(() => {
+        // Update the displayed tip
+        setDisplayedTip(newTip);
+        previousTipRef.current = newTip;
+        
+        // Fade in new tip
+        setTimeout(() => {
+          setIsTipTransitioning(false);
+        }, 50);
+      }, 300);
+    }
+  }, [currentWeather, weatherCache]);
 
   const safeFormatTime = (date: Date, format: string): string => {
     try {
@@ -483,11 +510,17 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
       {/* Weather Tip + Humidity - Combined Card - Always visible */}
       <div className="relative shrink-0">
-        <div className="relative flex flex-col items-start bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-white/10 max-w-[100px] sm:max-w-[120px] lg:max-w-[140px] xl:max-w-[160px] 3xl:max-w-[180px] 4k:max-w-[220px]">
-          {/* Contextual Weather Tip - Always displayed */}
-          {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity) && (
-            <span className="text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/80 leading-tight animate-weather-tip line-clamp-2">
-              {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity)}
+        <div className="relative flex flex-col items-start bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-white/10 max-w-[100px] sm:max-w-[120px] lg:max-w-[140px] xl:max-w-[160px] 3xl:max-w-[180px] 4k:max-w-[220px] overflow-hidden">
+          {/* Contextual Weather Tip - With smooth transition animation */}
+          {displayedTip && (
+            <span 
+              className={`text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/80 leading-tight line-clamp-2 transition-all duration-300 ease-out ${
+                isTipTransitioning 
+                  ? 'opacity-0 translate-y-1 scale-95' 
+                  : 'opacity-100 translate-y-0 scale-100'
+              }`}
+            >
+              {displayedTip}
             </span>
           )}
           {/* Humidity inline */}
