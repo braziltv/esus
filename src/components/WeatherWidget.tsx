@@ -508,25 +508,6 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
-      {/* Weather Tip + Humidity - Combined Card - Always visible, fixed */}
-      <div className="relative shrink-0">
-        <div className="relative flex flex-col items-start bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-white/10 max-w-[100px] sm:max-w-[120px] lg:max-w-[140px] xl:max-w-[160px] 3xl:max-w-[180px] 4k:max-w-[220px]">
-          {/* Contextual Weather Tip - Fixed, no animation */}
-          {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity) && (
-            <span className="text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/80 leading-tight line-clamp-2">
-              {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity)}
-            </span>
-          )}
-          {/* Humidity inline */}
-          <div className="flex items-center gap-0.5 sm:gap-1 mt-0.5">
-            <Droplets className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 3xl:w-3.5 3xl:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
-            <span className="font-medium text-cyan-300/80 tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm">
-              {weather.current.humidity}%
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Forecast Cards - Compact 3D Glass Style with smooth animations - visible on lg+ */}
       <div className="hidden lg:flex gap-1.5 shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
@@ -601,8 +582,70 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         })}
       </div>
 
-      {/* Date + Clock */}
-      {renderDateTimeCompact()}
+      {/* Clock + Date + Weather Tip - Grouped together */}
+      <div className="flex flex-col items-center gap-0.5 shrink-0">
+        {/* Clock on top */}
+        <div className="relative group">
+          {/* Glow background */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 rounded-lg blur-sm opacity-70" />
+          
+          {/* Main clock container */}
+          <div className="relative flex items-center gap-0.5 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-md sm:rounded-lg px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
+            
+            {/* Hours */}
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl 3xl:text-4xl 4k:text-5xl drop-shadow-[0_0_10px_rgba(6,182,212,0.7)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+              {safeFormatTime(currentTime, 'HH')}
+            </span>
+            
+            {/* Animated colon separator */}
+            <div className="flex flex-col items-center justify-center gap-0.5 mx-0.5">
+              <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 lg:w-1.5 lg:h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+              <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 lg:w-1.5 lg:h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.8)]" style={{ animationDelay: '0.5s' }} />
+            </div>
+            
+            {/* Minutes */}
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl 3xl:text-4xl 4k:text-5xl drop-shadow-[0_0_10px_rgba(6,182,212,0.7)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+              {safeFormatTime(currentTime, 'mm')}
+            </span>
+            
+            {/* Seconds with accent color */}
+            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-amber-400 to-orange-400 text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl animate-pulse drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] ml-0.5" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
+              {safeFormatTime(currentTime, 'ss')}
+            </span>
+          </div>
+        </div>
+
+        {/* Date pills below clock */}
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-amber-400/40 backdrop-blur-sm">
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]">
+              {safeFormatTime(currentTime, 'EEEE')}
+            </p>
+          </div>
+          <div className="bg-white/10 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-cyan-400/30 backdrop-blur-sm">
+            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_4px_rgba(6,182,212,0.4)]">
+              {safeFormatTime(currentTime, 'dd/MM/yyyy')}
+            </p>
+          </div>
+        </div>
+
+        {/* Weather Tip + Humidity below date */}
+        <div className="relative flex flex-col items-center bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-white/10 max-w-[120px] sm:max-w-[140px] lg:max-w-[160px] xl:max-w-[180px] 3xl:max-w-[200px] 4k:max-w-[240px]">
+          {/* Contextual Weather Tip - Fixed, no animation */}
+          {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity) && (
+            <span className="text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/80 leading-tight line-clamp-2 text-center">
+              {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity)}
+            </span>
+          )}
+          {/* Humidity inline */}
+          <div className="flex items-center gap-0.5 sm:gap-1 mt-0.5">
+            <Droplets className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 3xl:w-3.5 3xl:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
+            <span className="font-medium text-cyan-300/80 tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm">
+              {weather.current.humidity}%
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
