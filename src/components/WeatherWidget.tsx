@@ -332,165 +332,69 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   return (
     <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 xl:gap-3 3xl:gap-4 justify-end flex-nowrap">
-      {/* City + Weather Icon - Compact 3D Glass Card */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <div className="relative">
-          {/* Glow effect behind city info */}
-          <div className="absolute -inset-1 bg-gradient-to-br from-amber-500/15 to-orange-500/10 rounded-xl blur-sm" />
-          
-          <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-3 sm:px-4 lg:px-5 xl:px-6 py-2 sm:py-2.5 lg:py-3 border border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] min-w-[160px] sm:min-w-[200px] lg:min-w-[250px] xl:min-w-[300px]">
-            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[9px] sm:text-[11px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg drop-shadow-md whitespace-nowrap">
-              Previsão do Tempo
-            </span>
-            <div className="flex items-center justify-center gap-1.5 w-full mt-0.5">
-              <MapPin className={`w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 3xl:w-4 3xl:h-4 text-amber-400 shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)] transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`} />
-              <span 
-                className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-md leading-tight transition-all duration-300 ${
-                  isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
-                } ${
-                  displayCity.length > 18 
+      {/* City + Weather Info - Compact 3D Glass Card */}
+      <div className="relative shrink-0">
+        {/* Glow effect behind city info */}
+        <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/20 to-purple-500/15 rounded-xl blur-sm" />
+        
+        <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-3 sm:px-4 lg:px-5 xl:px-6 py-1.5 sm:py-2 lg:py-2.5 border border-indigo-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] min-w-[130px] sm:min-w-[160px] lg:min-w-[200px] xl:min-w-[240px]">
+          <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[8px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-md whitespace-nowrap">
+            Previsão do Tempo
+          </span>
+          <div className="flex items-center justify-center gap-1 w-full mt-0.5">
+            <MapPin className={`w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 3xl:w-3.5 3xl:h-3.5 text-amber-400 shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)] transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-75' : 'opacity-100 scale-100 animate-bounce'}`} />
+            <span 
+              className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-md leading-tight transition-all duration-300 ${
+                isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
+              } ${
+                displayCity.length > 18 
+                  ? 'text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-[11px] 4k:text-xs' 
+                  : displayCity.length > 12 
                     ? 'text-[8px] sm:text-[9px] lg:text-[10px] xl:text-[11px] 3xl:text-xs 4k:text-sm' 
-                    : displayCity.length > 12 
-                      ? 'text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base' 
-                      : 'text-[10px] sm:text-[11px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg'
-                }`}
-              >
-                {displayCity}-MG
-              </span>
-            </div>
+                    : 'text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base'
+              }`}
+            >
+              {displayCity}-MG
+            </span>
           </div>
         </div>
-        
-        {/* 3D Weather Icon */}
-        <Weather3DIcon description={weather.current.description} size="lg" />
       </div>
 
-      {/* Current Temperature - Compact 3D Glass Card */}
+      {/* Current Temperature - "AGORA" Card */}
       <div className="relative shrink-0">
-        <div className="absolute -inset-1 bg-gradient-to-br from-emerald-500/20 to-teal-500/15 rounded-xl blur-sm opacity-70" />
+        <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500/20 to-blue-500/15 rounded-xl blur-sm opacity-70" />
         
-        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 border border-emerald-500/40 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
-          <span className="font-bold text-emerald-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[10px] 3xl:text-[11px] 4k:text-sm drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]">
+        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/40 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+          <span className="font-bold text-cyan-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs drop-shadow-[0_0_6px_rgba(34,211,238,0.4)]">
             Agora
           </span>
           <div className="flex items-baseline">
-            <span className="font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-emerald-50 to-emerald-100 tabular-nums text-base sm:text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-md" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+            <span className="font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-50 to-cyan-100 tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-md" style={{ fontFamily: "'Orbitron', sans-serif" }}>
               {weather.current.temperature}
             </span>
-            <span className="font-bold text-emerald-400 text-[8px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-[0_0_4px_rgba(52,211,153,0.4)]">°C</span>
+            <span className="font-bold text-cyan-400 text-[7px] sm:text-[8px] lg:text-[10px] xl:text-[11px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_4px_rgba(34,211,238,0.4)]">°C</span>
           </div>
         </div>
       </div>
 
-      {/* Max/Min Temperature - Compact 3D Glass Card */}
+      {/* 3D Weather Icon */}
+      <Weather3DIcon description={weather.current.description} size="lg" />
+
+      {/* Max Temperature Card */}
       <div className="relative shrink-0">
-        <div className={`absolute -inset-1 rounded-xl blur-sm opacity-50 transition-all duration-500 ${
-          showMaxTemp ? 'bg-gradient-to-br from-orange-500/25 to-red-500/15' : 'bg-gradient-to-br from-cyan-500/25 to-blue-500/15'
-        }`} />
+        <div className="absolute -inset-1 bg-gradient-to-br from-rose-500/25 to-red-500/15 rounded-xl blur-sm opacity-50" />
         
-        <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 border shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-500 ${
-          showMaxTemp ? 'border-orange-500/40' : 'border-cyan-500/40'
-        }`}>
-          <span className={`font-bold uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[10px] 3xl:text-[11px] 4k:text-sm transition-colors duration-500 ${
-            showMaxTemp ? 'text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.4)]' : 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.4)]'
-          }`}>
-            {showMaxTemp ? 'Máx' : 'Mín'}
+        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 border border-rose-500/40 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+          <span className="font-bold text-rose-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs drop-shadow-[0_0_6px_rgba(244,63,94,0.4)]">
+            Máx
           </span>
           <div className="flex items-baseline">
-            <span className={`font-black text-transparent bg-clip-text tabular-nums text-base sm:text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-md transition-all duration-500 ${
-              showMaxTemp ? 'bg-gradient-to-b from-white via-orange-50 to-orange-100' : 'bg-gradient-to-b from-white via-cyan-50 to-cyan-100'
-            }`} style={{ fontFamily: "'Orbitron', sans-serif" }}>
-              {showMaxTemp ? maxTemp : minTemp}
+            <span className="font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-rose-50 to-rose-100 tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-md" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+              {maxTemp}
             </span>
-            <span className={`font-bold text-[8px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base transition-colors duration-500 ${
-              showMaxTemp ? 'text-orange-400 drop-shadow-[0_0_4px_rgba(251,146,60,0.4)]' : 'text-cyan-400 drop-shadow-[0_0_4px_rgba(34,211,238,0.4)]'
-            }`}>°C</span>
+            <span className="font-bold text-rose-400 text-[7px] sm:text-[8px] lg:text-[10px] xl:text-[11px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_4px_rgba(244,63,94,0.4)]">°C</span>
           </div>
         </div>
-      </div>
-
-      {/* Humidity - Minimalist with reduced opacity */}
-      <div className="relative shrink-0 opacity-60 hover:opacity-100 transition-opacity duration-300">
-        <div className="relative flex items-center gap-1 bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-blue-500/20">
-          <Droplets className="w-3 h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 3xl:w-5 3xl:h-5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
-          <span className="font-medium text-cyan-300/80 tabular-nums text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base">
-            {weather.current.humidity}%
-          </span>
-        </div>
-      </div>
-
-      {/* Forecast Cards - Compact 3D Glass Style with smooth animations - visible on lg+ */}
-      <div className="hidden lg:flex gap-1.5 shrink-0">
-        {weather.forecast?.slice(0, 2).map((day, index) => {
-          const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-          const today = currentTime;
-          const targetDate = new Date(today);
-          targetDate.setDate(targetDate.getDate() + index);
-          const dayName = index === 0 ? 'HOJE' : dayNames[targetDate.getDay()];
-
-          return (
-            <div 
-              key={`forecast-${index}-${day.date}`} 
-              className="relative group animate-[forecastCardIn_0.5s_ease-out_forwards] opacity-0"
-              style={{ 
-                animationDelay: `${index * 150}ms`,
-                animationFillMode: 'forwards'
-              }}
-            >
-              {/* Animated glow effect */}
-              <div className={`absolute -inset-1 rounded-xl blur-sm transition-all duration-500 group-hover:blur-md ${
-                index === 0 
-                  ? 'bg-gradient-to-br from-amber-500/30 to-orange-500/20 opacity-40 group-hover:opacity-70' 
-                  : 'bg-gradient-to-br from-purple-500/25 to-indigo-500/15 opacity-40 group-hover:opacity-60'
-              }`} />
-              
-              {/* Shimmer overlay on hover */}
-              <div className="absolute inset-0 rounded-xl overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              </div>
-              
-              <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-1.5 lg:px-2 py-1 lg:py-1.5 border shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.4)] ${
-                index === 0 ? 'border-amber-500/40 group-hover:border-amber-400/60' : 'border-purple-500/30 group-hover:border-purple-400/50'
-              }`}>
-                {/* Animated top highlight */}
-                <div className={`absolute top-0 left-[10%] right-[10%] h-px transition-all duration-300 ${
-                  index === 0 
-                    ? 'bg-gradient-to-r from-transparent via-amber-400/30 to-transparent group-hover:via-amber-400/60' 
-                    : 'bg-gradient-to-r from-transparent via-purple-400/20 to-transparent group-hover:via-purple-400/50'
-                }`} />
-                
-                <span className={`font-bold text-[7px] lg:text-[8px] xl:text-[10px] 3xl:text-[11px] 4k:text-sm tracking-wide transition-all duration-300 ${
-                  index === 0 
-                    ? 'text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.4)] group-hover:text-amber-200 group-hover:drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
-                    : 'text-purple-300 drop-shadow-[0_0_3px_rgba(168,85,247,0.3)] group-hover:text-purple-200 group-hover:drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]'
-                }`}>
-                  {dayName}
-                </span>
-                
-                <div className="my-1 transition-transform duration-300 group-hover:scale-110">
-                  <Weather3DIcon description={day.icon || 'cloud'} size="sm" />
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  <span className="text-cyan-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[10px] 3xl:text-[11px] 4k:text-sm drop-shadow-sm transition-all duration-300 group-hover:text-cyan-200 group-hover:drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]">
-                    {day.minTemp}°
-                  </span>
-                  <span className="text-white/40 font-bold text-[6px] lg:text-[7px] transition-colors duration-300 group-hover:text-white/60">/</span>
-                  <span className="text-orange-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[10px] 3xl:text-[11px] 4k:text-sm drop-shadow-sm transition-all duration-300 group-hover:text-orange-200 group-hover:drop-shadow-[0_0_6px_rgba(251,146,60,0.5)]">
-                    {day.maxTemp}°
-                  </span>
-                </div>
-                
-                {/* Bottom animated bar */}
-                <div className={`absolute bottom-0 left-[20%] right-[20%] h-px transition-all duration-500 ${
-                  index === 0 
-                    ? 'bg-gradient-to-r from-transparent via-amber-500/0 to-transparent group-hover:via-amber-500/40' 
-                    : 'bg-gradient-to-r from-transparent via-purple-500/0 to-transparent group-hover:via-purple-500/30'
-                }`} />
-              </div>
-            </div>
-          );
-        })}
       </div>
 
       {/* Date + Clock */}
