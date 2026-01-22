@@ -158,6 +158,100 @@ export default {
           "65%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(0%)" },
         },
+        // Weather animations
+        "weather-sun-pulse": {
+          "0%, 100%": { 
+            filter: "drop-shadow(0 0 8px rgba(253, 224, 71, 0.6))",
+            transform: "scale(1) rotate(0deg)"
+          },
+          "50%": { 
+            filter: "drop-shadow(0 0 20px rgba(253, 224, 71, 0.9)) drop-shadow(0 0 40px rgba(253, 224, 71, 0.4))",
+            transform: "scale(1.05) rotate(15deg)"
+          },
+        },
+        "weather-cloud-drift": {
+          "0%, 100%": { 
+            transform: "translateX(0) translateY(0)",
+            opacity: "0.9"
+          },
+          "25%": { 
+            transform: "translateX(3px) translateY(-1px)",
+            opacity: "1"
+          },
+          "50%": { 
+            transform: "translateX(0) translateY(1px)",
+            opacity: "0.85"
+          },
+          "75%": { 
+            transform: "translateX(-3px) translateY(-1px)",
+            opacity: "1"
+          },
+        },
+        "weather-rain": {
+          "0%, 100%": { 
+            transform: "translateY(0) rotate(-5deg)"
+          },
+          "25%": { 
+            transform: "translateY(2px) rotate(0deg)"
+          },
+          "50%": { 
+            transform: "translateY(0) rotate(5deg)"
+          },
+          "75%": { 
+            transform: "translateY(-2px) rotate(0deg)"
+          },
+        },
+        "weather-raindrop": {
+          "0%": { 
+            transform: "translateY(-5px)",
+            opacity: "0"
+          },
+          "20%": { 
+            opacity: "1"
+          },
+          "100%": { 
+            transform: "translateY(10px)",
+            opacity: "0"
+          },
+        },
+        "weather-storm": {
+          "0%, 85%, 100%": { 
+            filter: "drop-shadow(0 0 6px rgba(196, 181, 253, 0.5))",
+            opacity: "1"
+          },
+          "5%, 15%": { 
+            filter: "drop-shadow(0 0 30px rgba(255, 255, 255, 1)) drop-shadow(0 0 60px rgba(196, 181, 253, 1))",
+            opacity: "1"
+          },
+          "10%": { 
+            filter: "drop-shadow(0 0 4px rgba(196, 181, 253, 0.3))",
+            opacity: "0.8"
+          },
+        },
+        "weather-snow-float": {
+          "0%, 100%": { 
+            transform: "translateY(0) translateX(0) rotate(0deg)"
+          },
+          "25%": { 
+            transform: "translateY(-2px) translateX(2px) rotate(5deg)"
+          },
+          "50%": { 
+            transform: "translateY(0) translateX(0) rotate(0deg)"
+          },
+          "75%": { 
+            transform: "translateY(2px) translateX(-2px) rotate(-5deg)"
+          },
+        },
+        "weather-fog-drift": {
+          "0%, 100%": { 
+            transform: "translateX(0)",
+            opacity: "0.7"
+          },
+          "50%": { 
+            transform: "translateX(5px)",
+            opacity: "0.9"
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -167,6 +261,14 @@ export default {
         "shake": "shake 0.5s ease-in-out",
         "glow-pulse": "glow-pulse 1s ease-in-out infinite",
         "marquee": "marquee 6s linear infinite",
+        // Weather animations
+        "weather-sun-pulse": "weather-sun-pulse 6s ease-in-out infinite",
+        "weather-cloud-drift": "weather-cloud-drift 7s ease-in-out infinite",
+        "weather-rain": "weather-rain 5s ease-in-out infinite",
+        "weather-raindrop": "weather-raindrop 1s linear infinite",
+        "weather-storm": "weather-storm 8s ease-in-out infinite",
+        "weather-snow-float": "weather-snow-float 6s ease-in-out infinite",
+        "weather-fog-drift": "weather-fog-drift 7s ease-in-out infinite",
       },
     },
   },
