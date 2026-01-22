@@ -37,63 +37,50 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
     ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12'
     : 'w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5';
 
-  // Determine icon type, colors and animation
+  // Determine icon type, colors and animation with custom weather animations
   let IconComponent = CloudSun;
   let iconColor = 'text-amber-300';
   let glowColor = 'rgba(251, 191, 36, 0.5)';
-  let bgGradient = 'from-amber-500/10 via-orange-500/5 to-transparent';
-  let borderColor = 'border-amber-400/20';
-  let animation = 'animate-pulse';
+  let animation = 'animate-weather-sun-pulse';
+  let showRaindrops = false;
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) {
     IconComponent = Sun;
     iconColor = 'text-yellow-300';
     glowColor = 'rgba(253, 224, 71, 0.6)';
-    bgGradient = 'from-yellow-500/15 via-amber-500/10 to-transparent';
-    borderColor = 'border-yellow-400/30';
-    animation = 'animate-[spin_20s_linear_infinite]';
+    animation = 'animate-weather-sun-pulse';
   } else if (desc.includes('partly') || desc.includes('parcialmente')) {
     IconComponent = CloudSun;
     iconColor = 'text-amber-200';
     glowColor = 'rgba(251, 191, 36, 0.4)';
-    bgGradient = 'from-amber-500/10 via-slate-500/5 to-transparent';
-    borderColor = 'border-amber-400/25';
-    animation = 'animate-pulse';
+    animation = 'animate-weather-cloud-drift';
   } else if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('pancada')) {
     IconComponent = CloudRain;
     iconColor = 'text-sky-300';
     glowColor = 'rgba(56, 189, 248, 0.5)';
-    bgGradient = 'from-sky-500/15 via-blue-500/10 to-transparent';
-    borderColor = 'border-sky-400/30';
-    animation = 'animate-[bounce_1.5s_ease-in-out_infinite]';
+    animation = 'animate-weather-rain';
+    showRaindrops = true;
   } else if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) {
     IconComponent = CloudLightning;
     iconColor = 'text-violet-300';
     glowColor = 'rgba(196, 181, 253, 0.6)';
-    bgGradient = 'from-violet-500/15 via-purple-500/10 to-transparent';
-    borderColor = 'border-violet-400/30';
-    animation = 'animate-[pulse_0.8s_ease-in-out_infinite]';
+    animation = 'animate-weather-storm';
+    showRaindrops = true;
   } else if (desc.includes('snow') || desc.includes('neve')) {
     IconComponent = CloudSnow;
     iconColor = 'text-cyan-200';
     glowColor = 'rgba(165, 243, 252, 0.5)';
-    bgGradient = 'from-cyan-500/15 via-slate-400/10 to-transparent';
-    borderColor = 'border-cyan-300/30';
-    animation = 'animate-[bounce_2.5s_ease-in-out_infinite]';
+    animation = 'animate-weather-snow-float';
   } else if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) {
     IconComponent = Wind;
     iconColor = 'text-slate-300';
     glowColor = 'rgba(203, 213, 225, 0.4)';
-    bgGradient = 'from-slate-500/10 via-slate-400/5 to-transparent';
-    borderColor = 'border-slate-400/20';
-    animation = 'animate-pulse';
+    animation = 'animate-weather-fog-drift';
   } else if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) {
     IconComponent = Cloud;
     iconColor = 'text-slate-300';
     glowColor = 'rgba(203, 213, 225, 0.4)';
-    bgGradient = 'from-slate-400/10 via-slate-500/5 to-transparent';
-    borderColor = 'border-slate-400/20';
-    animation = 'animate-[pulse_3s_ease-in-out_infinite]';
+    animation = 'animate-weather-cloud-drift';
   }
 
   if (size === 'lg') {
@@ -107,6 +94,14 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
         
         {/* Minimalist container */}
         <div className={`relative ${sizeClasses} flex items-center justify-center`}>
+          {/* Raindrops effect for rain/storm */}
+          {showRaindrops && (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute w-0.5 h-2 bg-gradient-to-b from-sky-400/80 to-transparent rounded-full left-1/4 top-1/2 animate-weather-raindrop" style={{ animationDelay: '0s' }} />
+              <div className="absolute w-0.5 h-2 bg-gradient-to-b from-sky-400/80 to-transparent rounded-full left-1/2 top-1/2 animate-weather-raindrop" style={{ animationDelay: '0.3s' }} />
+              <div className="absolute w-0.5 h-2 bg-gradient-to-b from-sky-400/80 to-transparent rounded-full left-3/4 top-1/2 animate-weather-raindrop" style={{ animationDelay: '0.6s' }} />
+            </div>
+          )}
           <div className={animation}>
             <IconComponent 
               className={`${iconSizeClasses} ${iconColor}`}
