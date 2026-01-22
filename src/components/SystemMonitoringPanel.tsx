@@ -391,7 +391,7 @@ export function SystemMonitoringPanel() {
     }
   }, [checkDatabaseStatus, checkEdgeFunction, loadTableCounts, loadStorageInfo]);
 
-  const cleanTTSCache = useCallback(async () => {
+  const cleanTTSCache = useCallback(async (clearAll = false) => {
     setIsCleaningCache(true);
     try {
       const response = await fetch(
@@ -403,6 +403,7 @@ export function SystemMonitoringPanel() {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
+          body: JSON.stringify({ clearAll }),
         }
       );
 
@@ -643,20 +644,40 @@ export function SystemMonitoringPanel() {
                 <span className="font-medium">{status.storage.hourFiles}</span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full mt-2"
-              onClick={cleanTTSCache}
-              disabled={isCleaningCache}
-            >
-              {isCleaningCache ? (
-                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4 mr-1" />
-              )}
-              Limpar Cache (7 dias)
-            </Button>
+            <div className="flex gap-2 mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => cleanTTSCache(false)}
+                disabled={isCleaningCache}
+              >
+                {isCleaningCache ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-1" />
+                )}
+                Limpar (7d)
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  if (confirm('Limpar TODO o cache? Novos áudios serão gerados com a voz Neural2-C.')) {
+                    cleanTTSCache(true);
+                  }
+                }}
+                disabled={isCleaningCache}
+              >
+                {isCleaningCache ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-1" />
+                )}
+                Limpar Tudo
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

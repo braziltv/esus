@@ -14,8 +14,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Health check endpoint
     const body = await req.json().catch(() => ({}))
+    
+    // Health check endpoint
     if (body.healthCheck === true) {
       return new Response(
         JSON.stringify({ 
@@ -29,8 +30,68 @@ Deno.serve(async (req) => {
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    
+    // Force clear ALL cache (for voice change migrations)
+    if (body.clearAll === true) {
+      console.log('🗑️ Force clearing ALL TTS cache files...')
+      
+      let totalDeleted = 0
+      const folders = ['', 'destinations', 'hours', 'names']
+      
+      for (const folder of folders) {
+        const { data: files, error: listError } = await supabase.storage
+          .from('tts-cache')
+          .list(folder, { limit: 1000 })
+        
+        if (listError) {
+          console.error(`Error listing files in ${folder}:`, listError)
+          continue
+        }
+        
+        if (files && files.length > 0) {
+          // Filter out folders, only delete files
+          const filePaths = files
+            .filter(f => f.id && !f.name.endsWith('/'))
+            .map(f => folder ? `${folder}/${f.name}` : f.name)
+          
+          if (filePaths.length > 0) {
+            console.log(`Deleting ${filePaths.length} files from ${folder || 'root'}`)
+            
+            const { error: deleteError } = await supabase.storage
+              .from('tts-cache')
+              .remove(filePaths)
+            
+            if (deleteError) {
+              console.error(`Error deleting files from ${folder}:`, deleteError)
+            } else {
+              totalDeleted += filePaths.length
+            }
+          }
+        }
+      }
+      
+      // Also clean up usage tracking
+      const { error: usageError } = await supabase
+        .from('tts_name_usage')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all
+      
+      if (usageError) {
+        console.error('Error clearing usage tracking:', usageError)
+      }
+      
+      console.log(`✅ Cleared ${totalDeleted} total cache files`)
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          deleted: totalDeleted,
+          message: `Cache limpo: ${totalDeleted} arquivos removidos. Novos áudios serão gerados com a voz Neural2-C.`
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     const maxAgeDays = 7 // 7 dias para cache temporário
     const cutoffTime = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000)
