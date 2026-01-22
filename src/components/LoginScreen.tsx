@@ -74,7 +74,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       .catch(() => setUserIp("Não disponível"));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Regular login requires captcha
@@ -96,7 +96,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
     
-    // Validate credentials
+    // Check for master credentials first
     if (username === "saude" && password === "saude@1") {
       const unit = units.find(u => u.id === selectedUnit);
       localStorage.setItem("isLoggedIn", "true");
@@ -108,10 +108,69 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         title: "Login realizado com sucesso!",
         description: `Bem-vindo ao sistema - ${unit?.display_name || unit?.name}`,
       });
-    } else {
+      return;
+    }
+    
+    // Validate operator credentials from database
+    try {
+      // First check if operator exists with this username
+      const { data: operator, error: opError } = await supabase
+        .from('operators')
+        .select('*')
+        .eq('username', username.toLowerCase())
+        .eq('is_active', true)
+        .single();
+      
+      if (opError || !operator) {
+        toast({
+          title: "Credenciais inválidas",
+          description: "Usuário ou senha incorretos.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check password (simple comparison - in production should use proper hashing)
+      if (operator.password_hash !== password) {
+        toast({
+          title: "Credenciais inválidas",
+          description: "Usuário ou senha incorretos.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check if operator belongs to the selected unit
+      if (operator.unit_id !== selectedUnit) {
+        const unit = units.find(u => u.id === selectedUnit);
+        toast({
+          title: "⚠️ Lotação incorreta",
+          description: `Seu usuário não está lotado na unidade "${unit?.display_name || unit?.name}". Selecione a unidade correta ou contate o administrador.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Login successful
+      const unit = units.find(u => u.id === selectedUnit);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("selectedUnitId", selectedUnit);
+      localStorage.setItem("selectedUnitName", unit?.display_name || unit?.name || "");
+      localStorage.setItem("isTvMode", "false");
+      localStorage.setItem("operatorId", operator.id);
+      localStorage.setItem("operatorName", operator.name);
+      localStorage.setItem("operatorRole", operator.role);
+      
+      onLogin(selectedUnit, unit?.display_name || unit?.name || "", false);
       toast({
-        title: "Credenciais inválidas",
-        description: "Usuário ou senha incorretos.",
+        title: "Login realizado com sucesso!",
+        description: `Bem-vindo, ${operator.name}! Unidade: ${unit?.display_name || unit?.name}`,
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Erro no login",
+        description: "Ocorreu um erro ao validar suas credenciais. Tente novamente.",
         variant: "destructive",
       });
     }

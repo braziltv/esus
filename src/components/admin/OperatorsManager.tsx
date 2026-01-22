@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, Edit, Trash2, Loader2, Eye, EyeOff, Shield } from 'lucide-react';
-import { useOperators, useModules } from '@/hooks/useAdminData';
+import { Users, Plus, Edit, Trash2, Loader2, Eye, EyeOff, Shield, Building2, AlertTriangle } from 'lucide-react';
+import { useOperators, useModules, useUnits } from '@/hooks/useAdminData';
 import { Operator, UserRole, DEFAULT_ROLE_PERMISSIONS } from '@/types/admin';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface OperatorsManagerProps {
   unitId: string;
@@ -38,6 +39,7 @@ const ROLE_COLORS: Record<UserRole, string> = {
 export function OperatorsManager({ unitId }: OperatorsManagerProps) {
   const { operators, loading, createOperator, updateOperator, deleteOperator } = useOperators(unitId);
   const { modules } = useModules(unitId);
+  const { units } = useUnits();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingOperator, setEditingOperator] = useState<Operator | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -47,8 +49,17 @@ export function OperatorsManager({ unitId }: OperatorsManagerProps) {
     username: '',
     password_hash: '',
     role: 'recepcao' as UserRole,
-    is_active: true
+    is_active: true,
+    unit_id: unitId
   });
+  
+  // Update unit_id when unitId prop changes
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, unit_id: unitId }));
+  }, [unitId]);
+  
+  // Get current unit name
+  const currentUnit = units.find(u => u.id === unitId);
 
   const handleOpenCreate = () => {
     setEditingOperator(null);
@@ -57,7 +68,8 @@ export function OperatorsManager({ unitId }: OperatorsManagerProps) {
       username: '',
       password_hash: '',
       role: 'recepcao',
-      is_active: true
+      is_active: true,
+      unit_id: unitId
     });
     setCustomPermissions([]);
     setDialogOpen(true);
@@ -70,7 +82,8 @@ export function OperatorsManager({ unitId }: OperatorsManagerProps) {
       username: op.username,
       password_hash: '',
       role: op.role,
-      is_active: op.is_active
+      is_active: op.is_active,
+      unit_id: op.unit_id
     });
     setCustomPermissions([]);
     setDialogOpen(true);
@@ -134,6 +147,14 @@ export function OperatorsManager({ unitId }: OperatorsManagerProps) {
         </Button>
       </CardHeader>
       <CardContent>
+        {/* Alert about unit restriction */}
+        <Alert className="mb-4 border-primary/50 bg-primary/5">
+          <Building2 className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            <strong>Lotação:</strong> Os operadores criados aqui só poderão fazer login na unidade <span className="font-semibold text-primary">{currentUnit?.display_name || currentUnit?.name || 'atual'}</span>.
+          </AlertDescription>
+        </Alert>
+        
         {operators.length === 0 ? (
           <p className="text-center text-muted-foreground py-4">
             Nenhum operador cadastrado. Clique em "Novo Operador" para criar.
@@ -144,37 +165,47 @@ export function OperatorsManager({ unitId }: OperatorsManagerProps) {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Usuário</TableHead>
+                <TableHead>Lotação</TableHead>
                 <TableHead>Perfil</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {operators.map((op) => (
-                <TableRow key={op.id}>
-                  <TableCell className="font-medium">{op.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{op.username}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={ROLE_COLORS[op.role]}>
-                      <Shield className="w-3 h-3 mr-1" />
-                      {ROLE_LABELS[op.role]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${op.is_active ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
-                      {op.is_active ? 'Ativo' : 'Inativo'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(op)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(op.id)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {operators.map((op) => {
+                const opUnit = units.find(u => u.id === op.unit_id);
+                return (
+                  <TableRow key={op.id}>
+                    <TableCell className="font-medium">{op.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{op.username}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-secondary/50">
+                        <Building2 className="w-3 h-3 mr-1" />
+                        {opUnit?.display_name || opUnit?.name || 'N/A'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={ROLE_COLORS[op.role]}>
+                        <Shield className="w-3 h-3 mr-1" />
+                        {ROLE_LABELS[op.role]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${op.is_active ? 'bg-panel-success/20 text-green-600 dark:text-green-400' : 'bg-destructive/20 text-destructive'}`}>
+                        {op.is_active ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(op)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(op.id)}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
@@ -230,6 +261,38 @@ export function OperatorsManager({ unitId }: OperatorsManagerProps) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
+              </div>
+
+              {/* Unit selection (Lotação) */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  Lotação (Unidade de Acesso)
+                </Label>
+                <Select 
+                  value={formData.unit_id} 
+                  onValueChange={(value) => setFormData({ ...formData, unit_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a unidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4" />
+                          <span>{unit.display_name || unit.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Alert className="mt-2 border-amber-500/50 bg-amber-500/10">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertDescription className="text-xs text-amber-600 dark:text-amber-400">
+                    O operador só poderá fazer login na unidade selecionada. Se tentar acessar outra unidade, receberá um aviso de "Lotação incorreta".
+                  </AlertDescription>
+                </Alert>
               </div>
 
               <div className="space-y-2">
