@@ -1881,24 +1881,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, []);
 
   // Gerar TTS para frase de destino via Google Cloud TTS
+  // Uses fixed voice: pt-BR-Neural2-C (Female Premium)
   const speakDestinationPhrase = useCallback(
     async (phrase: string): Promise<void> => {
-      console.log('Speaking destination phrase:', phrase);
+      console.log('Speaking destination phrase (Neural2-C):', phrase);
       
-      // Get patient voice settings from localStorage (configured in admin panel)
-      let patientVoiceSettings = { voiceId: 'pt-BR-Neural2-A', volume: 1, speed: 1 };
-      try {
-        const saved = localStorage.getItem('patientVoiceSettings');
-        if (saved) {
-          patientVoiceSettings = JSON.parse(saved);
-        }
-      } catch {
-        console.warn('Failed to parse patientVoiceSettings, using defaults');
-      }
-
-      const configuredVoice = patientVoiceSettings.voiceId || 'pt-BR-Neural2-A';
-      const ttsVolume = patientVoiceSettings.volume ?? 1;
-      const speakingRate = patientVoiceSettings.speed ?? 1;
+      const ttsVolume = readVolume('volume-tts', 1);
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
@@ -1909,7 +1897,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: phrase, voiceName: configuredVoice, speakingRate }),
+          body: JSON.stringify({ 
+            text: phrase, 
+            voiceName: FIXED_VOICE_ID, 
+            speakingRate: FIXED_SPEAKING_RATE 
+          }),
         }
       );
 
@@ -1918,7 +1910,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
-      // Use arrayBuffer() like useHourAudio does (works on TV)
       const audioBuffer = await response.arrayBuffer();
       await playSimpleAudio(audioBuffer, ttsVolume);
     },
