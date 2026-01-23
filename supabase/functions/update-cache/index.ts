@@ -318,22 +318,46 @@ serve(async (req) => {
       }
     }
     
-    // Buscar notícias de todos os feeds (8 feeds aleatórios)
-    console.log('Fetching news from feeds...');
-    const shuffledFeeds = [...feeds].sort(() => Math.random() - 0.5).slice(0, 12);
-    const newsPromises = shuffledFeeds.map(feed => fetchNewsFromFeed(feed));
+    // Buscar notícias de TODOS os feeds (não apenas alguns aleatórios)
+    console.log(`Fetching news from all ${feeds.length} feeds...`);
+    const newsPromises = feeds.map(feed => fetchNewsFromFeed(feed));
     const newsResults = await Promise.all(newsPromises);
     const allNews = newsResults.flat();
     
-    if (allNews.length > 0) {
+    // Remover notícias duplicadas por título (normalizado)
+    const seenTitles = new Set<string>();
+    const uniqueNews = allNews.filter(news => {
+      // Normalizar título para comparação (lowercase, sem espaços extras, sem pontuação)
+      const normalizedTitle = news.title
+        .toLowerCase()
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      // Verificar se título similar já existe (usando primeiras 50 chars para evitar pequenas variações)
+      const titleKey = normalizedTitle.substring(0, 50);
+      
+      if (seenTitles.has(titleKey)) {
+        return false;
+      }
+      seenTitles.add(titleKey);
+      return true;
+    });
+    
+    // Embaralhar notícias para diversidade na exibição
+    const shuffledNews = uniqueNews.sort(() => Math.random() - 0.5);
+    
+    console.log(`Total news fetched: ${allNews.length}, unique after dedup: ${shuffledNews.length}`);
+    
+    if (shuffledNews.length > 0) {
       // Limpar cache antigo de notícias
       await supabase.from('news_cache').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       
-      // Inserir novas notícias
+      // Inserir novas notícias únicas
       const { error: newsError } = await supabase
         .from('news_cache')
         .insert(
-          allNews.map(n => ({
+          shuffledNews.map(n => ({
             source: n.source,
             title: n.title,
             link: n.link,
@@ -343,7 +367,7 @@ serve(async (req) => {
       if (newsError) {
         console.error('Error saving news cache:', newsError);
       } else {
-        console.log(`News cache updated with ${allNews.length} items`);
+        console.log(`News cache updated with ${shuffledNews.length} unique items from ${feeds.length} feeds`);
       }
     }
     
@@ -351,7 +375,9 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         weather_count: weatherResults.length,
-        news_count: allNews.length,
+        news_total_fetched: allNews.length,
+        news_unique_saved: shuffledNews.length,
+        feeds_processed: feeds.length,
         updated_at: new Date().toISOString(),
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
