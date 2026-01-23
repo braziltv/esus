@@ -517,8 +517,8 @@
 
 .animate-marquee {
   display: inline-flex;
-  /* 10% mais lento que anterior (1629 / 0.9 ≈ 1810s) */
-  animation: marquee 1810s linear infinite;
+  /* 20% mais lento que anterior (1810 / 0.8 ≈ 2263s) */
+  animation: marquee 2263s linear infinite;
 }
 
 @keyframes flash {
