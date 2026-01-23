@@ -93,28 +93,28 @@ export function CNNStyleNewsTicker({
               {items.map((item, index) => (
                 <span 
                   key={index} 
-                  className="mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl" 
+                  className="mx-4 xs:mx-6 sm:mx-8 md:mx-10 lg:mx-12 xl:mx-16 2xl:mx-20 inline-flex items-center gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 lg:gap-5 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl" 
                   style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}
                 >
                   <NewsSourceBadge source={item.source} index={index} />
                   <span className={`drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] ${getSourceTextStyle(item.source)}`}>
                     {item.title}
                   </span>
-                  <span className="text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
+                  <span className="text-red-500 mx-4 xs:mx-6 sm:mx-8 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
                 </span>
               ))}
               {/* Duplicate for seamless loop */}
               {items.map((item, index) => (
                 <span 
                   key={`dup-${index}`} 
-                  className="mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl" 
+                  className="mx-4 xs:mx-6 sm:mx-8 md:mx-10 lg:mx-12 xl:mx-16 2xl:mx-20 inline-flex items-center gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 lg:gap-5 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl" 
                   style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}
                 >
                   <NewsSourceBadge source={item.source} index={index + items.length} />
                   <span className={`drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] ${getSourceTextStyle(item.source)}`}>
                     {item.title}
                   </span>
-                  <span className="text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
+                  <span className="text-red-500 mx-4 xs:mx-6 sm:mx-8 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
                 </span>
               ))}
             </div>
