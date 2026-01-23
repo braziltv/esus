@@ -201,28 +201,32 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }, 300);
   }, []);
 
+  // Rotação sequencial por TODAS as cidades disponíveis
   useEffect(() => {
     if (availableCities.length === 0) return;
     
+    // Ordenar cidades alfabeticamente, mas com Paineiras primeiro
+    const sortedCities = [...availableCities].sort((a, b) => {
+      if (a === 'Paineiras') return -1;
+      if (b === 'Paineiras') return 1;
+      return a.localeCompare(b, 'pt-BR');
+    });
+    
     let currentIndex = 0;
     
+    // Mostrar cidade inicial
+    if (sortedCities[0]) {
+      setDisplayCity(sortedCities[0]);
+    }
+    
     const interval = setInterval(() => {
-      setRotationCount(prev => {
-        const next = prev + 1;
-        if (next % 5 === 0 && weatherCache['Paineiras']) {
-          changeCityWithTransition('Paineiras');
-        } else if (otherCities.length > 0) {
-          currentIndex = (currentIndex + 1) % otherCities.length;
-          changeCityWithTransition(otherCities[currentIndex]);
-        } else if (availableCities.length > 0) {
-          currentIndex = (currentIndex + 1) % availableCities.length;
-          changeCityWithTransition(availableCities[currentIndex]);
-        }
-        return next;
-      });
-    }, 10000);
+      currentIndex = (currentIndex + 1) % sortedCities.length;
+      changeCityWithTransition(sortedCities[currentIndex]);
+      setRotationCount(prev => prev + 1);
+    }, 8000); // 8 segundos por cidade para mostrar todas
+    
     return () => clearInterval(interval);
-  }, [availableCities.length, otherCities.length, weatherCache, changeCityWithTransition]);
+  }, [availableCities.length, weatherCache, changeCityWithTransition]);
 
   useEffect(() => {
     const interval = setInterval(() => {
