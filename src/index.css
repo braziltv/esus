@@ -517,8 +517,8 @@
 
 .animate-marquee {
   display: inline-flex;
-  /* Ciclo de 2500 segundos */
-  animation: marquee 2500s linear infinite;
+  /* Ciclo de 1000 segundos - ainda mais lento */
+  animation: marquee 1000s linear infinite;
 }
 
 /* Animação de destaque para frases de espera - intensificada */
