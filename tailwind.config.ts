@@ -20,8 +20,8 @@ export default {
       'xl': '1280px',
       '2xl': '1536px',
       '3xl': '1920px',   // Full HD TVs
-      '4k': '2560px',    // 4K TVs
-      '5k': '3840px',    // 5K/Ultra-wide
+      'qhd': '2560px',   // QHD/2K Monitors
+      '4k': '3840px',    // 4K UHD TVs (3840x2160)
     },
     extend: {
       fontFamily: {
