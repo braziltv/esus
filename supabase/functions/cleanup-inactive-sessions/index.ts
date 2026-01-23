@@ -20,16 +20,60 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}))
     const inactiveMinutes = body.inactiveMinutes || 10 // Default: 10 minutes for TV sessions
     const inactiveHours = body.inactiveHours || 2 // Default: 2 hours for regular sessions
+    const patientInactiveMinutes = body.patientInactiveMinutes || 10 // Default: 10 minutes for patients in active status
 
     const now = new Date()
+    
+    // Calculate today's start in Brazil timezone (UTC-3)
+    const brazilOffset = -3 * 60 * 60 * 1000
+    const brazilNow = new Date(now.getTime() + brazilOffset)
+    const todayStart = new Date(brazilNow)
+    todayStart.setUTCHours(3, 0, 0, 0) // 00:00 Brazil time = 03:00 UTC
     
     // Calculate cutoff times
     const tvCutoff = new Date(now.getTime() - inactiveMinutes * 60 * 1000)
     const regularCutoff = new Date(now.getTime() - inactiveHours * 60 * 60 * 1000)
+    const patientInactiveCutoff = new Date(now.getTime() - patientInactiveMinutes * 60 * 1000)
 
     console.log(`Cleaning up sessions inactive since:`)
     console.log(`- TV sessions: ${tvCutoff.toISOString()} (${inactiveMinutes} min)`)
     console.log(`- Regular sessions: ${regularCutoff.toISOString()} (${inactiveHours} hours)`)
+    console.log(`- Inactive patients: ${patientInactiveCutoff.toISOString()} (${patientInactiveMinutes} min)`)
+    console.log(`- Today start (Brazil): ${todayStart.toISOString()}`)
+
+    // ========== PATIENT CALLS CLEANUP ==========
+    
+    // 1. Delete patient_calls from previous days (not today)
+    const { data: deletedOldPatients, error: oldPatientsError } = await supabase
+      .from('patient_calls')
+      .delete()
+      .in('status', ['waiting', 'active'])
+      .lt('created_at', todayStart.toISOString())
+      .select('id, patient_name, unit_name')
+
+    if (oldPatientsError) {
+      console.error('Error deleting old patients:', oldPatientsError)
+    }
+
+    const oldPatientsDeleted = deletedOldPatients?.length || 0
+    console.log(`Deleted ${oldPatientsDeleted} patient calls from previous days`)
+
+    // 2. Delete inactive active patient calls (>10 min without update)
+    const { data: deletedInactivePatients, error: inactivePatientsError } = await supabase
+      .from('patient_calls')
+      .delete()
+      .eq('status', 'active')
+      .lt('created_at', patientInactiveCutoff.toISOString())
+      .select('id, patient_name, unit_name, call_type')
+
+    if (inactivePatientsError) {
+      console.error('Error deleting inactive patients:', inactivePatientsError)
+    }
+
+    const inactivePatientsDeleted = deletedInactivePatients?.length || 0
+    console.log(`Deleted ${inactivePatientsDeleted} inactive patient calls (>10 min)`)
+
+    // ========== USER SESSIONS CLEANUP ==========
 
     // Count sessions before cleanup
     const { count: beforeCount } = await supabase
@@ -87,16 +131,21 @@ Deno.serve(async (req) => {
     const tvDeleted = deletedTvSessions?.length || 0
     const regularDeleted = deletedRegularSessions?.length || 0
     const archived = archivedSessions?.length || 0
-    const totalCleaned = tvDeleted + regularDeleted + archived
+    const totalSessionsCleaned = tvDeleted + regularDeleted + archived
 
     const summary = {
       success: true,
       timestamp: now.toISOString(),
-      cleanup: {
+      patient_cleanup: {
+        old_patients_deleted: oldPatientsDeleted,
+        inactive_patients_deleted: inactivePatientsDeleted,
+        total_patients_cleaned: oldPatientsDeleted + inactivePatientsDeleted,
+      },
+      session_cleanup: {
         tv_sessions_deleted: tvDeleted,
         regular_sessions_deleted: regularDeleted,
         sessions_archived: archived,
-        total_cleaned: totalCleaned,
+        total_cleaned: totalSessionsCleaned,
       },
       sessions: {
         before: beforeCount || 0,
@@ -105,6 +154,7 @@ Deno.serve(async (req) => {
       thresholds: {
         tv_inactive_minutes: inactiveMinutes,
         regular_inactive_hours: inactiveHours,
+        patient_inactive_minutes: patientInactiveMinutes,
         archive_after_days: historyRetentionDays,
       }
     }
