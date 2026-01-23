@@ -80,6 +80,8 @@ const feeds = [
   { url: 'https://www.intercept.com.br/feed/', source: 'Intercept' },
   // Internacional
   { url: 'https://operamundi.uol.com.br/feed/', source: 'Opera Mundi' },
+  // Notícias rápidas
+  { url: 'https://www.noticiasaominuto.com.br/rss/ultima-hora', source: 'Notícias ao Minuto' },
 ];
 
 // Decodificar entidades HTML
