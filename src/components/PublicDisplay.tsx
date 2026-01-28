@@ -3041,9 +3041,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     waitingPhraseVisible ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{ 
-                    fontSize: `clamp(1.25rem, ${3 * responsiveScale}vw, 4rem)`,
-                    textShadow: '0 3px 8px rgba(0,0,0,0.7), 0 0 20px rgba(255,255,255,0.2)',
-                    letterSpacing: '0.05em',
+                    fontSize: `clamp(1.75rem, ${4.5 * responsiveScale}vw, 6rem)`,
+                    textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.3)',
+                    letterSpacing: '0.06em',
                   }}>
                     {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
@@ -3117,9 +3117,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   </div>
                   <p className={`text-white text-center font-black drop-shadow-lg transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                      style={{ 
-                       fontSize: `clamp(1.25rem, ${3 * responsiveScale}vw, 4rem)`,
-                       textShadow: '0 3px 8px rgba(0,0,0,0.7), 0 0 20px rgba(255,255,255,0.2)',
-                       letterSpacing: '0.05em',
+                       fontSize: `clamp(1.75rem, ${4.5 * responsiveScale}vw, 6rem)`,
+                       textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.3)',
+                       letterSpacing: '0.06em',
                      }}>
                     {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
