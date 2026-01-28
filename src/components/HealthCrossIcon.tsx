@@ -1,15 +1,19 @@
+import React from 'react';
+
 interface HealthCrossIconProps {
   size?: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function HealthCrossIcon({ size = 48, className = '' }: HealthCrossIconProps) {
+export function HealthCrossIcon({ size = 48, className = '', style }: HealthCrossIconProps) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 100 100"
       className={className}
+      style={style}
     >
       {/* Red cross shape */}
       <path
