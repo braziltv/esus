@@ -2876,9 +2876,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Simple top accent line */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500" style={{ borderRadius: 'inherit' }} />
           
-          <div className="flex items-center relative z-10 w-full" style={{ gap: `clamp(0.5rem, ${1.5 * responsiveScale}vw, 2.5rem)` }}>
-            {/* Left: Logo + Title - Clean and Legible */}
-            <div className="flex items-center shrink-0" style={{ gap: `clamp(0.5rem, ${1 * responsiveScale}vw, 1.5rem)` }}>
+          <div className="flex items-center relative z-10 w-full" style={{ gap: `clamp(0.75rem, ${1.5 * responsiveScale}vw, 2rem)` }}>
+            {/* Left: Logo + Title - FIXED WIDTH to prevent overlap */}
+            <div className="flex items-center shrink-0" style={{ 
+              gap: `clamp(0.5rem, ${1 * responsiveScale}vw, 1.5rem)`,
+              minWidth: `clamp(12rem, 25vw, 22rem)`,
+              maxWidth: `clamp(14rem, 30vw, 26rem)`,
+            }}>
               {/* Logo container - simplified */}
               <div className="relative shrink-0 bg-white rounded-lg shadow-lg flex items-center justify-center" 
                    style={{ 
@@ -2889,7 +2893,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </div>
               
               {/* Text content - high contrast */}
-              <div className="flex flex-col justify-center">
+              <div className="flex flex-col justify-center min-w-0 flex-1">
                 <h1 className="tv-font-heading font-black text-white leading-none whitespace-nowrap tracking-tight"
                     style={{ 
                       fontSize: `clamp(1rem, ${2 * responsiveScale}vw, 2.75rem)`,
@@ -2897,7 +2901,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     }}>
                   Painel de Chamadas
                 </h1>
-                <p className="tv-font-body text-amber-400 leading-tight font-bold truncate max-w-[20vw] lg:max-w-[25vw]" 
+                <p className="tv-font-body text-amber-400 leading-tight font-bold truncate" 
                    title={unitName || 'Unidade de Saúde'}
                    style={{ 
                      fontSize: `clamp(0.625rem, ${1.1 * responsiveScale}vw, 1.5rem)`,
@@ -2918,13 +2922,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </div>
             </div>
             
-            {/* Separator */}
+            {/* Separator - vertical divider */}
             <div className="hidden sm:block w-0.5 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent shrink-0" 
                  style={{ height: `clamp(2rem, ${4 * responsiveScale}vw, 5rem)` }} />
             
-            {/* Right: Weather + Clock */}
-            <div className="flex-1 flex items-center justify-end min-w-0">
-              <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
+            {/* Right: Weather + Clock - OVERFLOW HIDDEN to prevent overlap */}
+            <div className="flex-1 flex items-center justify-end min-w-0 overflow-hidden">
+              <div className="shrink-0 max-w-full">
+                <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
+              </div>
             </div>
           </div>
         </div>
