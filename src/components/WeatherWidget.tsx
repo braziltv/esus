@@ -359,18 +359,18 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
-      {/* Current Temperature Card */}
-      <div className="shrink-0 flex flex-col items-center bg-slate-900/95 rounded-xl px-3 sm:px-4 lg:px-5 xl:px-6 py-2 sm:py-2.5 lg:py-3 xl:py-4 border border-cyan-500/50 shadow-lg">
-        <span className="font-bold text-cyan-400 uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs"
+      {/* Current Temperature Card - FIXED: prevent text cutoff */}
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-xl px-4 sm:px-5 lg:px-6 xl:px-8 py-2.5 sm:py-3 lg:py-4 xl:py-5 border border-cyan-500/50 shadow-lg min-w-[80px] sm:min-w-[100px] lg:min-w-[120px] xl:min-w-[140px]">
+        <span className="font-bold text-cyan-400 uppercase tracking-wider text-[9px] sm:text-[10px] lg:text-xs xl:text-sm whitespace-nowrap"
               style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
           Agora
         </span>
-        <div className="flex items-baseline gap-0.5">
-          <span className="font-black text-white tabular-nums text-xl sm:text-2xl lg:text-3xl xl:text-4xl" 
-                style={{ fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 10px rgba(255,255,255,0.3)' }}>
+        <div className="flex items-baseline gap-0.5 whitespace-nowrap">
+          <span className="font-black text-white tabular-nums text-2xl sm:text-3xl lg:text-4xl xl:text-5xl" 
+                style={{ fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 12px rgba(255,255,255,0.4)' }}>
             {weather.current.temperature}
           </span>
-          <span className="font-bold text-cyan-400 text-sm sm:text-base lg:text-lg">°C</span>
+          <span className="font-bold text-cyan-400 text-base sm:text-lg lg:text-xl xl:text-2xl">°C</span>
         </div>
       </div>
 
