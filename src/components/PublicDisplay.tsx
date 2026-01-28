@@ -2901,21 +2901,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     }}>
                   Painel de Chamadas
                 </h1>
-                <p className="tv-font-body text-amber-400 leading-tight font-bold truncate" 
+                <p className="tv-font-body text-amber-400 leading-tight font-black truncate" 
                    title={unitName || 'Unidade de Saúde'}
                    style={{ 
-                     fontSize: `clamp(0.625rem, ${1.1 * responsiveScale}vw, 1.5rem)`,
-                     textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-                     marginTop: `clamp(0.125rem, ${0.2 * responsiveScale}vw, 0.375rem)`,
+                     fontSize: `clamp(0.75rem, ${1.4 * responsiveScale}vw, 1.75rem)`,
+                     textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(251,191,36,0.3)',
+                     marginTop: `clamp(0.125rem, ${0.25 * responsiveScale}vw, 0.5rem)`,
                    }}>
                   {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
-                {/* Kalebe Credits */}
-                <p className="tv-font-body leading-tight font-semibold whitespace-nowrap text-yellow-300/90"
+                {/* Kalebe Credits - INCREASED SIZE AND WEIGHT */}
+                <p className="tv-font-body leading-tight font-bold whitespace-nowrap text-yellow-300"
                    style={{ 
-                     fontSize: `clamp(0.5rem, ${0.7 * responsiveScale}vw, 1rem)`,
-                     marginTop: `clamp(0.125rem, ${0.15 * responsiveScale}vw, 0.25rem)`,
-                     textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                     fontSize: `clamp(0.625rem, ${0.9 * responsiveScale}vw, 1.25rem)`,
+                     marginTop: `clamp(0.125rem, ${0.2 * responsiveScale}vw, 0.375rem)`,
+                     textShadow: '0 2px 4px rgba(0,0,0,0.6), 0 0 8px rgba(253,224,71,0.3)',
                    }}>
                   ✨ Solução criada por Kalebe Gomes
                 </p>
